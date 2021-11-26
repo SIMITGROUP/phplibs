@@ -1,0 +1,14 @@
+{
+    "name": "simitsdk/phplibs",
+    "description": "All php libs",
+    "require": {
+        "php": ">=7.4",
+        "tecnickcom/tc-lib-pdf":"*",
+        "tecnickcom/tcpdf": "^6.4"     
+    },
+    "autoload": {
+        "psr-4": {
+            "Simitsdk\\": "src/"
+        }
+    }
+}
