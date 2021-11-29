@@ -12,13 +12,15 @@ class Pdf extends \TCPDF implements ExportInterface
     protected array $bands=[];
     protected string $lastdetailband='';
     protected array $elements=[];    
-    protected int $groupcount=0;
+    protected array $groups=[];
+    protected array $groupnames=[];
     protected int $currentY=0;
     protected int $maxY=0;
     protected int $columnno=1;
     protected string $defaultfont='helvetica';
     protected int $currentRowNo=0;
     protected bool $debugband=true;
+    protected string $groupbandprefix = 'report_group_';
     public function __construct($prop)
     {           
         $this->pagesettings=$prop;
@@ -44,12 +46,16 @@ class Pdf extends \TCPDF implements ExportInterface
     {
         $this->AddPage();
     }
-    public function defineBands(array $bands,array $elements,int $groupcount)
+    public function defineBands(array $bands,array $elements,array $groups)
     {
         
         $this->bands = $bands;
-        $this->elements = $elements;      
-        $this->groupcount = $groupcount;
+        $this->elements = $elements;              
+        $this->groups = $groups;
+        foreach($groups as $gname=>$gsetting)
+        {
+            array_push($this->groupnames,$gname);
+        }
         foreach($bands as $b=>$setting)
         {
             if(str_contains($b,'detail'))
@@ -79,7 +85,7 @@ class Pdf extends \TCPDF implements ExportInterface
         $filename = '/tmp/sample1.pdf';
         // unlink($filename);
         // $this->Output($filename,'F');   //send out the complete page
-
+        // print_r($this->bands);
         $this->Output($filename,'F');
     }
 
@@ -253,14 +259,14 @@ class Pdf extends \TCPDF implements ExportInterface
     public function prepareBand(string $bandname, mixed $callback=null):array
     {        
         $offsets=[];
-        echo "\nprepareband $bandname\n";
+        // echo "\nprepareband $bandname, $this->groupbandprefix\n";
         if(str_contains($bandname,'detail'))
         {
             $methodname = 'draw_detail';
             $band = $this->bands[$bandname];
             $offsets = call_user_func([$this,$methodname],$bandname,$callback);
         }
-        else if(str_contains($bandname,'group_'))
+        else if(str_contains($bandname,$this->groupbandprefix))
         {
             $methodname = 'draw_group';
             $band = $this->bands[$bandname];
@@ -356,6 +362,18 @@ class Pdf extends \TCPDF implements ExportInterface
         return $offset;
     }
 
+    protected function getLastGroupName():string
+    {
+        
+        if($this->groupCount()>0)
+        {
+            return array_key_last($this->groups);
+        }
+        else
+        {
+            return '';
+        }
+    }
     public function setDetailNextPage(string $detailname)
     {
 
@@ -370,9 +388,10 @@ class Pdf extends \TCPDF implements ExportInterface
         if($detailbandname =='detail_0')
         {
             
-            if($this->groupcount>0)
+            if($this->groupCount()>0)
             {
-                $prevband='lastgroupband********************';
+                $prevband=$this->groupbandprefix.$this->getLastGroupName().'_header';
+
             }
             else
             {
@@ -391,6 +410,7 @@ class Pdf extends \TCPDF implements ExportInterface
         {
             $prevband = 'detail_'.((int)$detailno -1 );
         }
+        // echo "\ndetail band prevband : $prevband\n";
         $offsety = $this->bands[$prevband]['endY'];    
         
         if($this->PageNo() == 1)
@@ -456,7 +476,18 @@ class Pdf extends \TCPDF implements ExportInterface
     }
     public function draw_summary(mixed $callback=null)
     {
-        $offsety = $this->bands[$this->lastdetailband]['endY'];
+        if($this->groupCount()>0)
+        {            
+            $endgroupname = $this->getHashKeyFromIndex($this->groups,0);
+            $lastband = $this->groupbandprefix. $endgroupname.'_footer';
+            
+            $offsety = $this->bands[$lastband]['endY'];
+        }
+        else
+        {
+            $offsety = $this->bands[$this->lastdetailband]['endY'];
+        }
+        
         $estimateY=$offsety+$this->getBandHeight('summary');
         if($this->isEndDetailSpace($estimateY) && gettype($callback)=='object')
         {            
@@ -477,10 +508,58 @@ class Pdf extends \TCPDF implements ExportInterface
     }
 
     public function draw_group(string $bandname)
-    {
+    {        
+        $groupame = str_replace([$this->groupbandprefix,'_header','_footer'],'',$bandname);
+
+        $groupno = $this->groups[$groupame]['groupno'];
+        if(str_contains($bandname,'_header'))
+        {
+            //if continue print from previous group
+            if($groupno > 0)
+            {
+                $prevgroupno = $groupno-1;
+                $prevband = $this->getHashValueFromIndex($this->groups,$prevgroupno);
+                $this->currentY=$offsety = $prevband['endY'];    
+            }                            
+            else
+            {
+                //if rowno=0
+                if($this->currentRowNo==0)
+                {
+                    $this->currentY=$offsety = $this->bands['columnHeader']['endY'];                    
+                }
+                else
+                {
+                    $headerbandname = $this->groupbandprefix.$groupame.'_footer';
+                    $this->currentY=$offsety = $this->bands[$headerbandname]['endY'];                    
+                }
+                
+            }
+                
+            
+        }
+        else if(str_contains($bandname,'_footer'))
+        {
+             
+            $lastgroup = $this->groups[$this->getLastGroupName()];
+            $lastgroupno = $lastgroup['groupno'];
+            // echo "\nlastgroup\n";
+            // print_r($lastgroup);
+            if($groupno == $lastgroupno )
+            {
+                $this->currentY=$offsety = $this->bands[$this->lastdetailband]['endY'];    
+            }
+            else
+            {
+                $nextgroupno = $groupno + 1;
+                $nextband = $this->getHashValueFromIndex($this->groups,$nextgroupno);
+                $this->currentY=$offsety = $nextband['endY'];    
+            }
+            
+                
+
+        }
         
-        echo "\ndraw_group:".$bandname."\n";
-        $this->currentY=400;
         $offsety = $this->currentY;
         $offset = ['x'=>$this->pagesettings['leftMargin'],'y'=>$offsety];
         return $offset;
@@ -517,4 +596,9 @@ class Pdf extends \TCPDF implements ExportInterface
     {
         return array('forecolor'=>$colorstr,"r"=>hexdec(substr($colorstr,1,2)),"g"=>hexdec(substr($colorstr,3,2)),"b"=>hexdec(substr($colorstr,5,2)));
     }
+    public function groupCount(): int
+    {
+        return $groupcount = count($this->groups);
+    }
+    
 }

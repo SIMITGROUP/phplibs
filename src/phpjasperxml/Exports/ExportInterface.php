@@ -4,7 +4,7 @@ namespace Simitsdk\phpjasperxml\Exports;
 interface ExportInterface
 {
     public function setData(array $data);
-    public function defineBands(array $bands,array $elements,int $groupcount);
+    public function defineBands(array $bands,array $elements,array $groups);
     //bands
 
     public function prepareBand(string $bandname):array;

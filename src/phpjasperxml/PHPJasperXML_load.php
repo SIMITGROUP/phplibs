@@ -12,6 +12,7 @@ trait PHPJasperXML_load
     protected array $elements = [];
     protected string $querystring = '';
     protected array $subdatasets=[];
+    protected string $groupbandprefix = 'report_group_';
     /**
      * read jrxml file and load into memeory
      * @param string $filename
@@ -134,9 +135,10 @@ trait PHPJasperXML_load
     {
         $name = (string)$obj->attributes()['name'];
         $groupExpression = (string)$obj->groupExpression;
-        $bandname = 'group_'.$name;
+        $bandname = 'report_group_'.$name;
         $groupExpression = $obj->groupExpression;
-        $this->groups[$name]=[ 'value'=>'NOVALUE','count'=>0,'groupExpression'=>$groupExpression];
+        
+        $this->groups[$name]=[ 'value'=>'NOVALUE','count'=>0,'groupExpression'=>$groupExpression, 'groupno'=>$this->groupcount];
         $this->addBand($bandname.'_header',$obj->groupHeader,true);
         $this->addBand($bandname.'_footer',$obj->groupFooter,true);
         $this->groupcount++;

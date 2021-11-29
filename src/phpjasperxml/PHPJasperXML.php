@@ -3,11 +3,11 @@ namespace Simitsdk\phpjasperxml;
 
 class PHPJasperXML{
     use PHPJasperXML_load;
-    use PHPJasperXML_datasource;
-    use PHPJasperXML_output;
+    use PHPJasperXML_datasource;    
     use PHPJasperXML_elements;
     use PHPJasperXML_expression;
     use Tools\Toolbox;
+    use PHPJasperXML_output;
     public function __construct()
     {
 

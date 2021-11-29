@@ -19,5 +19,31 @@ trait Toolbox
         return substr($str, -$length);
     }
 
+    protected function getHashValueFromIndex(array $arr,int $no): mixed
+    {
+        $i=0;
+        foreach($arr as $k=>$v)
+        {
+            if($i==$no)
+            {
+                return $v;
+            }
+            $i++;
+        }
+        
+    }
+    protected function getHashKeyFromIndex(array $arr,int $no): mixed
+    {
+        $i=0;
+        foreach($arr as $k=>$v)
+        {
+            if($i==$no)
+            {
+                return $k;
+            }
+            $i++;
+        }
+        
+    }
 
 }

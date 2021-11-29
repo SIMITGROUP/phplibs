@@ -8,13 +8,13 @@ trait PHPJasperXML_output
     protected $output = null;
     protected int $currentRow=0;
     protected array $row = [];
-    
+        
     // protected $bandsequence = [];
     public function export(string $type)
     {
         $classname = '\\Simitsdk\\phpjasperxml\\Exports\\'.ucfirst($type);
         $this->output  = new $classname($this->pageproperties);        
-        $this->output->defineBands($this->bands,$this->elements,$this->groupcount);
+        $this->output->defineBands($this->bands,$this->elements,$this->groups);
         if($this->rowcount>0)
         {
             foreach($this->rows as $i=>$r)
@@ -56,8 +56,7 @@ trait PHPJasperXML_output
     }
 
     protected function endPage()
-    {
-        // $this->draw_groupsFooter();
+    {        
         $this->draw_columnFooter();
         $this->draw_summary();
         $this->draw_lastPageFooter(); //if no content, it will call draw_pageFooter
@@ -101,7 +100,7 @@ trait PHPJasperXML_output
             }
             else
             {
-                $this->groups[$groupname]['ischange']=false;
+                $this->groups[$groupname]['ischange']=true;
             }
 
             $this->groups[$groupname]['count']++;
@@ -150,8 +149,8 @@ trait PHPJasperXML_output
     {
         foreach($this->groups as $groupname=>$groupsetting)
         {
-            $bandname = 'group_'.$groupname.'_header';            
-            if($groupsetting->ischange)
+            $bandname = $this->groupbandprefix.$groupname.'_header';            
+            if($groupsetting['ischange'])
             {
                 $this->drawBand($bandname);
             }
@@ -177,7 +176,15 @@ trait PHPJasperXML_output
     }
     protected function draw_groupsFooter()
     {
-        $this->drawBand('groupsFooter');
+        foreach($this->groups as $groupname=>$groupsetting)
+        {
+            $bandname = $this->groupbandprefix.$groupname.'_footer';
+            if($groupsetting['ischange'])
+            {
+                $this->drawBand($bandname);
+            }
+            
+        }        
     }
     protected function draw_columnFooter()
     {
