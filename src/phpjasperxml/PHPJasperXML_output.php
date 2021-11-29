@@ -24,10 +24,14 @@ trait PHPJasperXML_output
                 {
                    $this->newPage(true);
                 }
+                else
+                {
+                    $this->draw_groupsFooter();        
+                }
                 $this->draw_groupsHeader();
-                $this->draw_detail();
-                $this->draw_groupsFooter();
+                $this->draw_detail();                
             }
+            $this->draw_groupsFooter(true);
             $this->endPage();
         }
         else
@@ -88,19 +92,22 @@ trait PHPJasperXML_output
             
 
             if($resettherest)
-            {
+            {                
+                $this->groups[$groupname]['count']=0;
                 $this->groups[$groupname]['ischange']=true;
+                $this->output->groups[$groupname]['ischange']=true;
                 //reset all variables under this group
                 foreach($this->variables as $varname=>$varsetting)
                 {
                     $this->variables[$varname]['value']='--value reset--';
                     $this->variables[$varname]['lastresetvalue']='--lastvalue reset--';
                 }
-                $this->groups[$groupname]['count']=0;
+                
             }
             else
             {
-                $this->groups[$groupname]['ischange']=true;
+                $this->groups[$groupname]['ischange']=false;
+                $this->output->groups[$groupname]['ischange']=false;
             }
 
             $this->groups[$groupname]['count']++;
@@ -174,12 +181,12 @@ trait PHPJasperXML_output
             }
         }        
     }
-    protected function draw_groupsFooter()
+    protected function draw_groupsFooter(bool $forceshow=false)
     {
         foreach($this->groups as $groupname=>$groupsetting)
         {
             $bandname = $this->groupbandprefix.$groupname.'_footer';
-            if($groupsetting['ischange'])
+            if($forceshow || $groupsetting['ischange'])
             {
                 $this->drawBand($bandname);
             }

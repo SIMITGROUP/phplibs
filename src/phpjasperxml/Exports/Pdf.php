@@ -12,8 +12,8 @@ class Pdf extends \TCPDF implements ExportInterface
     protected array $bands=[];
     protected string $lastdetailband='';
     protected array $elements=[];    
-    protected array $groups=[];
-    protected array $groupnames=[];
+    public array $groups=[];
+    public array $groupnames=[];
     protected int $currentY=0;
     protected int $maxY=0;
     protected int $columnno=1;
@@ -272,18 +272,18 @@ class Pdf extends \TCPDF implements ExportInterface
             $band = $this->bands[$bandname];
             $offsets = call_user_func([$this,$methodname],$bandname,$callback);
         }        
-        else if(in_array($bandname,['summary']))
-        {
+        // else if(in_array($bandname,['summary']))
+        // {
             
-            $methodname = 'draw_'.$bandname;
-            $band = $this->bands[$bandname];
-            $offsets = call_user_func([$this,$methodname],$callback);
-        }
+        //     $methodname = 'draw_'.$bandname;
+        //     $band = $this->bands[$bandname];
+        //     $offsets = call_user_func([$this,$methodname],$callback);
+        // }
         else
         {
             $methodname = 'draw_'.$bandname;
             $band = $this->bands[$bandname];
-            $offsets = call_user_func([$this,$methodname],);
+            $offsets = call_user_func([$this,$methodname],$callback);
             
         }
         
@@ -314,8 +314,10 @@ class Pdf extends \TCPDF implements ExportInterface
             }
             
         }
-        $this->bands[$bandname]['endY']=$offsety+$height;
-        // echo "\n Print band $bandname, h = $height :".print_r($offsets,true)." \n";
+        $endY=$offsety+$height;;
+        $this->bands[$bandname]['endY']=$endY;
+        
+        echo "\n Print band $bandname, $offsety+$height = endY = $endY \n";
         return $offsets;
 
     }
@@ -385,13 +387,26 @@ class Pdf extends \TCPDF implements ExportInterface
         $offsetx = $this->pagesettings['leftMargin'];
         
         $prevband='';
+
+        //detail_0
         if($detailbandname =='detail_0')
         {
             
+            
             if($this->groupCount()>0)
-            {
-                $prevband=$this->groupbandprefix.$this->getLastGroupName().'_header';
-
+            {                
+                $lastgroupname = $this->getLastGroupName();                
+                $lastgroup = $this->groups[$lastgroupname];
+                
+                $isgroupchanged = $lastgroup['ischange'];    
+                if($isgroupchanged)
+                {
+                    $prevband=$this->groupbandprefix.$lastgroupname.'_header';
+                }
+                else
+                {
+                    $prevband=$this->lastdetailband;
+                }
             }
             else
             {
@@ -406,7 +421,7 @@ class Pdf extends \TCPDF implements ExportInterface
             }
             
         }
-        else
+        else //detail_1, detail_2...
         {
             $prevband = 'detail_'.((int)$detailno -1 );
         }
@@ -512,6 +527,8 @@ class Pdf extends \TCPDF implements ExportInterface
         $groupame = str_replace([$this->groupbandprefix,'_header','_footer'],'',$bandname);
 
         $groupno = $this->groups[$groupame]['groupno'];
+
+        //print header
         if(str_contains($bandname,'_header'))
         {
             //if continue print from previous group
@@ -538,7 +555,7 @@ class Pdf extends \TCPDF implements ExportInterface
                 
             
         }
-        else if(str_contains($bandname,'_footer'))
+        else if(str_contains($bandname,'_footer')) //print group footer
         {
              
             $lastgroup = $this->groups[$this->getLastGroupName()];
@@ -547,10 +564,12 @@ class Pdf extends \TCPDF implements ExportInterface
             // print_r($lastgroup);
             if($groupno == $lastgroupno )
             {
-                $this->currentY=$offsety = $this->bands[$this->lastdetailband]['endY'];    
+                
+                $this->currentY=$offsety = $this->bands[$this->lastdetailband]['endY'];
             }
             else
             {
+                
                 $nextgroupno = $groupno + 1;
                 $nextband = $this->getHashValueFromIndex($this->groups,$nextgroupno);
                 $this->currentY=$offsety = $nextband['endY'];    
