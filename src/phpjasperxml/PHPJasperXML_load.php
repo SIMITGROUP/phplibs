@@ -6,7 +6,8 @@ trait PHPJasperXML_load
     protected array $variables=[];
     protected array $parameters=[];
     protected array $fields=[];
-
+    protected array $groups=[];
+    protected int $groupcount = 0;
     protected array $bands=[];
     protected array $elements = [];
     protected string $querystring = '';
@@ -48,6 +49,11 @@ trait PHPJasperXML_load
                 case 'parameter':
                 case 'variable':
                     $attributename = $k.'s';                    
+                    
+                    foreach($out as $key=>$value)
+                    {
+                        $setting[$key]=(string)$value;
+                    }
                     $this->$attributename[$name]=$setting;                    
                     break;                    
                 case 'queryString':
@@ -100,33 +106,24 @@ trait PHPJasperXML_load
     protected function addBand(string $bandname,object $elements,bool $isgroup = false)
     {               
         
-        $offsety=0;        
-        if($bandname == 'detail')
-        {
-            // $detailcount = count($elements->band);
-            foreach($elements->band as $bandno=>$bandobj)
+        $offsety=0;               
+        $count=0;
+        foreach($elements->band as $bandobj)
+        {            
+            if($bandname == 'detail')
             {
-                $newbandname = $bandname.'_'.$bandno;
-                $this->bands[$newbandname]  = $this->prop($bandobj);
-                $this->elements[$newbandname] = $this->getBandChildren($bandobj);
+                $newbandname = $bandname.'_'.$count;
             }
-            // print_r($this->bands);die;
-        }
-        else
-        {
-            $this->bands[$bandname]  = $this->prop($elements->band);
-            $this->elements[$bandname] = $this->getBandChildren($elements->band);
-        }
-        
-        
+            else
+            {
+                $newbandname = $bandname;
+            }
             
-            
-        
-        // if(in_array($bandname,['detail','pageHeader']))
-        // {
-            // echo "\n $bandname . ".gettype($elements->band).", count:". count($elements->band)."\n";
-            // die;
-        // }
+            $this->bands[$newbandname]  = $this->prop($bandobj);
+            $this->elements[$newbandname] = $this->getBandChildren($bandobj);
+            $count++;
+        }            
+
     }
 
     /**
@@ -136,10 +133,13 @@ trait PHPJasperXML_load
     protected function addGroup($obj)
     {
         $name = (string)$obj->attributes()['name'];
+        $groupExpression = (string)$obj->groupExpression;
         $bandname = 'group_'.$name;
         $groupExpression = $obj->groupExpression;
+        $this->groups[$name]=[ 'value'=>'NOVALUE','count'=>0,'groupExpression'=>$groupExpression];
         $this->addBand($bandname.'_header',$obj->groupHeader,true);
         $this->addBand($bandname.'_footer',$obj->groupFooter,true);
+        $this->groupcount++;
     }
 
     protected function addSubDataSets(string $name, string $sql)

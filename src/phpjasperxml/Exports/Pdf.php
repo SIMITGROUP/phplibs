@@ -8,15 +8,20 @@ use Com\Tecnick\Color\Model\Rgb;
 class Pdf extends \TCPDF implements ExportInterface
 {
     use \Simitsdk\phpjasperxml\Tools\Toolbox;
-    protected $pagesettings=[];
-    protected $bands=[];
-    protected $elements=[];
-    protected $bandsheight=[];
-    protected $currentY=0;
-    protected $defaultfont='times';
-    protected $currentRowNo=0;
+    protected array $pagesettings=[];
+    protected array $bands=[];
+    protected string $lastdetailband='';
+    protected array $elements=[];    
+    protected int $groupcount=0;
+    protected int $currentY=0;
+    protected int $maxY=0;
+    protected int $columnno=1;
+    protected string $defaultfont='helvetica';
+    protected int $currentRowNo=0;
+    protected bool $debugband=true;
     public function __construct($prop)
     {           
+        $this->pagesettings=$prop;
         
         $orientation = isset($prop['orientation'])? $this->left($prop['orientation'],1):'P';
         $unit='pt';
@@ -32,14 +37,26 @@ class Pdf extends \TCPDF implements ExportInterface
         $this->SetTitle('sample pdf');
         $this->SetSubject('subject1');
         $this->SetKeywords('keyword1');
-        $this->AddPage();
+        
     }
 
-    public function defineBands(array $bands,array $elements)
+    public function NewPage()
+    {
+        $this->AddPage();
+    }
+    public function defineBands(array $bands,array $elements,int $groupcount)
     {
         
         $this->bands = $bands;
-        $this->elements = $elements;        
+        $this->elements = $elements;      
+        $this->groupcount = $groupcount;
+        foreach($bands as $b=>$setting)
+        {
+            if(str_contains($b,'detail'))
+            {
+                $this->lastdetailband = $b;
+            }
+        }  
     }
     public function setData(array $data)
     {
@@ -49,11 +66,18 @@ class Pdf extends \TCPDF implements ExportInterface
     {
         return isset($this->bands[$bandname]['height']) ? $this->bands[$bandname]['height'] : 0;
     }
-
+    public function ColumnNo():int
+    {
+        return $this->columnno;
+    }
+    public function PageNo():int
+    {
+        return parent::PageNo();
+    }
     public function export()
     {
-        $filename = '/tmp/aa.pdf';
-        unlink($filename);
+        $filename = '/tmp/sample1.pdf';
+        // unlink($filename);
         // $this->Output($filename,'F');   //send out the complete page
 
         $this->Output($filename,'F');
@@ -70,7 +94,7 @@ class Pdf extends \TCPDF implements ExportInterface
     {        
         // $prop = $this->prop($obj->reportElement);
         $x = $prop['x']+$offsetx;
-        $y = $prop['y']+$this->currentY;
+        $y = $prop['y']+$offsety;//$this->currentY;
         $height = $prop['height'];
         $width = $prop['width'];
 
@@ -92,8 +116,6 @@ class Pdf extends \TCPDF implements ExportInterface
         // $this->SetDrawColor(50, 0, 0, 0);
         // $this->SetTextColor(100, 0, 0, 0);
         $this->SetDrawColor($forecolor['r'], $forecolor['g'],$forecolor['b']);
-
-
         $this->Line($x1,$y1,$x2,$y2);
         // echo "\ndrawline  $uuid ".print_r($prop,true)."\n";
     }
@@ -168,11 +190,19 @@ class Pdf extends \TCPDF implements ExportInterface
         $w=$prop['width'];
         $h=$prop['height'];        
         $forecolor = $this->convertColorStrToRGB($prop['forecolor']??'');
-        $this->SetTextColor($forecolor["r"],$forecolor["g"],$forecolor["b"]);
+        $this->SetTextColor($forecolor["r"],$forecolor["g"],$forecolor["b"]);        
+        $isfill=false;
+        if(!empty($prop['backcolor']))
+        {
+            $isfill = true;
+        }
         $backcolor = $this->convertColorStrToRGB($prop['backcolor']??'');
         $this->SetFillColor($backcolor['r'], $backcolor['g'],$backcolor['b']);
         $halign = !empty($prop['textAlignment']) ? $prop['textAlignment'] : 'L';
+        $halign = $this->left($halign,1);
+        //textAlignment="Right", L,C,R,J
         $valign = !empty($prop['verticalAlignment']) ? $prop['verticalAlignment'] : 'T'; 
+        //B,C,T
         $markup = !empty($prop['markup']) ? $prop['markup'] : '';
         $prop['fontName'] = $prop['fontName']?? $this->defaultfont;
         $fontName=strtolower($prop['fontName']);        
@@ -181,7 +211,18 @@ class Pdf extends \TCPDF implements ExportInterface
         $fontstyle.= !empty($prop['isItalic']) ? 'I':'';
         $fontstyle.= !empty($prop['isUnderline']) ? 'U':'';
         $fontsize= !empty($prop['size']) ? $prop['size'] : 8;        
-
+        
+        $topPenlineWidth = !empty($prop['topPenlineWidth']) ? $prop['topPenlineWidth'] : 0; 
+        $bottomPenlineWidth = !empty($prop['bottomPenlineWidth']) ? $prop['bottomPenlineWidth'] : 0; 
+        $leftPenlineWidth = !empty($prop['leftPenlineWidth']) ? $prop['leftPenlineWidth'] : 0; 
+        $rightPenlineWidth = !empty($prop['rightPenlineWidth']) ? $prop['rightPenlineWidth'] : 0; 
+        $border='';
+        
+        $border.= ($topPenlineWidth>0)?'T':'';   
+        $border.= ($bottomPenlineWidth>0)?'B':'';   
+        $border.= ($leftPenlineWidth>0)?'L':'';   
+        $border.= ($rightPenlineWidth>0)?'R':'';   
+        
         $this->SetFont($fontName, $fontstyle, $fontsize);
         
         if($isTextField)
@@ -192,7 +233,7 @@ class Pdf extends \TCPDF implements ExportInterface
         {
             $text = $prop['text'];
         }
-        $this->Cell($w,$h,$text);
+        $this->Cell($w,$h,$text,$border,0,$halign,$isfill);
     }
     public function draw_textField(string $uuid,array $prop)
     {
@@ -209,31 +250,65 @@ class Pdf extends \TCPDF implements ExportInterface
      * prepare band in pdf, and return x,y offsets
      * @param 
      */
-    public function prepareBand(string $bandname):array
+    public function prepareBand(string $bandname, mixed $callback=null):array
     {        
         $offsets=[];
-        $methodname = 'draw_'.$bandname;
-        $band = $this->bands[$bandname];
-        $offsets = call_user_func([$this,$methodname],);
+        echo "\nprepareband $bandname\n";
+        if(str_contains($bandname,'detail'))
+        {
+            $methodname = 'draw_detail';
+            $band = $this->bands[$bandname];
+            $offsets = call_user_func([$this,$methodname],$bandname,$callback);
+        }
+        else if(str_contains($bandname,'group_'))
+        {
+            $methodname = 'draw_group';
+            $band = $this->bands[$bandname];
+            $offsets = call_user_func([$this,$methodname],$bandname,$callback);
+        }        
+        else if(in_array($bandname,['summary']))
+        {
+            
+            $methodname = 'draw_'.$bandname;
+            $band = $this->bands[$bandname];
+            $offsets = call_user_func([$this,$methodname],$callback);
+        }
+        else
+        {
+            $methodname = 'draw_'.$bandname;
+            $band = $this->bands[$bandname];
+            $offsets = call_user_func([$this,$methodname],);
+            
+        }
+        
+        // echo "\n$methodname\n";
+        // print_r($offsets);
+        
 
         $witdh = $this->getPageWidth() - $this->lMargin - $this->rMargin;
         $height = isset($band['height'])? $band['height'] : 0;
-        
+        $offsety=0;
         if($height>0)
         {
             $offsetx = isset($offsets['x']) ? $offsets['x']: 0;
             $offsetx = (int)$offsetx;
             $offsety = isset($offsets['y']) ? $offsets['y']: 0 ;
             $offsety = (int)$offsety;
-            $this->SetDrawColor(50, 0, 0, 0);
-            $this->SetTextColor(100, 0, 0, 0);
+            $this->maxY=$offsety+$height;
             $this->currentY=$offsety;
             $this->SetXY($offsetx,$offsety);
-            $this->Rect($offsetx,$offsety,$witdh ,$height);     
-            $this->Cell($witdh,$height,$bandname,1);
             $offsets = ['x'=>$offsetx,'y'=>$offsety];
+            if($this->debugband)
+            {
+                $this->SetFontSize(8);
+                $this->SetDrawColor(50, 0, 0, 0);
+                $this->SetTextColor(100, 0, 0, 0);            
+                $this->Rect($offsetx,$offsety,$witdh ,$height);     
+                $this->Cell($witdh,10,$bandname,0);    
+            }
+            
         }
-        
+        $this->bands[$bandname]['endY']=$offsety+$height;
         // echo "\n Print band $bandname, h = $height :".print_r($offsets,true)." \n";
         return $offsets;
 
@@ -241,18 +316,14 @@ class Pdf extends \TCPDF implements ExportInterface
     
     public function draw_background()
     {        
-        $offsety=$this->tMargin;
-        $offset = ['x'=>$this->lMargin,'y'=>$offsety];
-        $bandname='background';        
-        //$this->drawBand($bandname,$offset);
+        $offsety=$this->pagesettings['topMargin'];
+        $offset = ['x'=>$this->pagesettings['leftMargin'],'y'=>$offsety];
         return $offset;
     }
     public function draw_title()
     {
-        $offsety=$this->tMargin;
-        $offset = ['x'=>$this->lMargin,'y'=>$offsety];
-        $bandname='title';
-        //$this->drawBand($bandname,$offset);
+        $offsety=$this->pagesettings['topMargin'];
+        $offset = ['x'=>$this->pagesettings['leftMargin'],'y'=>$offsety];
         return $offset;
         
     }
@@ -260,110 +331,159 @@ class Pdf extends \TCPDF implements ExportInterface
     {
         if($this->PageNo() == 1)
         {
-            $offsety = $this->tMargin + $this->getBandHeight('title');
+            $offsety = $this->pagesettings['topMargin'] + $this->getBandHeight('title');
         }
         else
         {
-            $offsety = $this->tMargin;
+            $offsety = $this->pagesettings['topMargin'];
         }
         
-        $offset = ['x'=>$this->lMargin,'y'=>$offsety];
-        $bandname='pageHeader';
-        //$this->drawBand($bandname,$offset);
+        $offset = ['x'=>$this->pagesettings['leftMargin'],'y'=>$offsety];
         return $offset;
     }
     public function draw_columnHeader()
     {
         if($this->PageNo() == 1)
         {
-            $offsety = $this->tMargin + $this->getBandHeight('title') +  $this->getBandHeight('pageHeader');
+            $offsety = $this->pagesettings['topMargin'] + $this->getBandHeight('title') +  $this->getBandHeight('pageHeader');
         }
         else
         {
-            $offsety = $this->tMargin + $this->getBandHeight('pageHeader');
+            $offsety = $this->pagesettings['topMargin'] + $this->getBandHeight('pageHeader');
         }
-        $offset = ['x'=>$this->lMargin,'y'=>$offsety];
-        $bandname='columnHeader';
-        //$this->drawBand($bandname,$offset);
-        return $offset;
-    }
-    public function draw_detail(string $detailno)
-    {
-        $offsety=$this->tMargin + $this->getBandHeight('title') +  $this->getBandHeight('pageHeader')+  $this->getBandHeight('columnHeader') + $this->getBandHeight('detail')*$this->currentRowNo;
-        if($this->PageNo() == 1)
-        {
-            $offsety += $this->getBandHeight('title');
-        }
-        $offset = ['x'=>$this->lMargin,'y'=>$offsety];
-        $bandname='detail';
+        $offset = ['x'=>$this->pagesettings['leftMargin'],'y'=>$offsety];
         //$this->drawBand($bandname,$offset);
         return $offset;
     }
 
+    public function setDetailNextPage(string $detailname)
+    {
+
+    }
+    public function draw_detail(string $detailbandname,mixed $callback=null)
+    {
+        $detailno = (int)str_replace('detail_','',$detailbandname);
+        $totaldetailheight = 0;
+        $offsetx = $this->pagesettings['leftMargin'];
+        
+        $prevband='';
+        if($detailbandname =='detail_0')
+        {
+            
+            if($this->groupcount>0)
+            {
+                $prevband='lastgroupband********************';
+            }
+            else
+            {
+                if($this->currentRowNo==0)
+                {
+                    $prevband='columnHeader';
+                }
+                else
+                {
+                    $prevband=$this->lastdetailband;
+                }  
+            }
+            
+        }
+        else
+        {
+            $prevband = 'detail_'.((int)$detailno -1 );
+        }
+        $offsety = $this->bands[$prevband]['endY'];    
+        
+        if($this->PageNo() == 1)
+        {
+            $offsety += $this->getBandHeight('title');
+        }
+
+        $estimateY=$offsety+$this->getBandHeight($detailbandname);
+        if($this->isEndDetailSpace($estimateY) && gettype($callback)=='object')
+        {            
+            $callback();
+            $offsety = $this->bands['columnHeader']['endY'];    
+        }
+
+        $offset = ['x'=>$offsetx, 'y'=>$offsety];
+        return $offset;
+    }
+    protected function isEndDetailSpace(int $estimateY)
+    {
+        $offsets = $this->draw_columnFooter();
+        $offsety=$offsets['y'];
+        if($estimateY > $offsety)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
     public function setRowNumber(int $no)
     {
         $this->currentRowNo=$no;
     }
     public function draw_columnFooter()
-    {
+    {        
+        $pageheight = $this->getPageHeight();//1000
+        $pagefooterheight =  $this->getBandHeight('pageFooter');
+        $bottommargin =  $this->pagesettings['bottomMargin'];        
+        $columnfooterheight = $this->getBandHeight('columnFooter');
+        $offsety = $pageheight - $pagefooterheight - $bottommargin - $columnfooterheight;
+        $offset = ['x'=>$this->pagesettings['leftMargin'] ,'y'=>$offsety];
+        
+        return $offset;
         
     }
     public function draw_pageFooter()
     {
         
-        $pageheight = $this->getPageHeight();//1000
+        $pageheight = $this->getPageHeight();
         $pagefooterheight =  $this->getBandHeight('pageFooter');
-        $bottommargin =  $this->getFooterMargin();
+        $bottommargin =  $this->pagesettings['bottomMargin'];
+        
         $offsety = $pageheight - $pagefooterheight - $bottommargin ;
-        $offset = ['x'=>$this->lMargin,'y'=>$offsety];
-        $bandname='pageFooter';
-        //$this->drawBand($bandname,$offset);
+        $offset = ['x'=>$this->pagesettings['leftMargin'],'y'=>$offsety];
+
         return $offset;
         
     }
     public function draw_lastPageFooter()
     {
-        $pageheight = $this->getPageHeight();//1000
-        $pagefooterheight =  $this->getBandHeight('lastPageFooter');
-        $bottommargin =  $this->getFooterMargin();
-        $offsety = $pageheight - $pagefooterheight - $bottommargin ;
-        $offset = ['x'=>$this->lMargin,'y'=>$offsety];
-        $bandname='pageFooter';
-        //$this->drawBand($bandname,$offset);
-        return $offset;
-        
+        return $this->draw_pageFooter();        
     }
-    public function draw_summary()
+    public function draw_summary(mixed $callback=null)
     {
-        $this->currentY=400;        
-        $offsety = $this->currentY;
-        $offset = ['x'=>$this->lMargin,'y'=>$offsety];
-        $bandname='summary';
-        //$this->drawBand($bandname,$offset);
+        $offsety = $this->bands[$this->lastdetailband]['endY'];
+        $estimateY=$offsety+$this->getBandHeight('summary');
+        if($this->isEndDetailSpace($estimateY) && gettype($callback)=='object')
+        {            
+            $callback();
+            $offsety = $this->bands['columnHeader']['endY'];    
+        }
+
+
+        $offset = ['x'=>$this->pagesettings['leftMargin'],'y'=>$offsety];        
         return $offset;
     }
     public function draw_noData()
     {
-        $this->currentY=400;
-        $offsety = $this->currentY;
-        $offset = ['x'=>$this->lMargin,'y'=>$offsety];
+        
+        $offsety = $this->pagesettings['topMargin'];
+        $offset = ['x'=>$this->pagesettings['leftMargin'],'y'=>$offsety];
         return $offset;
     }
 
-    public function draw_groupsHeader()
+    public function draw_group(string $bandname)
     {
+        
+        echo "\ndraw_group:".$bandname."\n";
         $this->currentY=400;
         $offsety = $this->currentY;
-        $offset = ['x'=>$this->lMargin,'y'=>$offsety];
+        $offset = ['x'=>$this->pagesettings['leftMargin'],'y'=>$offsety];
         return $offset;
-    }
-    public function draw_groupsFooter()
-    {
-        $this->currentY=400;
-        $offsety = $this->currentY;
-        $offset = ['x'=>$this->lMargin,'y'=>$offsety];
-        return $offset;
-
     }
 
 
@@ -383,6 +503,15 @@ class Pdf extends \TCPDF implements ExportInterface
         }
     }
 
+    public function columnCount(): int
+    {
+        return $this->pagesettings['columnCount'];
+    }
+
+    public function getNumPages(): int
+    {
+        return parent::getNumPages();
+    }
 
     protected function convertColorStrToRGB(string $colorstr):array
     {

@@ -2,12 +2,12 @@
 
 namespace Simitsdk\phpjasperxml;
 
-trait PHPJasperXML_database{
+trait PHPJasperXML_datasource{
     protected $db = null;
     protected $rows = [];
     protected $rowcount = 0 ;
-    
-    public function connect(array $setting):self
+    protected $dataloaded=false;
+    public function setDataSource(array $setting):self
     {
         
         if(empty($setting['driver']))
@@ -17,36 +17,34 @@ trait PHPJasperXML_database{
         else
         {
             $driver = $setting['driver'];
-            $driverfile = __DIR__.'/Dbdrivers/'.$driver.'.php';
+            $driverfile = __DIR__.'/datadrivers/'.$driver.'.php';
             if(!file_exists($driverfile))
             {
                 die("$driverfile does not exists");
             }
             else
             {
-                $classname = '\\Simitsdk\\phpjasperxml\\dbdrivers\\' . ucfirst($driver);
+                $classname = '\\Simitsdk\\phpjasperxml\\datadrivers\\' . ucfirst($driver);
                 $this->db = new $classname($setting);     
+                $this->fetchData();
                 return $this;           
             }
         }   
     }
 
 
-    public function transferDBtoArray(array $setting) : self
+    public function fetchData() : self
     {
-        $this->connect($setting);
-        $q = $this->db ->query("SELECT * FROM global_user");
-
-        while($r=$this->db->fetchArray($q))
-        {
-            array_push($this->rows,$r);
-            $this->rowcount++;
-        }
+        $sql = $this->parseExpression($this->querystring);
+        $data =$this->db->fetchData($sql);
+        $this->loadData($data);
         return $this;
     }
 
-    public function setData(array $data):self
+    public function loadData(array $data):self
     {
+        $this->dataloaded=true;
+        $this->rowcount = count($data);
         $this->rows = $data;
         return $this;
     }
