@@ -24,14 +24,11 @@ trait PHPJasperXML_output
                 {
                    $this->newPage(true);
                 }
-                else
-                {
-                    $this->draw_groupsFooter();        
-                }
+                
                 $this->draw_groupsHeader();
-                $this->draw_detail();                
+                $this->draw_detail();                        
+                $this->draw_groupsFooter();
             }
-            $this->draw_groupsFooter(true);
             $this->endPage();
         }
         else
@@ -69,51 +66,12 @@ trait PHPJasperXML_output
     {
         $this->currentRow=$i;
         $this->row = $this->rows[$i];
-        $this->resetGroupIfRequire($i);
         $this->computeVariables($i);
         $this->output->setRowNumber($i);
         
     }
 
-    protected function resetGroupIfRequire($i)
-    {
-        $resettherest = false;        
-        foreach($this->groups as $groupname=>$groupsetting)
-        {
-            $groupExpression = $groupsetting['groupExpression'];
-            $lastgroupvalue = $groupsetting['value'];
-            $newgroupvalue = $this->parseExpression($groupExpression);
-            
-            if($lastgroupvalue != $newgroupvalue)
-            {
-                $resettherest=true;
-                $this->groups[$groupname]['value'] = $newgroupvalue;                
-            }
-            
-
-            if($resettherest)
-            {                
-                $this->groups[$groupname]['count']=0;
-                $this->groups[$groupname]['ischange']=true;
-                $this->output->groups[$groupname]['ischange']=true;
-                //reset all variables under this group
-                foreach($this->variables as $varname=>$varsetting)
-                {
-                    $this->variables[$varname]['value']='--value reset--';
-                    $this->variables[$varname]['lastresetvalue']='--lastvalue reset--';
-                }
-                
-            }
-            else
-            {
-                $this->groups[$groupname]['ischange']=false;
-                $this->output->groups[$groupname]['ischange']=false;
-            }
-
-            $this->groups[$groupname]['count']++;
-            
-        }
-    }
+    
     
     protected function drawBand(string $bandname, mixed $callback=null)
     {
@@ -164,6 +122,12 @@ trait PHPJasperXML_output
             $bandname = $this->groupbandprefix.$groupname.'_header';            
             if($groupsetting['ischange'])
             {
+                $this->groups[$groupname]['ischange']=false;
+                $this->output->groups[$groupname]['ischange']=false;
+                $groupExpression = $groupsetting['groupExpression'];
+                $newgroupvalue = $this->parseExpression($groupExpression);
+                $this->groups[$groupname]['value'] = $newgroupvalue;                
+
                 $this->drawBand($bandname,function(){
                     $this->newPage();
                 });
@@ -188,18 +152,95 @@ trait PHPJasperXML_output
             }
         }        
     }
-    protected function draw_groupsFooter(bool $forceshow=false)
+
+
+    // protected function resetGroupIfRequire(int $rowno=null)
+    // {
+    //     $resettherest = false;        
+    //     foreach($this->groups as $groupname=>$groupsetting)
+    //     {
+    //         $groupExpression = $groupsetting['groupExpression'];
+    //         $lastgroupvalue = $groupsetting['value'];
+    //         $newgroupvalue = $this->parseExpression($groupExpression,$rowno);
+            
+    //         if($lastgroupvalue != $newgroupvalue)
+    //         {
+    //             $resettherest=true;
+    //             $this->groups[$groupname]['value'] = $newgroupvalue;                
+    //         }
+            
+
+    //         if($resettherest)
+    //         {                
+    //             $this->groups[$groupname]['count']=0;
+    //             $this->groups[$groupname]['ischange']=true;
+    //             $this->output->groups[$groupname]['ischange']=true;
+    //             //reset all variables under this group
+    //             foreach($this->variables as $varname=>$varsetting)
+    //             {
+    //                 $this->variables[$varname]['value']='--value reset--';
+    //                 $this->variables[$varname]['lastresetvalue']='--lastvalue reset--';
+    //             }
+                
+    //         }
+    //         else
+    //         {
+    //             $this->groups[$groupname]['ischange']=false;
+    //             $this->output->groups[$groupname]['ischange']=false;
+    //         }
+
+    //         $this->groups[$groupname]['count']++;
+            
+    //     }
+    // }
+    protected function draw_groupsFooter()
     {
+
+        //$this->resetGroupIfRequire(($i+1));        
         $descgroupnames = [];
+        $resettherest=false;
         foreach($this->groups as $groupname=>$groupsetting)
         {
+            $groupExpression = $groupsetting['groupExpression'];
+            $lastgroupvalue = $groupsetting['value'];
+            $newgroupvalue = $this->parseExpression($groupExpression,1);
+            
+            if($lastgroupvalue != $newgroupvalue)
+            {
+                $resettherest=true;
+                $this->groups[$groupname]['value'] = $newgroupvalue;                
+            }
+
+            if($resettherest)
+            {                
+                // echo "\nchanged group $groupname\n";
+                $this->groups[$groupname]['count']=0;
+                $this->groups[$groupname]['ischange']=true;
+                $this->output->groups[$groupname]['ischange']=true;
+                //reset all variables under this group
+                foreach($this->variables as $varname=>$varsetting)
+                {
+                    $this->variables[$varname]['value']='--value reset--';
+                    $this->variables[$varname]['lastresetvalue']='--lastvalue reset--';
+                }
+                
+            }
+            else
+            {
+                $this->groups[$groupname]['ischange']=false;
+                $this->output->groups[$groupname]['ischange']=false;
+            }
+
+
             array_push($descgroupnames,$groupname);                        
         }        
-        for($i=count($descgroupnames)-1;$i>0;$i--)
+
+        for($i=count($descgroupnames)-1;$i>=0;$i--)
         {                        
             $groupname = $descgroupnames[$i];
             $bandname = $this->groupbandprefix.$groupname.'_footer';
-            if($forceshow || $groupsetting['ischange'])
+            // echo "\n currentRow $this->currentRow ==  ($this->rowcount-1) rowcount-1 \n";
+            if($this->groups[$groupname]['ischange'] || $this->currentRow == ($this->rowcount-1) )
             {
                 $this->drawBand($bandname,function(){
                     $this->newPage();

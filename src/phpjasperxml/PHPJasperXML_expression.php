@@ -7,7 +7,7 @@ trait PHPJasperXML_expression
     protected bool $validate = true;
     protected array $resettypes = ['Report','Group','None','Page'];
     protected bool $debugtxt = false;
-    protected function parseExpression(string $expression): string
+    protected function parseExpression(string $expression,int $addrowqty=0): string
     {
         $value = $expression;
         // echo "\nexpression: $expression :";
@@ -27,7 +27,8 @@ trait PHPJasperXML_expression
         
         foreach($fieldnames as $f => $fieldname)
         {
-            $data = $this->getFieldValue($fieldname);
+            $data = $this->getFieldValue($fieldname,$addrowqty);
+            $data = $data ?? '';
             // $value = str_replace('$F{'.$fieldname.'}', $data,$value);
             $value = str_replace($fieldstrings[$f], $data,$value);
         }
@@ -286,9 +287,19 @@ trait PHPJasperXML_expression
         return $setting;
     }
 
-    protected function getFieldValue(string $name)
+    protected function getFieldValue(string $name,int $addrowqty=0)
     {
-        $value=$this->row[$name];
+        $rowno = $this->currentRow+$addrowqty;
+        if(isset($this->rows[$rowno]))
+        {
+            $row=$this->rows[$rowno] ;
+            $value=$row[$name];
+        }
+        else
+        {
+            $value=null;
+        }
+        
         return $value;
     }
 

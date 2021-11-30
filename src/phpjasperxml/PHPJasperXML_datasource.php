@@ -37,7 +37,7 @@ trait PHPJasperXML_datasource{
     {
         $sql = $this->parseExpression($this->querystring);
         $data =$this->db->fetchData($sql);
-        $this->loadData($data);
+        $this->loadData($data);        
         return $this;
     }
 

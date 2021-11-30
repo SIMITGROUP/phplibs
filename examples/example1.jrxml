@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Created with Jaspersoft Studio version 6.18.1.final using JasperReports Library version 6.18.1-9d75d1969e774d4f179fb3be8401e98a0e6d1611  -->
-<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="example1" pageWidth="595" pageHeight="420" orientation="Landscape" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="51adeca7-9f15-46d6-b157-714028ffc1e5">
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="example1" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="51adeca7-9f15-46d6-b157-714028ffc1e5">
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="postgres"/>
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
 	<property name="com.jaspersoft.studio.unit." value="pixel"/>
@@ -68,7 +68,7 @@
 	<group name="groupcountry_code" isReprintHeaderOnEachPage="true">
 		<groupExpression><![CDATA[$F{country_code}]]></groupExpression>
 		<groupHeader>
-			<band height="50">
+			<band height="30">
 				<textField>
 					<reportElement x="0" y="0" width="100" height="30" uuid="27c953f2-73e7-488d-9a4c-ebe99d317f65"/>
 					<textFieldExpression><![CDATA[$F{country_code}]]></textFieldExpression>
@@ -76,13 +76,18 @@
 			</band>
 		</groupHeader>
 		<groupFooter>
-			<band height="50"/>
+			<band height="50">
+				<textField>
+					<reportElement x="0" y="0" width="100" height="30" uuid="85554e7c-b59b-4bf7-9e7c-f9d5b41475be"/>
+					<textFieldExpression><![CDATA["end"+$F{country_code}]]></textFieldExpression>
+				</textField>
+			</band>
 		</groupFooter>
 	</group>
 	<group name="group_gender" isReprintHeaderOnEachPage="true">
 		<groupExpression><![CDATA[$F{gender}]]></groupExpression>
 		<groupHeader>
-			<band height="50">
+			<band height="40">
 				<textField>
 					<reportElement x="124" y="10" width="100" height="30" uuid="f8924907-c299-4abb-b447-dbc47184f846"/>
 					<textFieldExpression><![CDATA[$F{gender}]]></textFieldExpression>
@@ -90,7 +95,12 @@
 			</band>
 		</groupHeader>
 		<groupFooter>
-			<band height="50"/>
+			<band height="50">
+				<textField>
+					<reportElement x="124" y="10" width="100" height="30" uuid="df613656-f6ba-4860-9085-abe7165cb383"/>
+					<textFieldExpression><![CDATA["end "+$F{gender}]]></textFieldExpression>
+				</textField>
+			</band>
 		</groupFooter>
 	</group>
 	<background>
@@ -113,7 +123,7 @@
 		</band>
 	</pageHeader>
 	<columnHeader>
-		<band height="61" splitType="Stretch">
+		<band height="30" splitType="Stretch">
 			<staticText>
 				<reportElement x="71" y="0" width="100" height="30" uuid="157762d9-bdcc-43bf-9264-e3abca4b5e9d">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="6788ad40-bc57-49d2-9348-6c78d197c1c4"/>

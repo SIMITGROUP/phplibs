@@ -338,7 +338,7 @@ class Pdf extends \TCPDF implements ExportInterface
         $this->lastBandEndY=$offsety+$height;;
         $this->bands[$bandname]['endY']=$this->lastBandEndY;
         
-        echo "\n Print band $bandname, $offsety+$height = endY = $this->lastBandEndY \n";
+        // echo "\n Print band $bandname, $offsety+$height = endY = $this->lastBandEndY \n";
         return $offsets;
 
     }

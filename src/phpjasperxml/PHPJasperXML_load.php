@@ -144,7 +144,7 @@ trait PHPJasperXML_load
         $bandname = 'report_group_'.$name;
         $groupExpression = $obj->groupExpression;
         
-        $this->groups[$name]=[ 'value'=>'NOVALUE','count'=>0,'groupExpression'=>$groupExpression, 'groupno'=>$this->groupcount];
+        $this->groups[$name]=[ 'value'=>'NOVALUE','count'=>0,'groupExpression'=>$groupExpression, 'groupno'=>$this->groupcount,'ischange'=>true];
         $this->addBand($bandname.'_header',$obj->groupHeader,true);
         $this->addBand($bandname.'_footer',$obj->groupFooter,true);
         $this->groupcount++;
