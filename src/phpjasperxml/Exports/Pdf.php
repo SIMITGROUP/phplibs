@@ -15,6 +15,7 @@ class Pdf extends \TCPDF implements ExportInterface
     public array $groups=[];
     public array $groupnames=[];
     protected int $currentY=0;
+    protected int $lastBandEndY=0;
     protected int $maxY=0;
     protected int $columnno=1;
     protected string $defaultfont='helvetica';
@@ -39,7 +40,6 @@ class Pdf extends \TCPDF implements ExportInterface
         $this->SetTitle('sample pdf');
         $this->SetSubject('subject1');
         $this->SetKeywords('keyword1');
-        
     }
 
     public function NewPage()
@@ -270,7 +270,17 @@ class Pdf extends \TCPDF implements ExportInterface
         {
             $methodname = 'draw_group';
             $band = $this->bands[$bandname];
-            $offsets = call_user_func([$this,$methodname],$bandname,$callback);
+            $groupname = str_replace([$this->groupbandprefix,'_header','_footer'],'',$bandname);
+            $groupno = $this->groups[$groupname]['groupno'];
+            if(str_contains($bandname,'_header'))
+            {
+                $offsets = $this->draw_groupHeader($bandname,$callback);
+            }
+            else
+            {
+                $offsets = $this->draw_groupHeader($bandname,$callback);
+            }
+            // $offsets = call_user_func([$this,$methodname],$bandname,$callback);
         }        
         // else if(in_array($bandname,['summary']))
         // {
@@ -306,18 +316,29 @@ class Pdf extends \TCPDF implements ExportInterface
             $offsets = ['x'=>$offsetx,'y'=>$offsety];
             if($this->debugband)
             {
+                
+                if(str_contains($bandname,$this->groupbandprefix))
+                {
+                    $color1=100;
+                    $color2=100;
+                }
+                else
+                {
+                    $color1=50;
+                    $color2=0;
+                }
                 $this->SetFontSize(8);
-                $this->SetDrawColor(50, 0, 0, 0);
-                $this->SetTextColor(100, 0, 0, 0);            
+                $this->SetDrawColor($color1,$color2 , 0, 0);
+                $this->SetTextColor($color1, $color2, 0, 0);            
                 $this->Rect($offsetx,$offsety,$witdh ,$height);     
                 $this->Cell($witdh,10,$bandname,0);    
             }
             
         }
-        $endY=$offsety+$height;;
-        $this->bands[$bandname]['endY']=$endY;
+        $this->lastBandEndY=$offsety+$height;;
+        $this->bands[$bandname]['endY']=$this->lastBandEndY;
         
-        echo "\n Print band $bandname, $offsety+$height = endY = $endY \n";
+        echo "\n Print band $bandname, $offsety+$height = endY = $this->lastBandEndY \n";
         return $offsets;
 
     }
@@ -351,14 +372,15 @@ class Pdf extends \TCPDF implements ExportInterface
     }
     public function draw_columnHeader()
     {
-        if($this->PageNo() == 1)
-        {
-            $offsety = $this->pagesettings['topMargin'] + $this->getBandHeight('title') +  $this->getBandHeight('pageHeader');
-        }
-        else
-        {
-            $offsety = $this->pagesettings['topMargin'] + $this->getBandHeight('pageHeader');
-        }
+        $offsety = $this->lastBandEndY;
+        // if($this->PageNo() == 1)
+        // {
+        //     $offsety = $this->pagesettings['topMargin'] + $this->getBandHeight('title') +  $this->getBandHeight('pageHeader');
+        // }
+        // else
+        // {
+        //     $offsety = $this->pagesettings['topMargin'] + $this->getBandHeight('pageHeader');
+        // }
         $offset = ['x'=>$this->pagesettings['leftMargin'],'y'=>$offsety];
         //$this->drawBand($bandname,$offset);
         return $offset;
@@ -376,6 +398,18 @@ class Pdf extends \TCPDF implements ExportInterface
             return '';
         }
     }
+    protected function getFirstGroupName():string
+    {
+        
+        if($this->groupCount()>0)
+        {
+            return array_key_first($this->groups);
+        }
+        else
+        {
+            return '';
+        }
+    }
     public function setDetailNextPage(string $detailname)
     {
 
@@ -385,53 +419,53 @@ class Pdf extends \TCPDF implements ExportInterface
         $detailno = (int)str_replace('detail_','',$detailbandname);
         $totaldetailheight = 0;
         $offsetx = $this->pagesettings['leftMargin'];
-        
-        $prevband='';
+        $offsety = $this->lastBandEndY;
+        // $prevband='';
 
-        //detail_0
-        if($detailbandname =='detail_0')
-        {
+        // //detail_0
+        // if($detailbandname =='detail_0')
+        // {
             
             
-            if($this->groupCount()>0)
-            {                
-                $lastgroupname = $this->getLastGroupName();                
-                $lastgroup = $this->groups[$lastgroupname];
+        //     if($this->groupCount()>0)
+        //     {                
+        //         $lastgroupname = $this->getLastGroupName();                
+        //         $lastgroup = $this->groups[$lastgroupname];
                 
-                $isgroupchanged = $lastgroup['ischange'];    
-                if($isgroupchanged)
-                {
-                    $prevband=$this->groupbandprefix.$lastgroupname.'_header';
-                }
-                else
-                {
-                    $prevband=$this->lastdetailband;
-                }
-            }
-            else
-            {
-                if($this->currentRowNo==0)
-                {
-                    $prevband='columnHeader';
-                }
-                else
-                {
-                    $prevband=$this->lastdetailband;
-                }  
-            }
+        //         $isgroupchanged = $lastgroup['ischange'];    
+        //         if($isgroupchanged)
+        //         {
+        //             $prevband=$this->groupbandprefix.$lastgroupname.'_header';
+        //         }
+        //         else
+        //         {
+        //             $prevband=$this->lastdetailband;
+        //         }
+        //     }
+        //     else
+        //     {
+        //         if($this->currentRowNo==0)
+        //         {
+        //             $prevband='columnHeader';
+        //         }
+        //         else
+        //         {
+        //             $prevband=$this->lastdetailband;
+        //         }  
+        //     }
             
-        }
-        else //detail_1, detail_2...
-        {
-            $prevband = 'detail_'.((int)$detailno -1 );
-        }
-        // echo "\ndetail band prevband : $prevband\n";
-        $offsety = $this->bands[$prevband]['endY'];    
+        // }
+        // else //detail_1, detail_2...
+        // {
+        //     $prevband = 'detail_'.((int)$detailno -1 );
+        // }
+        // // echo "\ndetail band prevband : $prevband\n";
+        // $offsety = $this->bands[$prevband]['endY'];    
         
-        if($this->PageNo() == 1)
-        {
-            $offsety += $this->getBandHeight('title');
-        }
+        // if($this->PageNo() == 1)
+        // {
+        //     $offsety += $this->getBandHeight('title');
+        // }
 
         $estimateY=$offsety+$this->getBandHeight($detailbandname);
         if($this->isEndDetailSpace($estimateY) && gettype($callback)=='object')
@@ -491,26 +525,31 @@ class Pdf extends \TCPDF implements ExportInterface
     }
     public function draw_summary(mixed $callback=null)
     {
-        if($this->groupCount()>0)
-        {            
-            $endgroupname = $this->getHashKeyFromIndex($this->groups,0);
-            $lastband = $this->groupbandprefix. $endgroupname.'_footer';
+        // if($this->groupCount()>0)
+        // {            
+        //     $endgroupname = $this->getHashKeyFromIndex($this->groups,0);
+        //     $lastband = $this->groupbandprefix. $endgroupname.'_footer';
             
-            $offsety = $this->bands[$lastband]['endY'];
-        }
-        else
-        {
-            $offsety = $this->bands[$this->lastdetailband]['endY'];
-        }
+        //     $offsety = $this->bands[$lastband]['endY'];
+        // }
+        // else
+        // {
+        //     $offsety = $this->bands[$this->lastdetailband]['endY'];
+        // }
         
+        // $estimateY=$offsety+$this->getBandHeight('summary');
+        // if($this->isEndDetailSpace($estimateY) && gettype($callback)=='object')
+        // {            
+        //     $callback();
+        //     $offsety = $this->bands['columnHeader']['endY'];    
+        // }
+        $offsety = $this->lastBandEndY;
         $estimateY=$offsety+$this->getBandHeight('summary');
         if($this->isEndDetailSpace($estimateY) && gettype($callback)=='object')
         {            
             $callback();
             $offsety = $this->bands['columnHeader']['endY'];    
         }
-
-
         $offset = ['x'=>$this->pagesettings['leftMargin'],'y'=>$offsety];        
         return $offset;
     }
@@ -522,67 +561,134 @@ class Pdf extends \TCPDF implements ExportInterface
         return $offset;
     }
 
-    public function draw_group(string $bandname)
-    {        
-        $groupame = str_replace([$this->groupbandprefix,'_header','_footer'],'',$bandname);
-
-        $groupno = $this->groups[$groupame]['groupno'];
-
-        //print header
-        if(str_contains($bandname,'_header'))
-        {
-            //if continue print from previous group
-            if($groupno > 0)
-            {
-                $prevgroupno = $groupno-1;
-                $prevband = $this->getHashValueFromIndex($this->groups,$prevgroupno);
-                $this->currentY=$offsety = $prevband['endY'];    
-            }                            
-            else
-            {
-                //if rowno=0
-                if($this->currentRowNo==0)
-                {
-                    $this->currentY=$offsety = $this->bands['columnHeader']['endY'];                    
-                }
-                else
-                {
-                    $headerbandname = $this->groupbandprefix.$groupame.'_footer';
-                    $this->currentY=$offsety = $this->bands[$headerbandname]['endY'];                    
-                }
-                
-            }
-                
-            
+    public function draw_groupHeader(string $bandname,mixed $callback=null) : array
+    {
+        $offsetx=$this->pagesettings['leftMargin'];
+        // $offsety=$this->pagesettings['leftMargin'];
+        $offsety = $this->lastBandEndY;
+        $estimateY=$offsety+$this->getBandHeight($bandname);
+        if($this->isEndDetailSpace($estimateY) && gettype($callback)=='object')
+        {            
+            $callback();
+            $offsety = $this->bands['columnHeader']['endY'];    
         }
-        else if(str_contains($bandname,'_footer')) //print group footer
-        {
-             
-            $lastgroup = $this->groups[$this->getLastGroupName()];
-            $lastgroupno = $lastgroup['groupno'];
-            // echo "\nlastgroup\n";
-            // print_r($lastgroup);
-            if($groupno == $lastgroupno )
-            {
-                
-                $this->currentY=$offsety = $this->bands[$this->lastdetailband]['endY'];
-            }
-            else
-            {
-                
-                $nextgroupno = $groupno + 1;
-                $nextband = $this->getHashValueFromIndex($this->groups,$nextgroupno);
-                $this->currentY=$offsety = $nextband['endY'];    
-            }
-            
-                
+        /*
+            if parent == previousheader
+            else parent == this group footer
 
-        }
-        
-        $offsety = $this->currentY;
-        $offset = ['x'=>$this->pagesettings['leftMargin'],'y'=>$offsety];
+         */
+        $offset=['x'=>$offsetx,'y'=>$offsety];
         return $offset;
     }
+
+    public function draw_groupFooter(string $bandname,mixed $callback=null) : array
+    {
+        $offsetx=$this->pagesettings['leftMargin'];
+        // $offsety=$this->pagesettings['leftMargin'];
+        $offsety = $this->lastBandEndY;
+        $estimateY=$offsety+$this->getBandHeight($bandname);
+        if($this->isEndDetailSpace($estimateY) && gettype($callback)=='object')
+        {            
+            $callback();
+            $offsety = $this->bands['columnHeader']['endY'];    
+        }
+
+        $offset=['x'=>$offsetx,'y'=>$offsety];
+        return $offset;
+    }
+
+
+    // public function draw_group2(string $bandname)
+    // {        
+    //     $groupname = str_replace([$this->groupbandprefix,'_header','_footer'],'',$bandname);
+
+    //     $groupno = $this->groups[$groupname]['groupno'];
+
+    //     //print header
+    //     if(str_contains($bandname,'_header'))
+    //     {
+    //         //if continue print from previous group
+    //         if($this->groupCount()==1)
+    //         {                
+    //             if($this->currentRowNo == 0)
+    //             {
+    //                 $this->currentY=$offsety = $this->bands['columnHeader']['endY'];                    
+    //             }   
+    //             else
+    //             {                    
+    //                 $headerbandname = $this->groupbandprefix.$groupname.'_footer';                    
+    //                 $this->currentY=$offsety = $this->bands[$headerbandname]['endY'];                    
+    //             }
+    //         }
+    //         else if($groupno > 0)
+    //         {
+    //             $prevgroupno = $groupno-1;
+    //             echo "\ngetHashkeyFromIndex prevgroupno $prevgroupno\n";
+    //             $prevgroupname = $this->getHashkeyFromIndex($this->groups,$prevgroupno);
+    //             echo "\nprevgroupnae $prevgroupname\n";
+    //             $prebandname =$this->groupbandprefix.$prevgroupname.'_header';
+    //             $prevband=$this->bands[$prebandname];
+    //             $this->currentY=$offsety = $prevband['endY'];    
+    //         }                            
+    //         else
+    //         {
+                
+    //             $nextgroupno = $groupno+1;                
+    //             $nextgroupname = $this->getHashkeyFromIndex($this->groups,$nextgroupno  );
+                
+    //             if($this->currentRowNo == 0)
+    //             {
+    //                 $this->currentY=$offsety = $this->bands['columnHeader']['endY'];                    
+    //             }   
+    //             else
+    //             {
+                    
+    //                 $headerbandname = $this->groupbandprefix.$nextgroupname.'_footer';
+                    
+    //                 $this->currentY=$offsety = $this->bands[$headerbandname]['endY'];                    
+    //                 echo "\nheaderbandname $headerbandname $offsety\n";
+    //             }
+                
+    //         }
+                
+            
+    //     }
+    //     else if(str_contains($bandname,'_footer')) //print group footer
+    //     {
+             
+    //         $lastgroup = $this->groups[$this->getLastGroupName()];
+    //         $lastgroupno = $lastgroup['groupno'];
+    //         echo "\nlastgroup: groupno = $groupno lastgroupno = $lastgroupno\n";
+    //         // print_r($lastgroup);
+    //         if($this->groupCount()==1)
+    //         {
+    //             $bandname =$this->groupbandprefix.$groupname.'_header';
+    //             $band=$this->bands[$bandname];
+    //             $this->currentY=$offsety = $band['endY'];  
+    //         }
+    //         else if($groupno == $lastgroupno )
+    //         {
+                
+    //             $this->currentY=$offsety = $this->bands[$this->lastdetailband]['endY'];
+    //         }
+    //         else
+    //         {
+                
+    //             $nextgroupno = $groupno + 1;
+    //             $nextgroupname = $this->getHashKeyFromIndex($this->groups,$nextgroupno);
+    //             $nextbandname =$this->groupbandprefix.$nextgroupname.'_footer';
+    //             $nextband=$this->bands[$nextbandname];
+    //             echo "\nnextgroupname $nextgroupname $nextbandname\n";
+    //             print_r($this->bands);
+    //             $this->currentY=$offsety = $nextband['endY'];    
+    //         }
+
+    //     }
+        
+    //     $offsety = $this->currentY;
+    //     $offset = ['x'=>$this->pagesettings['leftMargin'],'y'=>$offsety];
+    //     return $offset;
+    // }
 
 
     /*************** misc function ****************/

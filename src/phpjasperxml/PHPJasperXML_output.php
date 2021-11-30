@@ -8,7 +8,7 @@ trait PHPJasperXML_output
     protected $output = null;
     protected int $currentRow=0;
     protected array $row = [];
-        
+    
     // protected $bandsequence = [];
     public function export(string $type)
     {
@@ -122,15 +122,20 @@ trait PHPJasperXML_output
         $offsety=(int)$offsets['y'];
 
         // echo "\n$bandname: $offsetx $offsety\n";
-        foreach($this->elements[$bandname] as $uuid =>$element)
+        $height = $this->bands[$bandname]['height'];
+        if($height>0)
         {
-            $tmp = $element;
-            if(isset($tmp['textFieldExpression']))
+            foreach($this->elements[$bandname] as $uuid =>$element)
             {
-                $tmp['textFieldExpression']=$this->parseExpression($tmp['textFieldExpression']);
+                $tmp = $element;
+                if(isset($tmp['textFieldExpression']))
+                {
+                    $tmp['textFieldExpression']=$this->parseExpression($tmp['textFieldExpression']);
+                }
+                $this->output->drawElement($uuid,$tmp,$offsetx,$offsety);
             }
-            $this->output->drawElement($uuid,$tmp,$offsetx,$offsety);
         }
+        
     }
     protected function draw_background()
     {        
@@ -159,7 +164,9 @@ trait PHPJasperXML_output
             $bandname = $this->groupbandprefix.$groupname.'_header';            
             if($groupsetting['ischange'])
             {
-                $this->drawBand($bandname);
+                $this->drawBand($bandname,function(){
+                    $this->newPage();
+                });
             }
             
         }
@@ -183,15 +190,23 @@ trait PHPJasperXML_output
     }
     protected function draw_groupsFooter(bool $forceshow=false)
     {
+        $descgroupnames = [];
         foreach($this->groups as $groupname=>$groupsetting)
         {
+            array_push($descgroupnames,$groupname);                        
+        }        
+        for($i=count($descgroupnames)-1;$i>0;$i--)
+        {                        
+            $groupname = $descgroupnames[$i];
             $bandname = $this->groupbandprefix.$groupname.'_footer';
             if($forceshow || $groupsetting['ischange'])
             {
-                $this->drawBand($bandname);
+                $this->drawBand($bandname,function(){
+                    $this->newPage();
+                });
             }
             
-        }        
+        }   
     }
     protected function draw_columnFooter()
     {

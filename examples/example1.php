@@ -2,13 +2,12 @@
 include "main.php";
 
 use Simitsdk\phpjasperxml\PHPJasperXML;
-$filename = __DIR__.'/sample1.jrxml';
+$filename = __DIR__.'/example1.jrxml';
 // $filename = __DIR__.'/je.jrxml';
 // $filename = __DIR__.'/rc.jrxml';
 // $filename = __DIR__.'/statement.jrxml';
 // $filename = __DIR__.'/uat.jrxml';
 
-$connectconf = [''];
 $config = ['driver'=>'postgresql','host'=>'127.0.0.1','user'=>'postgres','pass'=>'postgres','name'=>'backend']; //db
 // $config = ['driver'=>'dummy','data'=>$array];
 

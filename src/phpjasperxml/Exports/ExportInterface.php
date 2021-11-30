@@ -12,7 +12,7 @@ interface ExportInterface
     public function draw_title();
     public function draw_pageHeader();
     public function draw_columnHeader();
-    public function draw_group(string $bandname);
+    // public function draw_group(string $bandname);
     public function draw_detail(string $detailbandname);
     public function draw_columnFooter();
     public function draw_summary();

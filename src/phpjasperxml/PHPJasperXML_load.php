@@ -8,7 +8,7 @@ trait PHPJasperXML_load
     protected array $fields=[];
     protected array $groups=[];
     protected int $groupcount = 0;
-    protected array $bands=[];
+    
     protected array $elements = [];
     protected string $querystring = '';
     protected array $subdatasets=[];
@@ -119,9 +119,15 @@ trait PHPJasperXML_load
             {
                 $newbandname = $bandname;
             }
-            
-            $this->bands[$newbandname]  = $this->prop($bandobj);
+            $prop = $this->prop($bandobj);
+            foreach($prop as $k=>$v)
+            {
+                $this->bands[$newbandname][$k]  = $v;
+            }            
+            $this->bands[$newbandname]['endY'] = $this->bands[$newbandname]['endY']??0;
+            $this->bands[$newbandname]['height'] = $this->bands[$newbandname]['height']??0;
             $this->elements[$newbandname] = $this->getBandChildren($bandobj);
+            
             $count++;
         }            
 

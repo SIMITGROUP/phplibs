@@ -8,9 +8,15 @@ class PHPJasperXML{
     use PHPJasperXML_expression;
     use Tools\Toolbox;
     use PHPJasperXML_output;
+    protected array $defaultbands=['background', 'title', 'pageHeader', 'columnHeader', 'detail', 'columnFooter', 'pageFooter', 'lastPageFooter', 'summary', 'noData', ];
+    protected array $bands=[];
+    
     public function __construct()
     {
-
+        foreach($this->defaultbands as $bandname)
+        {
+            $this->bands[$bandname]=['height'=>0,'endY'=>0];
+        }
     }
 
 
