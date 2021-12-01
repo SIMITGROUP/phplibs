@@ -8,7 +8,9 @@ trait PHPJasperXML_load
     protected array $fields=[];
     protected array $groups=[];
     protected int $groupcount = 0;
-    
+    protected int $columnCount = 1;    
+    protected int $columnWidth = 0;
+    protected string $printOrder = '';
     protected array $elements = [];
     protected string $querystring = '';
     protected array $subdatasets=[];
@@ -35,16 +37,19 @@ trait PHPJasperXML_load
     {
         $obj = simplexml_load_string($jrxml);
         $this->pageproperties = $this->prop($obj);
-
+        $this->columnWidth=$this->pageproperties['columnWidth'];
+        $this->columnCount=$this->pageproperties['columnCount'];
+        $this->printOrder = $this->pageproperties['printOrder']?? 'Vertical' ;
         foreach ($obj as $k=>$out)
         {            
             $setting = $this->prop($out);
-            $name= isset($setting['name']) ? $setting['name'] : '';
-            
+            $name= isset($setting['name']) ? $setting['name'] : '';            
             switch($k)
             {
                 case 'property':
                     $this->pageproperties[$name]=$setting;
+                    
+                    
                     break;
                 case 'field':
                 case 'parameter':
