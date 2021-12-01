@@ -148,7 +148,18 @@ trait PHPJasperXML_output
             $bandname = $this->groupbandprefix.$groupname.'_header';            
             if($groupsetting['ischange'])
             {
+                if($groupsetting['isStartNewPage'] && $this->currentRow>0)
+                {
+
+                    $this->newPage();
+                }
+                else if($groupsetting['isStartNewColumn'] && $this->currentRow>0)
+                {
+                    $this->nextColumn();
+                }
                 $this->groups[$groupname]['ischange']=false;
+                echo "\ngroup $groupname\n";
+                print_r($this->groups[$groupname]);
                 $this->output->groups[$groupname]['ischange']=false;
                 $groupExpression = $groupsetting['groupExpression'];
                 $newgroupvalue = $this->parseExpression($groupExpression);

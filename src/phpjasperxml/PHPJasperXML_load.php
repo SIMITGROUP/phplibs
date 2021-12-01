@@ -144,12 +144,17 @@ trait PHPJasperXML_load
      */
     protected function addGroup($obj)
     {
-        $name = (string)$obj->attributes()['name'];
+        $prop = $this->prop($obj);
+        $name = (string)$prop['name'];
         $groupExpression = (string)$obj->groupExpression;
         $bandname = 'report_group_'.$name;
         $groupExpression = $obj->groupExpression;
-        
-        $this->groups[$name]=[ 'value'=>'NOVALUE','count'=>0,'groupExpression'=>$groupExpression, 'groupno'=>$this->groupcount,'ischange'=>true];
+        $prop['value']=0;
+        $prop['count']=0;
+        $prop['groupExpression']=$groupExpression;
+        $prop['groupno']=$this->groupcount;
+        $prop['ischange']=true;
+        $this->groups[$name]=$prop;//[ 'value'=>'NOVALUE','count'=>0,'groupExpression'=>$groupExpression, 'groupno'=>$this->groupcount,'ischange'=>true];
         $this->addBand($bandname.'_header',$obj->groupHeader,true);
         $this->addBand($bandname.'_footer',$obj->groupFooter,true);
         $this->groupcount++;
