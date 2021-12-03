@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Created with Jaspersoft Studio version 6.18.1.final using JasperReports Library version 6.18.1-9d75d1969e774d4f179fb3be8401e98a0e6d1611  -->
-<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="example1" columnCount="3" pageWidth="595" pageHeight="842" columnWidth="185" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="51adeca7-9f15-46d6-b157-714028ffc1e5">
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="example1" columnCount="4" printOrder="Horizontal" pageWidth="595" pageHeight="842" columnWidth="138" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="51adeca7-9f15-46d6-b157-714028ffc1e5">
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="postgres"/>
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
 	<queryString>
@@ -56,7 +56,7 @@
 		<property name="com.jaspersoft.studio.field.label" value="country_code"/>
 		<property name="com.jaspersoft.studio.field.tree.path" value="global_user"/>
 	</field>
-	<group name="groupcountry_code" isStartNewColumn="true" isStartNewPage="true" isReprintHeaderOnEachPage="true">
+	<group name="groupcountry_code" isStartNewPage="true">
 		<groupExpression><![CDATA[$F{country_code}]]></groupExpression>
 		<groupHeader>
 			<band height="30">
@@ -136,9 +136,9 @@
 	</columnHeader>
 	<detail>
 		<band height="45" splitType="Stretch">
-			<property name="com.jaspersoft.studio.layout" value="com.jaspersoft.studio.editor.layout.spreadsheet.SpreadsheetLayout"/>
+			<property name="com.jaspersoft.studio.layout" value="com.jaspersoft.studio.editor.layout.FreeLayout"/>
 			<textField>
-				<reportElement x="0" y="0" width="100" height="45" uuid="3edb30c4-7b3c-43f8-ab8f-a58d7b5487ac">
+				<reportElement x="20" y="0" width="100" height="45" uuid="3edb30c4-7b3c-43f8-ab8f-a58d7b5487ac">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="6788ad40-bc57-49d2-9348-6c78d197c1c4"/>
 					<property name="com.jaspersoft.studio.unit.y" value="px"/>
 				</reportElement>

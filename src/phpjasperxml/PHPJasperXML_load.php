@@ -38,7 +38,7 @@ trait PHPJasperXML_load
         $obj = simplexml_load_string($jrxml);
         $this->pageproperties = $this->prop($obj);
         $this->columnWidth=$this->pageproperties['columnWidth'];
-        $this->columnCount=$this->pageproperties['columnCount'];
+        $this->columnCount=$this->pageproperties['columnCount']??1;
         $this->printOrder = $this->pageproperties['printOrder']?? 'Vertical' ;
         foreach ($obj as $k=>$out)
         {            

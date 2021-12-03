@@ -48,6 +48,7 @@ trait PHPJasperXML_outputhorizontal{
         if($this->output->getColumnNo() == $this->columnCount)
         {
             $this->output->setColumnNo(0);            
+            $this->currentRowTop = $this->maxDetailEndY;
         }
         $this->output->setLastBandEndY($this->currentRowTop);
     }

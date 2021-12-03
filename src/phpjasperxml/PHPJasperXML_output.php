@@ -57,7 +57,7 @@ trait PHPJasperXML_output
             $this->draw_columnFooter();
             $this->draw_pageFooter(); //if no content, it will call draw_pageFooter
         }    
-
+        echo "\nAdd Page\n";
         $this->output->AddPage();          
         $this->draw_background();
         if($withTitle)
@@ -161,7 +161,22 @@ trait PHPJasperXML_output
                 }
                 else if($groupsetting['isStartNewColumn'] && $this->currentRow>0)
                 {
-                    $this->nextColumn();
+                    $currentcolumn = $this->output->getColumnNo();
+                    $pageno = $this->output->PageNo();
+                    echo "\n isStartNewColumn ($pageno) $this->columnCount == $currentcolumn + 1 \n";
+                    if($this->columnCount == $currentcolumn + 1 )
+                    {
+                        echo "\n new page:\n";
+                        $this->newPage();
+                        $pageno = $this->output->PageNo();
+                        echo "\n new page with no $pageno\n";
+                    }
+                    else
+                    {
+                        echo "\nnew column\n";
+                        $this->nextColumn();
+                    }
+                    
                 }
                 $this->groups[$groupname]['ischange']=false;
                 echo "\ngroup $groupname\n";
@@ -172,7 +187,26 @@ trait PHPJasperXML_output
                 $this->groups[$groupname]['value'] = $newgroupvalue;                
 
                 $this->drawBand($bandname,function(){
-                    $this->nextColumn();
+                    
+                    if($this->printOrder=='Vertical')
+                    {
+                        $columnno = $this->output->getColumnNo();
+                        if($columnno == $this->columnCount -1)
+                        {
+                            $this->newPage();
+                        }
+                        else
+                        {
+                            $this->nextColumn();
+                        }
+                        
+                    }
+                    else
+                    {
+                        $this->maxDetailEndY=0;
+                        $this->newPage();
+                    }
+                    // $this->nextColumn();
                 });
             }
             
@@ -194,7 +228,16 @@ trait PHPJasperXML_output
                     
                     if($mode=='Vertical')
                     {
-                        $this->nextColumn();
+                        $columnno = $this->output->getColumnNo();
+                        if($columnno == $this->columnCount -1)
+                        {
+                            $this->newPage();
+                        }
+                        else
+                        {
+                            $this->nextColumn();
+                        }
+                        
                     }
                     else
                     {
