@@ -154,6 +154,8 @@ trait PHPJasperXML_load
         $prop['groupExpression']=$groupExpression;
         $prop['groupno']=$this->groupcount;
         $prop['ischange']=true;
+        $prop['isStartNewPage']= $prop['isStartNewPage']??'';
+        $prop['isStartNewColumn']= $prop['isStartNewColumn']??'';
         $this->groups[$name]=$prop;//[ 'value'=>'NOVALUE','count'=>0,'groupExpression'=>$groupExpression, 'groupno'=>$this->groupcount,'ischange'=>true];
         $this->addBand($bandname.'_header',$obj->groupHeader,true);
         $this->addBand($bandname.'_footer',$obj->groupFooter,true);

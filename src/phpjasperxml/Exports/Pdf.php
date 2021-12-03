@@ -50,6 +50,11 @@ class Pdf extends \TCPDF implements ExportInterface
     {
         $this->lastBandEndY=$lastBandEndY;
     }
+    public function getLastBandEndY()
+    {
+        return $this->lastBandEndY;
+    }
+
     public function NewPage()
     {
         $this->AddPage();        
@@ -58,6 +63,16 @@ class Pdf extends \TCPDF implements ExportInterface
     public function nextColumn()
     {
         $this->columnno++;
+        echo "\n nextColumn $this->columnno\n";
+    }
+    public function getColumnNo()
+    {
+        return $this->columnno;
+    }
+    public function setColumnNo(int $columnno)
+    {        
+        $this->columnno = $columnno;
+        echo "\nsetColumnNo $this->columnno\n";
     }
     public function defineBands(array $bands,array $elements,array $groups)
     {
@@ -270,6 +285,7 @@ class Pdf extends \TCPDF implements ExportInterface
     /****************************** draw all bands ********************************/
     public function getColumnBeginingX()
     {
+        echo "\n getColumnBeginingX $this->columnno\n";
         $x = $this->columnno * $this->columnWidth + $this->pagesettings['leftMargin'];
         return $x;
     }
@@ -379,7 +395,8 @@ class Pdf extends \TCPDF implements ExportInterface
                 $this->SetFontSize(8);
                 $this->SetDrawColor($color1,$color2 , 0, 0);
                 $this->SetTextColor($color1, $color2, 0, 0);            
-                $this->Rect($offsetx,$offsety,$width ,$height);     
+                $this->Rect($offsetx,$offsety,$width ,$height);    
+                $this->lastBandEndY=$offsety+$height;; 
                 $this->Cell($width,10,$bandname."--$this->printbandcount",0);    
             }
             
@@ -549,10 +566,10 @@ class Pdf extends \TCPDF implements ExportInterface
             echo "summary add page";
             $offsety = $callback();//$this->bands['columnHeader']['endY'];    
         }
-        else
-        {
-            $offsety = $this->lastBandEndY;
-        }
+        // else
+        // {
+        //     $offsety = $this->lastBandEndY;
+        // }
         
         // $estimateY=$offsety+$this->getBandHeight('summary');
         // if($this->isEndDetailSpace($estimateY) && gettype($callback)=='object')
@@ -593,6 +610,7 @@ class Pdf extends \TCPDF implements ExportInterface
 
     public function draw_groupFooter(string $bandname,mixed $callback=null) : array
     {
+        
         $offsetx=$this->getColumnBeginingX();//$this->pagesettings['leftMargin'];
         // $offsety=$this->pagesettings['leftMargin'];
         $offsety = $this->lastBandEndY;
@@ -602,7 +620,7 @@ class Pdf extends \TCPDF implements ExportInterface
             $callback();
             $offsety = $this->bands['columnHeader']['endY'];    
         }
-
+        echo "\n draw_groupFooter: $offsetx\n";
         $offset=['x'=>$offsetx,'y'=>$offsety];
         return $offset;
     }
