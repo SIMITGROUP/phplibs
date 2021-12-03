@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Created with Jaspersoft Studio version 6.18.1.final using JasperReports Library version 6.18.1-9d75d1969e774d4f179fb3be8401e98a0e6d1611  -->
-<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="example1" columnCount="4" pageWidth="595" pageHeight="842" columnWidth="138" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="51adeca7-9f15-46d6-b157-714028ffc1e5">
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="example1" columnCount="3" pageWidth="595" pageHeight="842" columnWidth="185" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="51adeca7-9f15-46d6-b157-714028ffc1e5">
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="postgres"/>
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
 	<queryString>
@@ -94,32 +94,6 @@
 			</band>
 		</groupFooter>
 	</group>
-	<background>
-		<band height="802" splitType="Stretch">
-			<rectangle>
-				<reportElement x="60" y="100" width="470" height="597" backcolor="#E205FF" uuid="f5ad41b7-033b-44a8-883a-bb69065bc838"/>
-			</rectangle>
-		</band>
-	</background>
-	<title>
-		<band height="79" splitType="Stretch">
-			<staticText>
-				<reportElement x="401" y="16" width="100" height="30" uuid="f14587d4-8884-4eaa-94cf-97fe0526b47d"/>
-				<text><![CDATA[title]]></text>
-			</staticText>
-		</band>
-	</title>
-	<pageHeader>
-		<band height="46" splitType="Stretch">
-			<staticText>
-				<reportElement x="60" y="0" width="470" height="30" uuid="c770cf4c-4f67-47ab-9333-cfb19d98b0fe"/>
-				<textElement textAlignment="Center">
-					<font size="14" isBold="true"/>
-				</textElement>
-				<text><![CDATA[my page title]]></text>
-			</staticText>
-		</band>
-	</pageHeader>
 	<columnHeader>
 		<band height="30" splitType="Stretch">
 			<staticText>
@@ -163,33 +137,4 @@
 			</textField>
 		</band>
 	</columnFooter>
-	<pageFooter>
-		<band height="54" splitType="Stretch">
-			<staticText>
-				<reportElement x="347" y="15" width="100" height="30" uuid="497511dc-e37a-4f6b-b178-9e981731e30b"/>
-				<text><![CDATA[page footer, continue next==>]]></text>
-			</staticText>
-		</band>
-	</pageFooter>
-	<lastPageFooter>
-		<band height="53">
-			<staticText>
-				<reportElement x="330" y="20" width="100" height="30" uuid="07876ae9-b40f-4a2e-a886-7e8a581907d3"/>
-				<text><![CDATA[last page footer]]></text>
-			</staticText>
-		</band>
-	</lastPageFooter>
-	<summary>
-		<band height="80" splitType="Stretch">
-			<property name="com.jaspersoft.studio.layout" value="com.jaspersoft.studio.editor.layout.spreadsheet.SpreadsheetLayout"/>
-			<textField>
-				<reportElement x="0" y="0" width="300" height="40" uuid="c6c25902-b94d-4ff8-ad99-7adf34944b19"/>
-				<textFieldExpression><![CDATA["summary"]]></textFieldExpression>
-			</textField>
-			<textField>
-				<reportElement x="310" y="40" width="245" height="40" uuid="f542e92b-6618-43d3-8032-45684301c8b7"/>
-				<textFieldExpression><![CDATA["summary end"]]></textFieldExpression>
-			</textField>
-		</band>
-	</summary>
 </jasperReport>

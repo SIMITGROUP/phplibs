@@ -112,13 +112,18 @@ class Pdf extends \TCPDF implements ExportInterface
     {
         return parent::PageNo();
     }
-    public function export()
+    public function export(string $filename='')
     {
-        $filename = '/tmp/sample1.pdf';
+        // if(empty($filename))
+        {
+            $filename = '/tmp/sample1.pdf';
+        }
+        
         // unlink($filename);
         // $this->Output($filename,'F');   //send out the complete page
         // print_r($this->bands);
         $this->Output($filename,'F');
+        echo $filename;
     }
 
     //*********************************************** draw elements ***************************************************/    
@@ -298,17 +303,20 @@ class Pdf extends \TCPDF implements ExportInterface
         $endY=$this->draw_columnFooter()['y']+$this->bands['columnFooter']['height'];
         $this->SetDrawColor(40,10,10,0);
         $this->SetTextColor(40,10,10,0);
-        for($i=0;$i<$columnCount;$i++)
-        {
-            $colname='column '.$i;
-            $x=$this->pagesettings['leftMargin'] + $i*$columnWidth;
-            $this->SetAlpha(0.5);
-            $this->Rect($x,$beginY,$columnWidth ,($endY - $beginY),'FD','',[5,5,5,0.1] );     
-            $this->SetAlpha(1);
-            $this->SetXY($x,$beginY);
-            $this->Cell($columnWidth,10,$colname,0,'','C');    
+
+        if($this->debugband)
+        {        
+            for($i=0;$i<$columnCount;$i++)
+            {
+                $colname='column '.$i;
+                $x=$this->pagesettings['leftMargin'] + $i*$columnWidth;
+                $this->SetAlpha(0.5);
+                $this->Rect($x,$beginY,$columnWidth ,($endY - $beginY),'FD','',[5,5,5,0.1] );     
+                $this->SetAlpha(1);
+                $this->SetXY($x,$beginY);
+                $this->Cell($columnWidth,10,$colname,0,'','C');    
+            }
         }
-        
     }
     /**
      * prepare band in pdf, and return x,y offsets
@@ -355,7 +363,7 @@ class Pdf extends \TCPDF implements ExportInterface
             $offsets = call_user_func([$this,$methodname],$callback);
             
         }
-        
+        $offsetx=0;
         // echo "\n$methodname\n";
         // print_r($offsets);
         

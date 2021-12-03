@@ -12,6 +12,7 @@ trait PHPJasperXML_load
     protected int $columnWidth = 0;
     protected string $printOrder = '';
     protected array $elements = [];
+    protected string $filename ='';
     protected string $querystring = '';
     protected array $subdatasets=[];
     protected string $groupbandprefix = 'report_group_';
@@ -21,8 +22,9 @@ trait PHPJasperXML_load
      * @return self
      */
     public function load_xml_file(string $file ): self
-    {        
-        $xml =  file_get_contents($file);                
+    {   
+        $this->filename = pathinfo($file)['basename'];     
+        $xml =  file_get_contents($file);                  
         $this->load_xml_string($xml);      
         // print_r($this->bandelements);
         return $this;

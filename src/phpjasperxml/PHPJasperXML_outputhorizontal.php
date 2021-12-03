@@ -5,13 +5,49 @@ namespace Simitsdk\phpjasperxml;
 trait PHPJasperXML_outputhorizontal{
     protected $currentRowTop=0;
     protected $maxDetailEndY=0;
+    protected $page_isdrawcolumns=[];
+    
     protected function draw_columnHeaderHorizontal()
     {
+        $pageno = $this->output->PageNo();
+        $key = 'colheader_'.$pageno;        
+        
+        if(!isset($this->page_isdrawcolumns[$key]))
+        {
+            
+            $currentcolumn=$this->output->getColumnNo();
+            $this->page_isdrawcolumns[$key]=true;
+            
+            for($i=0;   $i< $this->columnCount ; $i++)
+            {
+                $this->output->setColumnNo($i);
+                
+                $this->drawBand('columnHeader');
+            }
+            $this->output->setColumnNo($currentcolumn);
+        }
         
     }
     protected function draw_columnFooterHorizontal()
     {
-
+        $pageno = $this->output->PageNo();
+        $key = 'colfooter_'.$pageno;        
+        
+        if(!isset($this->page_isdrawcolumns[$key]))
+        {
+            
+            $currentcolumn=$this->output->getColumnNo();
+            $this->page_isdrawcolumns[$key]=true;
+            
+            for($i=0; $i< $this->columnCount ; $i++)
+            {
+                $this->output->setColumnNo($i);
+                
+                $this->drawBand('columnFooter');
+            }
+            $this->output->setColumnNo($currentcolumn);
+        }
+                
     }
     protected function draw_groupsHeaderHorizontal()
     {

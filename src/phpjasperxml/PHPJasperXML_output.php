@@ -42,7 +42,16 @@ trait PHPJasperXML_output
         {
             $this->draw_noData();
         }
-        $this->output->export();
+        if(!empty($this->filename))
+        {
+            $filename = '/tmp/'.str_replace('.jrxml','.pdf',$this->filename);
+            $this->output->export($filename);
+        }
+        else
+        {
+            $this->output->export();
+        }
+        
     }
     protected function newBlankPage()
     {
@@ -143,9 +152,38 @@ trait PHPJasperXML_output
 
     protected function draw_columnHeader()
     {        
+        echo "\nprint column header $this->printOrder\n";
+        if($this->printOrder=='Vertical')
+        {
+            $this->draw_columnHeaderVertical();
+        }
+        else
+        {
+            $this->draw_columnHeaderHorizontal();
+        }
+
+    }
+    protected function draw_columnFooter()
+    {
+        if($this->printOrder=='Vertical')
+        {
+            $this->draw_columnFooterVertical();
+        }
+        else
+        {
+            $this->draw_columnFooterHorizontal();
+        }
+        
+    }
+    protected function draw_columnHeaderVertical()
+    {
         $this->drawBand('columnHeader');
     }
-
+    protected function draw_columnFooterVertical()
+    {
+        $this->drawBand('columnFooter');
+    }
+    
     protected function draw_groupsHeader()
     {
         foreach($this->groups as $groupname=>$groupsetting)
@@ -206,7 +244,7 @@ trait PHPJasperXML_output
                         $this->maxDetailEndY=0;
                         $this->newPage();
                     }
-                    // $this->nextColumn();
+                    $this->nextColumn();
                 });
             }
             
@@ -350,16 +388,17 @@ trait PHPJasperXML_output
             
         }   
     }
-    protected function draw_columnFooter()
-    {
-        $this->drawBand('columnFooter');
-    }
+    
     protected function draw_summary()
-    {        
-        $this->drawBand('summary',function(){
-            $this->newBlankPage();
-            return $this->output->getMargin('top');
-        });
+    {       
+        if($this->bands['summary']['height']>0)
+        {
+            $callback = function(){
+                $this->newBlankPage();
+                return $this->output->getMargin('top');
+            };
+        } 
+        $this->drawBand('summary',$callback);
     }
     protected function draw_lastPageFooter()
     {        
