@@ -9,7 +9,7 @@ trait PHPJasperXML_output
     protected int $currentRow=0;
     protected array $descgroupnames=[];
     protected array $row = [];
-    
+    protected bool $isgroupchanged=false;
     // protected $bandsequence = [];
     public function export(string $type)
     {
@@ -66,7 +66,7 @@ trait PHPJasperXML_output
             $this->draw_columnFooter();
             $this->draw_pageFooter(); //if no content, it will call draw_pageFooter
         }    
-        echo "\nAdd Page\n";
+        // echo "\nAdd Page\n";
         $this->output->AddPage();          
         $this->draw_background();
         if($withTitle)
@@ -152,7 +152,7 @@ trait PHPJasperXML_output
 
     protected function draw_columnHeader()
     {        
-        echo "\nprint column header $this->printOrder\n";
+        // echo "\nprint column header $this->printOrder\n";
         if($this->printOrder=='Vertical')
         {
             $this->draw_columnHeaderVertical();
@@ -201,23 +201,23 @@ trait PHPJasperXML_output
                 {
                     $currentcolumn = $this->output->getColumnNo();
                     $pageno = $this->output->PageNo();
-                    echo "\n isStartNewColumn ($pageno) $this->columnCount == $currentcolumn + 1 \n";
+                    // echo "\n isStartNewColumn ($pageno) $this->columnCount == $currentcolumn + 1 \n";
                     if($this->columnCount == $currentcolumn + 1 )
                     {
-                        echo "\n new page:\n";
+                        // echo "\n new page:\n";
                         $this->newPage();
                         $pageno = $this->output->PageNo();
-                        echo "\n new page with no $pageno\n";
+                        // echo "\n new page with no $pageno\n";
                     }
                     else
                     {
-                        echo "\nnew column\n";
+                        // echo "\nnew column\n";
                         $this->nextColumn();
                     }
                     
                 }
                 $this->groups[$groupname]['ischange']=false;
-                echo "\ngroup $groupname\n";
+                // echo "\ngroup $groupname\n";
                 // print_r($this->groups[$groupname]);
                 $this->output->groups[$groupname]['ischange']=false;
                 $groupExpression = $groupsetting['groupExpression'];
@@ -255,34 +255,39 @@ trait PHPJasperXML_output
     /**
      * draw detail bands(multiple) element
      */
-    protected function draw_detail(string $mode='Vertical')
+    protected function draw_detail()
     {
-        
+        if($this->printOrder=='Vertical')
+        {
+            $this->draw_detailHorizontal();
+        }
+        else
+        {
+            $this->draw_detailVertical();
+        }
+
+    }
+    protected function draw_detailVertical()
+    {
+        $initdetailpage = $this->output->PageNo();;
+        $beginingY=$this->output->getLastBandEndY;
         foreach($this->bands as $bandname=>$setting)
         {
             if(str_contains($bandname,'detail_'))    
             {                
-                $this->drawBand($bandname,function() use ($mode){
-                    
-                    if($mode=='Vertical')
+                $this->drawBand($bandname,function() use ($initdetailpage)
+                {
+                    $currentpage = $this->output->PageNo();
+                    $totalpage = $this->output->getNumPages();                            
+                    $columnno = $this->output->getColumnNo();
+                    if($columnno == $this->columnCount -1)
                     {
-                        $columnno = $this->output->getColumnNo();
-                        if($columnno == $this->columnCount -1)
-                        {
-                            $this->newPage();
-                        }
-                        else
-                        {
-                            $this->nextColumn();
-                        }
-                        
+                        $this->newPage();
                     }
                     else
                     {
-                        $this->maxDetailEndY=0;
-                        $this->newPage();
-                    }
-                    
+                        $this->nextColumn();
+                    }                                                               
                 });
             }
         }        
@@ -369,6 +374,7 @@ trait PHPJasperXML_output
 
             array_push($this->descgroupnames,$groupname);                        
         }        
+        $this->isgroupchanged = $resettherest;
         return $resettherest;
     }
     protected function draw_groupsFooter()
@@ -391,6 +397,7 @@ trait PHPJasperXML_output
     
     protected function draw_summary()
     {       
+        $callback = null;
         if($this->bands['summary']['height']>0)
         {
             $callback = function(){

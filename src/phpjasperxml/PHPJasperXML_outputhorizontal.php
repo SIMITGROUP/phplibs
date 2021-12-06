@@ -6,7 +6,9 @@ trait PHPJasperXML_outputhorizontal{
     protected $currentRowTop=0;
     protected $maxDetailEndY=0;
     protected $page_isdrawcolumns=[];
-    
+    protected $lastdetailpage = 1;
+    protected $lastdetailcolumn = 0;
+    protected $lastdetailbeginingY = null;
     protected function draw_columnHeaderHorizontal()
     {
         $pageno = $this->output->PageNo();
@@ -66,17 +68,63 @@ trait PHPJasperXML_outputhorizontal{
     }
     protected function draw_detailHorizontal()
     {           
-        // $lastdetailendy = $this->output->getLastBandEndY();
         
-        $this->draw_detail('Horizontal');
+        if($this->isgroupchanged || $this->currentRow==0) //group changed, detail no continue next column
+        {            
+            $mycolumn=0;            
+        }
+        else
+        {
+            $this->lastdetailcolumn += 1;
+            //mean have balance slot at previous page detail band
+            if($this->columnCount > $this->lastdetailcolumn)
+            {
+                
+                $this->output->SetPage($this->lastdetailpage);
+                $mycolumn = $this->lastdetailcolumn;                
+                // $this->output->setLastBandEndY($this->lastdetailbeginingY);
+            }   
+            
+        }
+            $this->output->setColumnNo($mycolumn);
+
+            $this->lastdetailpage = $this->output->PageNo();;
+            $this->lastdetailcolumn = $this->output->getColumnNo();        
+            
+    
+        foreach($this->bands as $bandname=>$setting)
+        {
+            if(str_contains($bandname,'detail_'))    
+            {                
+                $this->drawBand($bandname,function() use ($mycolumn)
+                {
+                    $currentpage = $this->output->PageNo();
+                    $totalpage = $this->output->getNumPages();                            
+                    $this->maxDetailEndY=0;                    
+                    // if($currentpage == $this->lastdetailpage)
+                    {
+                        echo "\nnew page $currentpage == $totalpage\n"; 
+                        $this->newPage();
+                        $this->output->setColumnNo($mycolumn);
+                    }
+                    // else
+                    {
+                        // echo "\nset page $currentpage == $totalpage\n"; 
+                        // $this->setPage(($currentpage-1));
+                    }                                                            
+                });
+                // $this->output->setPage($initdetailpage);
+            }
+        }   
         $currentEndY= $this->output->getLastBandEndY();
         if($currentEndY > $this->maxDetailEndY)
         {
             $this->maxDetailEndY =  $currentEndY;
         }
-
-        echo "\ndraw_detailHorizontal maxDetailEndY $this->maxDetailEndY\n";
+        $this->lastdetailbeginingY=$this->output->getLastBandEndY();
+        // echo "\ndraw_detailHorizontal maxDetailEndY $this->maxDetailEndY\n";
         $this->setNextAvailableSlot();
+        
     }
     protected function setNextAvailableSlot()
     {
@@ -92,7 +140,7 @@ trait PHPJasperXML_outputhorizontal{
     protected function draw_groupsFooterHorizontal()
     {
         $endY=$this->maxDetailEndY;
-        echo "\ndraw_groupsFooterHorizontal begin with  $endY\n";
+        // echo "\ndraw_groupsFooterHorizontal begin with  $endY\n";
         $isgroupchange = $this->identifyGroupChange();
         if($isgroupchange)
         {

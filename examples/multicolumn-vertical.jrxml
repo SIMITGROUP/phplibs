@@ -56,44 +56,6 @@
 		<property name="com.jaspersoft.studio.field.label" value="country_code"/>
 		<property name="com.jaspersoft.studio.field.tree.path" value="global_user"/>
 	</field>
-	<group name="groupcountry_code" isStartNewColumn="true" isReprintHeaderOnEachPage="true">
-		<groupExpression><![CDATA[$F{country_code}]]></groupExpression>
-		<groupHeader>
-			<band height="30">
-				<textField>
-					<reportElement x="0" y="0" width="100" height="30" uuid="27c953f2-73e7-488d-9a4c-ebe99d317f65"/>
-					<textFieldExpression><![CDATA[$F{country_code}]]></textFieldExpression>
-				</textField>
-			</band>
-		</groupHeader>
-		<groupFooter>
-			<band height="50">
-				<textField>
-					<reportElement x="40" y="0" width="100" height="30" uuid="85554e7c-b59b-4bf7-9e7c-f9d5b41475be"/>
-					<textFieldExpression><![CDATA["end"+$F{country_code}]]></textFieldExpression>
-				</textField>
-			</band>
-		</groupFooter>
-	</group>
-	<group name="group_gender">
-		<groupExpression><![CDATA[$F{gender}]]></groupExpression>
-		<groupHeader>
-			<band height="40">
-				<textField>
-					<reportElement x="30" y="0" width="100" height="30" uuid="f8924907-c299-4abb-b447-dbc47184f846"/>
-					<textFieldExpression><![CDATA[$F{gender}]]></textFieldExpression>
-				</textField>
-			</band>
-		</groupHeader>
-		<groupFooter>
-			<band height="50">
-				<textField>
-					<reportElement x="40" y="0" width="100" height="30" uuid="df613656-f6ba-4860-9085-abe7165cb383"/>
-					<textFieldExpression><![CDATA["end "+$F{gender}]]></textFieldExpression>
-				</textField>
-			</band>
-		</groupFooter>
-	</group>
 	<columnHeader>
 		<band height="30" splitType="Stretch">
 			<staticText>
@@ -109,25 +71,24 @@
 		</band>
 	</columnHeader>
 	<detail>
-		<band height="45" splitType="Stretch">
-			<property name="com.jaspersoft.studio.layout" value="com.jaspersoft.studio.editor.layout.spreadsheet.SpreadsheetLayout"/>
+		<band height="20" splitType="Stretch">
+			<property name="com.jaspersoft.studio.layout" value="com.jaspersoft.studio.editor.layout.FreeLayout"/>
 			<textField>
-				<reportElement x="0" y="0" width="100" height="45" uuid="3edb30c4-7b3c-43f8-ab8f-a58d7b5487ac">
+				<reportElement x="0" y="0" width="70" height="20" isPrintWhenDetailOverflows="true" uuid="3edb30c4-7b3c-43f8-ab8f-a58d7b5487ac">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="6788ad40-bc57-49d2-9348-6c78d197c1c4"/>
 					<property name="com.jaspersoft.studio.unit.y" value="px"/>
 				</reportElement>
 				<textFieldExpression><![CDATA[$F{fullname}]]></textFieldExpression>
 			</textField>
-		</band>
-		<band height="35">
-			<textField>
-				<reportElement x="4" y="5" width="100" height="30" uuid="1f0bf042-a29c-4fc4-bc86-a4280b72e6fa">
+			<textField textAdjust="ScaleFont">
+				<reportElement stretchType="ContainerHeight" x="80" y="0" width="100" height="20" isPrintWhenDetailOverflows="true" uuid="1f0bf042-a29c-4fc4-bc86-a4280b72e6fa">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="217ec77d-e498-4be1-a3ad-9e6731dc46d3"/>
 					<property name="com.jaspersoft.studio.unit.y" value="px"/>
 				</reportElement>
 				<textFieldExpression><![CDATA[$F{email}]]></textFieldExpression>
 			</textField>
 		</band>
+		<band height="35"/>
 	</detail>
 	<columnFooter>
 		<band height="45" splitType="Stretch">
