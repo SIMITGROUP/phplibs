@@ -80,7 +80,8 @@ trait PHPJasperXML_output
     }
     protected function nextColumn()
     {
-        if($this->output->getColumnNo()<$this->columnCount-1 )
+        $this->output->nextColumn();
+        if($this->output->getColumnNo()<$this->columnCount )
         {
             $this->draw_columnFooter();
             $this->output->nextColumn();

@@ -84,7 +84,10 @@ trait PHPJasperXML_outputhorizontal{
                 $mycolumn = $this->lastdetailcolumn;                
                 // $this->output->setLastBandEndY($this->lastdetailbeginingY);
             }   
-            
+            else
+            {
+                $mycolumn=0;            
+            }
         }
             $this->output->setColumnNo($mycolumn);
 
@@ -158,7 +161,8 @@ trait PHPJasperXML_outputhorizontal{
                 // $lastdetailendy = $this->bands[$this->lastbandname]['endY'];
                 // $this->output->setLastBandEndY($this->maxDetailEndY);
                 $this->drawBand($bandname,function(){
-                    $this->nextColumn();
+                    $this->newPage();
+                    $this->nextColumnHorizontal();
                 });                
             }
             
@@ -179,10 +183,11 @@ trait PHPJasperXML_outputhorizontal{
 
     protected function nextColumnHorizontal()
     {
-        if($this->output->getColumnNo()<$this->columnCount-1 )
+        $this->output->nextColumn();
+        if($this->output->getColumnNo()<$this->columnCount -1)
         {
             // $this->draw_columnFooter();
-            $this->output->setLastBandEndY($this->currentRowTop);
+            $this->output->setLastBandEndY($this->currentRowTop);            
             $this->output->nextColumn();
             
             // $this->draw_columnHeader();
