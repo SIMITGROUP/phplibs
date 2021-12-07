@@ -80,8 +80,8 @@ trait PHPJasperXML_output
     }
     protected function nextColumn()
     {
-        $this->output->nextColumn();
-        if($this->output->getColumnNo()<$this->columnCount )
+        
+        if($this->output->getColumnNo()<$this->columnCount-1 )
         {
             $this->draw_columnFooter();
             $this->output->nextColumn();
@@ -263,28 +263,29 @@ trait PHPJasperXML_output
      */
     protected function draw_detail()
     {
+        
         if($this->printOrder=='Vertical')
         {
-            $this->draw_detailHorizontal();
+            $this->draw_detailVertical();
         }
         else
         {
-            $this->draw_detailVertical();
+            $this->draw_detailHorizontal();
         }
 
     }
     protected function draw_detailVertical()
     {
-        $initdetailpage = $this->output->PageNo();;
-        $beginingY=$this->output->getLastBandEndY;
+        // $initdetailpage = $this->output->PageNo();;
+        // $beginingY=$this->output->getLastBandEndY;
         foreach($this->bands as $bandname=>$setting)
         {
             if(str_contains($bandname,'detail_'))    
             {                
-                $this->drawBand($bandname,function() use ($initdetailpage)
+                $this->drawBand($bandname,function() 
                 {
-                    $currentpage = $this->output->PageNo();
-                    $totalpage = $this->output->getNumPages();                            
+                    // $currentpage = $this->output->PageNo();
+                    // $totalpage = $this->output->getNumPages();                            
                     $columnno = $this->output->getColumnNo();
                     if($columnno == $this->columnCount -1)
                     {
@@ -366,7 +367,15 @@ trait PHPJasperXML_output
                 //reset all variables under this group
                 foreach($this->variables as $varname=>$varsetting)
                 {
-                    $this->variables[$varname]['value']='--value reset--';
+                    if($varsetting['datatype']=='string')
+                    {
+                        $this->variables[$varname]['value']='--value reset--';
+                    }
+                    else
+                    {
+                        $this->variables[$varname]['value']=null;
+                    }
+                    
                     $this->variables[$varname]['lastresetvalue']='--lastvalue reset--';
                 }
                 

@@ -38,3 +38,23 @@ Generally, phpjasperxml provide below compatiblity result of:
     * pdf [done]
     * xlsx [not yet]
     * html [not yet]
+4. Variables
+    * calculation
+        * No Calculation Function [done]
+        * Sum [done]
+        * Average [done]
+        * Highest [done]
+        * Lowest [done]
+        * First [done]
+        * Variance [not yet]
+        * Standard Deviation [not yet]
+        * Count [not yet]
+        * Distinct Count [not yet]
+    * Increment Type [no plan to do yet, seems useless]
+    * Reset Type
+        * Report [done]
+        * Page [done]
+        * Column [done]
+        * Groupxxx [done]
+        * None [not yet]
+        * Master [not yet]

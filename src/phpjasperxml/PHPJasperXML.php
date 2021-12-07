@@ -5,6 +5,7 @@ class PHPJasperXML{
     use PHPJasperXML_load;
     use PHPJasperXML_datasource;    
     use PHPJasperXML_elements;
+    use PHPJasperXML_variables;
     use PHPJasperXML_expression;
     use Tools\Toolbox;
     use PHPJasperXML_output;
