@@ -2,11 +2,34 @@
 
 namespace Simitsdk\phpjasperxml;
 
+use Throwable;
+
 trait PHPJasperXML_expression
 {
     protected bool $validate = true;
     protected array $resettypes = ['Report','Group','None','Page'];
     protected bool $debugtxt = false;
+
+    protected function executeExpression(string $expression,int $addrowqty=0): mixed
+    {
+        $value = $this->parseExpression($expression,$addrowqty);
+
+        //it consist of string, use concate instead of maths operation
+        if(str_contains($value,'"') || str_contains($value,"'"))
+        {
+            $value = str_replace('+',' . ',$value);
+        }
+        
+        
+        $evalstr = "return $value;";
+        try{
+            $finalvalue = eval($evalstr);
+            return $finalvalue;
+        }catch(Throwable $err){
+            die("Cannot eval formula \"$evalstr\"");
+
+        }
+    }
     protected function parseExpression(string $expression,int $addrowqty=0): string
     {
         $value = $expression;
@@ -14,6 +37,8 @@ trait PHPJasperXML_expression
         $fieldpattern = '/\$F{(.*?)}/';
         $varpattern = '/\$V{(.*?)}/';
         $parapattern = '/\$P{(.*?)}/';
+
+
         preg_match_all($fieldpattern, $value, $matchfield);
         preg_match_all($varpattern, $value, $matchvar);
         preg_match_all($parapattern, $value, $matchpara);
@@ -44,6 +69,8 @@ trait PHPJasperXML_expression
         }
         // echo "$value\n";
         return $value;
+        
+        
     }
     
     protected function resetGroupValue(string $varname,array $setting, int $rowno)
@@ -124,7 +151,8 @@ trait PHPJasperXML_expression
     {
         foreach($this->variables as $varname=>$setting)
         {
-            
+            echo $varname;
+            print_r($setting);
             $setting['calculation']=$setting['calculation']??'';
             $setting['incrementType']=$setting['incrementType']??'';
             $setting['initialValueExpression']=$setting['initialValueExpression']??'';
@@ -290,6 +318,7 @@ trait PHPJasperXML_expression
     protected function getFieldValue(string $name,int $addrowqty=0)
     {
         $rowno = $this->currentRow+$addrowqty;
+        $datatype = $this->fields[$name]['datatype'];
         if(isset($this->rows[$rowno]))
         {
             $row=$this->rows[$rowno] ;
@@ -300,12 +329,15 @@ trait PHPJasperXML_expression
             $value=null;
         }
         
+        
+        $value = $this->escapeIfRequire($value,$datatype);
         return $value;
     }
 
 
     protected function getParameterValue($key)
     {
+        $value=null;
         if(!isset($this->parameters[$key]))
         {
             if($this->validate)
@@ -314,13 +346,17 @@ trait PHPJasperXML_expression
             }
             else
             {
-                return '';
+                $value =  '';
             }                    
         }
         else
         {
-            return $this->parameters[$key]['value'];
+            $value = $this->parameters[$key]['value'];
         } 
+        $datatype = $this->parameters[$key]['datatype'];
+        
+        $value = $this->escapeIfRequire($value,$datatype);
+        return $value ; 
     }
     protected function getVariableValue($key)
     {        
@@ -367,14 +403,37 @@ trait PHPJasperXML_expression
                     }
                     else
                     {
-                        return '';
+                        $data= '';
                     }                    
                 }
                 else
                 {
-                    return $this->variables[$key]['value'];
+                    $data = $this->variables[$key]['value'];
                 }
+                $datatype = $this->variables[$key]['datatype'];
+
+                return $this->escapeIfRequire($data,$datatype);
             break;
         }
+    }
+
+
+    public function escapeIfRequire(mixed $value,mixed $datatype): mixed
+    {
+        if(gettype($datatype)=='null')
+        {
+            $datatype = 'string';
+        }
+        $data = $value;
+        switch($datatype)
+        {
+            case 'string':
+                $data = "'".addslashes($value)."'";
+            break;
+            default:
+                
+            break;
+        }
+        return $data;
     }
 }

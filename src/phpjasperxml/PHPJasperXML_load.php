@@ -56,11 +56,15 @@ trait PHPJasperXML_load
                 case 'field':
                 case 'parameter':
                 case 'variable':
-                    $attributename = $k.'s';                    
-                    
+                    $attributename = $k.'s';                                        
                     foreach($out as $key=>$value)
                     {
                         $setting[$key]=(string)$value;
+                    }
+                    $setting['datatype']=$this->getDataType($setting);
+                    if($k!='field')
+                    {
+                        $setting['value']=null;
                     }
                     $this->$attributename[$name]=$setting;                    
                     break;                    
@@ -235,7 +239,34 @@ trait PHPJasperXML_load
     /************** misc functions *******************/
     /************** misc functions *******************/
     /************** misc functions *******************/
-
+    /**
+     * convert java datatype name to php datatype name
+     */
+    protected function getDataType(array $setting): string
+    {
+        $type='';
+        switch($setting['class'])
+        {
+            case 'java.lang.Boolean':
+                $type='boolean';
+            break;
+            
+            case 'java.lang.Long':                    
+            case 'java.lang.Short':
+            case 'java.lang.Double':            
+            case 'java.lang.Float':
+            case 'java.lang.BigDecimal':
+                $type='number';
+            break;
+            
+            case 'java.sql.Timestamp':
+            case 'java.lang.String':
+            default:
+                $type='string';
+            break;
+        }
+        return $type;
+    }
      /** 
      * get property of simplexml ofbject
      * @param SimpleXMLElement $obj

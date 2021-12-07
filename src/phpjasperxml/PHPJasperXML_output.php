@@ -103,6 +103,11 @@ trait PHPJasperXML_output
         $this->draw_summary();
         $this->draw_lastPageFooter(); //if no content, it will call draw_pageFooter
     }
+
+    /**
+     * loop through every row, and compute variable of each row
+     * @param int $i row number
+     */
     protected function setRow(int $i)
     {
         $this->currentRow=$i;
@@ -129,7 +134,7 @@ trait PHPJasperXML_output
                 $tmp = $element;
                 if(isset($tmp['textFieldExpression']))
                 {
-                    $tmp['textFieldExpression']=$this->parseExpression($tmp['textFieldExpression']);
+                    $tmp['textFieldExpression']=$this->executeExpression($tmp['textFieldExpression']);
                 }
                 $this->output->drawElement($uuid,$tmp,$offsetx,$offsety);
             }
