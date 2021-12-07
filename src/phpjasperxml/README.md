@@ -6,7 +6,7 @@ The goal of this project is to allow php developer design reasonable good printa
 # Compatibility:
 Generally, phpjasperxml provide below compatiblity result of:
 1. all band basic positioning is supported
-    * title
+    * title :white_check_mark:	
     * page header
     * column header (multiple column supported)
     * detail(s) (multiple band supported)
