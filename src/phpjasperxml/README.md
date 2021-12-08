@@ -48,27 +48,42 @@ note | :x: |
 custom visualzation | :x: | 
 map | :x: | 
 
-3. outputs
-    * pdf [done]
-    * xlsx [not yet]
-    * html [not yet]
-4. Variables
-    * calculation
-        * No Calculation Function [done]
-        * Sum [done]
-        * Average [done]
-        * Highest [done]
-        * Lowest [done]
-        * First [done]
-        * Variance [not yet]
-        * Standard Deviation [not yet]
-        * Count [not yet]
-        * Distinct Count [not yet]
-    * Increment Type [no plan to do yet, seems useless]
-    * Reset Type
-        * Report [done]
-        * Page [done]
-        * Column [done]
-        * Groupxxx [done]
-        * None [not yet]
-        * Master [not yet]
+## Outputs
+PHPJasperxml going to output report into several format.
+
+Output   | Status | Description
+--------- | ------ | -----------
+PDF | :white_check_mark: | done, not stable yet
+XLSX | :x: | coming future
+HTML | :x: |  coming future
+
+
+## Outputs
+Variable is important, but very language dependent. jrxml design for java and the attributes not fit into php environment perfectly. 
+Below is unsupported features:
+* Increment Type
+
+Calculation Function
+
+Calculation   | Status | Description
+--------- | ------ | -----------
+No Calculation Function | :white_check_mark: | 
+Sum | :white_check_mark: | 
+Average | :white_check_mark: | 
+Highest | :white_check_mark: | 
+Lowest | :white_check_mark: | 
+First | :white_check_mark: | 
+Variance | :x: |  coming future
+Standard Deviation | :x: |  coming future
+Count | :x: |  coming future
+Distinct Count | :x: |  coming future
+
+Reset Types
+Reset Type   | Status | Description
+------------ | ------ | -----------
+Report | :white_check_mark: |
+Page | :white_check_mark: |
+Column | :white_check_mark: |
+Groupxxx | :white_check_mark: |
+None | :white_check_mark: |
+Master | :x: | No plan
