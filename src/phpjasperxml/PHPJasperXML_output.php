@@ -126,17 +126,47 @@ trait PHPJasperXML_output
         $offsety=(int)$offsets['y'];
 
         // echo "\n$bandname: $offsetx $offsety\n";
+        
+        if(isset($this->bands[$bandname]['printWhenExpression']))
+        {
+            $banddisplayexpression = $this->bands[$bandname]['printWhenExpression'];
+            $isdisplay = $this->isDisplay($banddisplayexpression);
+            if(!$isdisplay)
+            {
+                $height=0;
+                $this->bands[$bandname]['height']=0;
+            }
+            else
+            {
+                $this->bands[$bandname]['originalheight']=0;
+            }
+        }
+
+
         $height = $this->bands[$bandname]['height'];
         if($height>0)
         {
             foreach($this->elements[$bandname] as $uuid =>$element)
             {
                 $tmp = $element;
-                if(isset($tmp['textFieldExpression']))
-                {
-                    $tmp['textFieldExpression']=$this->executeExpression($tmp['textFieldExpression']);
+                $isdisplayelement = true;
+                // $this->console("$uuid:  $element[printWhenExpression]");
+                // print_r($element);
+                if(isset($element['printWhenExpression']))
+                {                   
+                    $printWhenExpression = (string)$element['printWhenExpression'];
+                    $isdisplayelement = $this->isDisplay($printWhenExpression);
                 }
-                $this->output->drawElement($uuid,$tmp,$offsetx,$offsety);
+
+                //only match printWhenExpression will draw element
+                if($isdisplayelement)
+                {
+                    if(isset($tmp['textFieldExpression']))
+                    {
+                        $tmp['textFieldExpression']=$this->executeExpression($tmp['textFieldExpression']);
+                    }
+                    $this->output->drawElement($uuid,$tmp,$offsetx,$offsety);
+                }                            
             }
         }
         

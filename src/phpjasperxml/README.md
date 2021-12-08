@@ -31,7 +31,7 @@ Element   | Status | Description
 --------- | ------ | -----------
 textField | :white_check_mark: | 
 staticText | :white_check_mark: | 
-line | :white_check_mark: | 
+line | :white_check_mark: | Double line not supported
 rectangle | :white_check_mark: | 
 circle | :white_check_mark: | 
 image | :white_check_mark: | 
@@ -58,8 +58,27 @@ XLSX | :x: | coming future
 HTML | :x: |  coming future
 
 
-## Outputs
-Variable is important, but very language dependent. jrxml design for java and the attributes not fit into php environment perfectly. 
+# Expressions
+jrxml use a lot of expression which is defined as java(groovy) syntax. It not fit into php environment perfectly. Sometimes the report look nice in jasperstudio, but not exactly same in php. It is important to know how PHPJasperxml evaluate the expression, and the flow. Below is the flow:
+1. phpjasperxml extract expression string from specific element
+2. analyse expression using preg_match, and replace desire value into $F{},$V{},$P{}.
+3. If value data type is text/string kinds (Such as java.lang.String), it will apply quote/escape the string
+4. if quote exists, it will replace '+' become '.', cause php combine string using '.'
+5. then use eval() to evaluate it, get the final value. (Since eval() is not secure, you shall not allow untrusted developer define expression).
+
+Expression used at many places, included present the value, set hyperlink, set image location, show/hide specific element or band. It is To make report present as expected, you shall define expression according below rules:
+1. Use more php style syntax: $F{fieldname} == "COMPAREME", instead of $F{fieldname}.equal("COMPAREME")
+2. If you perform some operation/comparison with expression, make sure you double check, compare result from jasperstudio and generated pdf from phpjasperxml.
+3. There is plenty of effort to make expression accurate, but I still recommend you perform calculation within sql, php level. Example:
+    use sql calculate is more guarantee :
+        SELECT a+b+c as result1 from mytable (assume a=1,b=2,c=3, then result1=6)
+    then
+        $F{a}+$F{b}+$F{c}  // the result1 most probably = 6, but also possible become 123 (concate 3 string)
+        
+
+
+## Variables
+Variable is important, but very language dependent. 
 Below is unsupported features:
 * Increment Type
 
@@ -87,3 +106,5 @@ Column | :white_check_mark: |
 Groupxxx | :white_check_mark: |
 None | :white_check_mark: |
 Master | :x: | No plan
+
+

@@ -46,4 +46,9 @@ trait Toolbox
         
     }
 
+    public function console(mixed $txt='')
+    {
+        echo "\n$txt\n";
+    }
+
 }

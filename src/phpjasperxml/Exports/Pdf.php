@@ -29,7 +29,7 @@ class Pdf extends \TCPDF implements ExportInterface
     public function __construct($prop)
     {           
         $this->pagesettings=$prop;
-        
+        // $fontfolder = sys_get_temp_dir().'/phpjasperxml/fonts';        
         $orientation = isset($prop['orientation'])? $this->left($prop['orientation'],1):'P';
         $unit='pt';
         $format=[(int)$prop['pageWidth'],(int)$prop['pageHeight']];
@@ -59,7 +59,11 @@ class Pdf extends \TCPDF implements ExportInterface
     {
         $this->AddPage();        
     }
- 
+    
+    public function isFontExists(string $fontname): bool
+    {
+        return true;
+    }
     public function nextColumn()
     {
         $this->columnno++;
@@ -155,14 +159,45 @@ class Pdf extends \TCPDF implements ExportInterface
         $y1=$this->GetY();
         $x2=$x1+$prop['width'];
         $y2=$y1+$prop['height'];
-        $forecolor = $this->convertColorStrToRGB($prop['forecolor']??'');
+        $forecolor = $this->convertColorStrToRGB($prop['lineColor']??'');        
+        // $this->console("$uuid");
+        // print_r($prop);
+        // print_r($forecolor);
+        $dash="";
+        $lineWidth = $prop['lineWidth'];
+        $prop["lineStyle"]=$prop["lineStyle"]?? '';
+        switch($prop["lineStyle"])
+        {
+            case "Dotted":
+                $dash=sprintf("%d,%d",$lineWidth,$lineWidth);
+            break;
+            case "Dashed":
+                $dash=sprintf("%d,%d",$lineWidth*4,$lineWidth*2);
+                break;
+            default:
+                $dash="";
+            break;
+        }
+        
+        $style=[
+            'width'=> $lineWidth,
+            'color'=>$forecolor,
+            'dash'=>$dash,
+            'cap'=>'butt',
+            'join'=>'miter',
+        ];
         // $this->SetDrawColor(50, 0, 0, 0);
         // $this->SetTextColor(100, 0, 0, 0);
-        $this->SetDrawColor($forecolor['r'], $forecolor['g'],$forecolor['b']);
-        $this->Line($x1,$y1,$x2,$y2);
+        // $this->SetDrawColor($forecolor['r'], $forecolor['g'],$forecolor['b']);
+        $this->Line($x1,$y1,$x2,$y2,$style);
+        
         // echo "\ndrawline  $uuid ".print_r($prop,true)."\n";
     }
 
+    public function draw_image(string $uuid,array $prop)
+    {
+
+    }
     public function draw_rectangle(string $uuid,array $prop)
     {
         $x=$this->GetX();
@@ -218,6 +253,11 @@ class Pdf extends \TCPDF implements ExportInterface
 
         $this->Ellipse($x,$y,$rx,$ry,0,0,360,$style);
     }
+    protected function useFont(string $fontName, string $fontstyle, int $fontsize=8)
+    {
+        $fontName=$this->defaultfont;
+        $this->SetFont($fontName, $fontstyle, $fontsize);
+    }
     public function draw_break(string $uuid,array $prop)
     {
         $this->AddPage();
@@ -266,7 +306,7 @@ class Pdf extends \TCPDF implements ExportInterface
         $border.= ($leftPenlineWidth>0)?'L':'';   
         $border.= ($rightPenlineWidth>0)?'R':'';   
         
-        $this->SetFont($fontName, $fontstyle, $fontsize);
+        $this->useFont($fontName, $fontstyle, $fontsize);
         
         if($isTextField)
         {
@@ -370,7 +410,7 @@ class Pdf extends \TCPDF implements ExportInterface
 
         $width = $this->getPageWidth() - $this->pagesettings['leftMargin'] - $this->pagesettings['rightMargin'];
         $height = isset($band['height'])? $band['height'] : 0;
-        $offsety=0;
+        $offsety=$this->pagesettings['topMargin'];
         if($height>0)
         {
             $offsetx = isset($offsets['x']) ? $offsets['x']: 0;
@@ -402,7 +442,9 @@ class Pdf extends \TCPDF implements ExportInterface
                 $this->printbandcount++;  
                 $this->SetFontSize(8);
                 $this->SetDrawColor($color1,$color2 , 0, 0);
-                $this->SetTextColor($color1, $color2, 0, 0);            
+                $this->SetTextColor($color1, $color2, 0, 0);           
+                // $linestyle = ['dash'=>'','width'=>1];
+                // $this->SetLineStyle(); 
                 $this->Rect($offsetx,$offsety,$width ,$height);    
                 $this->lastBandEndY=$offsety+$height;; 
                 $this->Cell($width,10,$bandname."--$this->printbandcount",0);    
@@ -755,7 +797,7 @@ class Pdf extends \TCPDF implements ExportInterface
 
     protected function convertColorStrToRGB(string $colorstr):array
     {
-        return array('forecolor'=>$colorstr,"r"=>hexdec(substr($colorstr,1,2)),"g"=>hexdec(substr($colorstr,3,2)),"b"=>hexdec(substr($colorstr,5,2)));
+        return array("r"=>hexdec(substr($colorstr,1,2)),"g"=>hexdec(substr($colorstr,3,2)),"b"=>hexdec(substr($colorstr,5,2)));
     }
     public function groupCount(): int
     {

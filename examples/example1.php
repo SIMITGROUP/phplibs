@@ -2,7 +2,8 @@
 include "main.php";
 
 use Simitsdk\phpjasperxml\PHPJasperXML;
-$filename = __DIR__.'/multicolumn-vertical.jrxml';
+$filename = __DIR__.'/example1.jrxml';
+// $filename = __DIR__.'/multicolumn-vertical.jrxml';
 // $filename = __DIR__.'/multicolumn-horizontal.jrxml';
 // $filename = __DIR__.'/je.jrxml';
 // $filename = __DIR__.'/rc.jrxml';

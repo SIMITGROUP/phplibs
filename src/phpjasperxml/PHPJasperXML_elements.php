@@ -2,17 +2,13 @@
 
 namespace Simitsdk\phpjasperxml;
 
-trait PHPJasperXML_elements{
+trait PHPJasperXML_elements
+{
 
     protected function element_textField(array $prop, object $obj): array
-    {                        
-        if(isset($obj->textElement->font))
-        {
-            $prop = $this->appendprop($prop,$obj->textElement->font);
-        }
-        $prop = $this->addBorders($prop,$obj);        
-        $prop['textFieldExpression']=$obj->textFieldExpression;
-        $prop['printWhenExpression']=$obj->printWhenExpression;        
+    {      
+        $prop = $this->element_staticText($prop,$obj);          
+        $prop['textFieldExpression']=$obj->textFieldExpression;        
         return $prop;
     }
 
@@ -23,8 +19,10 @@ trait PHPJasperXML_elements{
             $prop = $this->appendprop($prop,$obj->textElement->font);
         }        
         $prop = $this->addBorders($prop,$obj);
-        $prop['text']=$obj->text;
-        $prop['printWhenExpression']=$obj->printWhenExpression;        
+        if(isset($obj->text))
+        {
+            $prop['text']=$obj->text;
+        }        
         return $prop;
     }
 

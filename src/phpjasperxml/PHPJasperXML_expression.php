@@ -10,6 +10,17 @@ trait PHPJasperXML_expression
     protected array $resettypes = ['Report','Group','None','Page'];
     protected bool $debugtxt = false;
 
+
+    protected function isDisplay(string $expression)
+    {
+        $result=true;
+        if(!empty($expression))
+        {
+            $result = $this->executeExpression($expression);        
+        }
+        $this->console("expression $expression === $result");
+        return $result;
+    }
     protected function executeExpression(string $expression,int $addrowqty=0): mixed
     {   
         // echo "\n  executeExpression: $expression\n";
@@ -115,7 +126,7 @@ trait PHPJasperXML_expression
 
     protected function getVariableValue($key)
     {        
-        echo "\n getVariableValue $key: \n";
+        // echo "\n getVariableValue $key: \n";
         $datatype = "number";//by default all datatype is number, unless variable class defined
         switch($key)
         {
@@ -161,7 +172,7 @@ trait PHPJasperXML_expression
                 }
 
                 
-                echo "\nvar $key type = $datatype, data = $data \n";
+                // echo "\nvar $key type = $datatype, data = $data \n";
                 $result = $this->escapeIfRequire($data,$datatype);
             break;
         }

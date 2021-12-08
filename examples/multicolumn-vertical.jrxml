@@ -68,7 +68,7 @@
 	<variable name="formula1" class="java.lang.Long">
 		<variableExpression><![CDATA[$F{globaluser_id}+20]]></variableExpression>
 	</variable>
-	<variable name="sumglobalid" class="java.lang.Long" resetType="Group" resetGroup="grpCountry" calculation="StandardDeviation">
+	<variable name="sumglobalid" class="java.lang.Long" resetType="Group" resetGroup="grpCountry" calculation="Sum">
 		<variableExpression><![CDATA[$F{globaluser_id}]]></variableExpression>
 	</variable>
 	<variable name="averageglovalid" class="java.lang.String" resetType="Group" resetGroup="grpCountry" calculation="Average">
@@ -95,6 +95,7 @@
 	</group>
 	<columnHeader>
 		<band height="30" splitType="Stretch">
+			<printWhenExpression><![CDATA[$F{gender}=="M"]]></printWhenExpression>
 			<staticText>
 				<reportElement x="1" y="0" width="100" height="30" uuid="157762d9-bdcc-43bf-9264-e3abca4b5e9d">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="6788ad40-bc57-49d2-9348-6c78d197c1c4"/>

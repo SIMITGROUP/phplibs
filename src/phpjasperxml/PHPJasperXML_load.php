@@ -135,10 +135,14 @@ trait PHPJasperXML_load
             {
                 $this->bands[$newbandname][$k]  = $v;
             }            
+            if(isset($bandobj->printWhenExpression))
+            {
+                $this->bands[$newbandname]['printWhenExpression'] = (string)$bandobj->printWhenExpression;
+            }
             $this->bands[$newbandname]['endY'] = $this->bands[$newbandname]['endY']??0;
             $this->bands[$newbandname]['height'] = $this->bands[$newbandname]['height']??0;
+            $this->bands[$newbandname]['originalheight'] = $this->bands[$newbandname]['height']; //hide is dynamically change depends on printwhen expression or scale.
             $this->elements[$newbandname] = $this->getBandChildren($bandobj);
-            
             $count++;
         }            
 
@@ -195,7 +199,7 @@ trait PHPJasperXML_load
                 if(isset($objvalue->reportElement))
                 {
                     
-                    $setting = $this->prop($objvalue->reportElement);
+                    $setting = $this->prop($objvalue->reportElement);                    
                     $uuid = $setting['uuid'];
                     $objvalue->type = $elementtype;
                     $methodname = 'element_'.$elementtype; //prepare elements setting
@@ -203,6 +207,9 @@ trait PHPJasperXML_load
                     {
                         $prop = $this->prop($objvalue);
                         $prop['type']=$elementtype;
+
+                        
+    
                         foreach($objvalue as $k=>$values)
                         {
                             $subprops = $this->prop($values);
@@ -210,8 +217,14 @@ trait PHPJasperXML_load
                             {
                                 $prop[$key]=$val;
                             }
+                        }                                                
+                        
+                        if(isset($objvalue->reportElement->printWhenExpression))
+                        {
+                            $prop['printWhenExpression']=(string)$objvalue->reportElement->printWhenExpression;
                         }
-                        $data[$uuid] = call_user_func([$this,$methodname],$prop,$objvalue);      
+                        $prop = call_user_func([$this,$methodname],$prop,$objvalue);      
+                        $data[$uuid] = $prop;
                     }
                     else
                     {

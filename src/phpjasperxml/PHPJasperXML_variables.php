@@ -26,22 +26,27 @@ trait PHPJasperXML_variables
             $setting['resetType']=$setting['resetType']??'None';
             
             $setting['resetGroup']=$setting['resetGroup']??'';                
-            $setting['lastresetvalue']='--no reset value yet--';
+            // $setting['lastresetvalue']=$setting['lastresetvalue']??'--no reset value yet--';
             
             
             $resettype = $setting['resetType'];            
             $resetGroup = $setting['resetGroup'];
             $initialValueExpression = $setting['initialValueExpression'];
-            $lastresetvalue=$this->variables[$varname]['lastresetvalue'];
-            $resetvalue = $this->getResetValue($varname, $resettype,$resetGroup,$initialValueExpression);
             $isreset = false;
-            echo "\ncompare reset value $lastresetvalue === $resetvalue \n";
-            if($lastresetvalue != $resetvalue)
+            if(isset($this->variables[$varname]['lastresetvalue']))
             {
-                $isreset = true;
-
-                $this->variables[$varname]['lastresetvalue']=$resetvalue;
+                $lastresetvalue=$this->variables[$varname]['lastresetvalue'];
+                $resetvalue = $this->getResetValue($varname, $resettype,$resetGroup,$initialValueExpression);                
+                // echo "\ncompare reset value $lastresetvalue === $resetvalue \n";
+                if($lastresetvalue != $resetvalue)
+                {
+                    $isreset = true;
+    
+                    $this->variables[$varname]['lastresetvalue']=$resetvalue;
+                }
+    
             }
+            
             
             $calculation = $setting['calculation'];
             if(!empty($calculation))
@@ -252,6 +257,11 @@ trait PHPJasperXML_variables
         $variableExpression = $setting['variableExpression'];
         $newvalue = $this->executeExpression($variableExpression);
         // echo "\nvariableExpression = $variableExpression, prevvalue = $prevvalue, newvalue = $newvalue, isreset $isreset\n";
+        $this->variables[$varname]['compute_count'] = $this->variables[$varname]['compute_count'] ?? 0;
+        $this->variables[$varname]['compute_sum'] = $this->variables[$varname]['compute_sum'] ?? 0;
+        
+
+
         if($isreset)
         {
             $this->variables[$varname]['compute_count']=1;
