@@ -5,10 +5,23 @@ The goal of this project is to allow php developer design reasonable good printa
 
 # Compatibility:
 Generally, phpjasperxml provide below compatiblity result of:
-Bands
+
+## Bands
+Band support both print order:
+* vertical
+* horizontal
 Band Name | Status | Description
 --------- | ------ | -----------
 title     | :white_check_mark: | First page only
+page header | :white_check_mark: |
+column header | :white_check_mark: |multiple column supported
+detail(s) | :white_check_mark: |multiple band supported
+column footer| :white_check_mark: |
+page footer| :white_check_mark: |
+last page footer| :white_check_mark: |
+summary| :white_check_mark: |
+no data| :white_check_mark: |
+groups | :white_check_mark: | multiple group supported, in both vertical/horizontal print order
 
 1. all band basic positioning is supported
     * title :white_check_mark:	
