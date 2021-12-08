@@ -24,35 +24,30 @@ summary| :white_check_mark: |
 no data| :white_check_mark: |
 groups | :white_check_mark: | multiple group supported, in both vertical/horizontal print order
 
-1. all band basic positioning is supported
-    * title :white_check_mark:	
-    * page header
-    * column header (multiple column supported)
-    * detail(s) (multiple band supported)
-    * column footer
-    * page footer
-    * last page footer
-    * summary
-    * no data
-2. status of elements
-    * text field [done]
-    * static text [done]
-    * line [done]
-    * rectangle [done]
-    * circle [done]
-    * image [not yet]
-    * barcode [not yet]
-    * break [not yet]
-    * sub report [not yet]
-    * charts [not yet]
-    * spider chart [not yet]
-    * map [not yet]
-    * list [not yet]
-    * table [not yet]
-    * frame [not yet]
-    * generic - [no plan to do]        
-    * note - [no plan to do]    
-    * custom visualzation - [no plan to do]
+## Elements
+Basic element for generate pdf is ready. Some element rely on additional datasets or 3rd party technology will not support.
+
+Element   | Status | Description
+--------- | ------ | -----------
+textField | :white_check_mark: | 
+staticText | :white_check_mark: | 
+line | :white_check_mark: | 
+rectangle | :white_check_mark: | 
+circle | :white_check_mark: | 
+image | :white_check_mark: | 
+barcode | :white_check_mark: | 
+break | :white_check_mark: | 
+subreport | :x: | plan to do
+chart | :x: | plan to do
+spiderchart | :x: |  plan to do
+list | :x: |  plan to do
+table | :x: |  plan to do
+frame | :x: |  plan to do
+generic | :x: | 
+note | :x: | 
+custom visualzation | :x: | 
+map | :x: | 
+
 3. outputs
     * pdf [done]
     * xlsx [not yet]
