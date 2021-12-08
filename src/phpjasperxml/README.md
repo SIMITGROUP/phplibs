@@ -5,6 +5,11 @@ The goal of this project is to allow php developer design reasonable good printa
 
 # Compatibility:
 Generally, phpjasperxml provide below compatiblity result of:
+Bands
+Band Name | Status | Description
+--------- | ------ | -----------
+title     | :white_check_mark: | First page only
+
 1. all band basic positioning is supported
     * title :white_check_mark:	
     * page header
