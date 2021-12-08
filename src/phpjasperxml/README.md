@@ -10,6 +10,7 @@ Generally, phpjasperxml provide below compatiblity result of:
 Band support both print order:
 * vertical
 * horizontal
+
 Band Name | Status | Description
 --------- | ------ | -----------
 title     | :white_check_mark: | First page only
