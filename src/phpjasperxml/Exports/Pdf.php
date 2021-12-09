@@ -137,32 +137,28 @@ class Pdf extends \TCPDF implements ExportInterface
     /**
      * draw all report elements according position
      */
-    public function drawElement(string $uuid, array $prop,int $offsetx,int $offsety)
-    {        
-        // $prop = $this->prop($obj->reportElement);
-        $x = $prop['x']+$offsetx;
-        $y = $prop['y']+$offsety;//$this->currentY;
-        $height = $prop['height'];
-        $width = $prop['width'];
+    // public function drawElement(string $uuid, array $prop,int $offsetx,int $offsety)
+    // {        
+    //     // $prop = $this->prop($obj->reportElement);
+    //     $x = $prop['x']+$offsetx;
+    //     $y = $prop['y']+$offsety;//$this->currentY;
+    //     $height = $prop['height'];
+    //     $width = $prop['width'];
 
-        // echo "draw element $uuid $obj->type:".print_r($prop,true)."\n";
-        $this->setPosition($x,$y);
-        $methodname = 'draw_'.$prop['type'];
-        call_user_func([$this,$methodname],$uuid,$prop);
+    //     // echo "draw element $uuid $obj->type:".print_r($prop,true)."\n";
+    //     $this->setPosition($x,$y);
+    //     $methodname = 'draw_'.$prop['type'];
+    //     call_user_func([$this,$methodname],$uuid,$prop);
         
-    }
+    // }
 
     public function draw_line(string $uuid,array $prop)
     {
-        // $prop = $this->prop($obj->reportElement);
         $x1=$this->GetX();
         $y1=$this->GetY();
         $x2=$x1+$prop['width'];
         $y2=$y1+$prop['height'];
         $forecolor = $this->convertColorStrToRGB($prop['lineColor']??'');        
-        // $this->console("$uuid");
-        // print_r($prop);
-        // print_r($forecolor);
         $dash="";
         $lineWidth = $prop['lineWidth'];
         $prop["lineStyle"]=$prop["lineStyle"]?? '';
@@ -186,17 +182,17 @@ class Pdf extends \TCPDF implements ExportInterface
             'cap'=>'butt',
             'join'=>'miter',
         ];
-        // $this->SetDrawColor(50, 0, 0, 0);
-        // $this->SetTextColor(100, 0, 0, 0);
-        // $this->SetDrawColor($forecolor['r'], $forecolor['g'],$forecolor['b']);
-        $this->Line($x1,$y1,$x2,$y2,$style);
-        
-        // echo "\ndrawline  $uuid ".print_r($prop,true)."\n";
+        $this->Line($x1,$y1,$x2,$y2,$style);        
     }
 
     public function draw_image(string $uuid,array $prop)
     {
-
+        $x=$this->GetX();
+        $y=$this->GetY();
+        $height = $prop['height'];
+        $width = $prop['width'];
+        $imageExpression = str_replace('"','',$prop['imageExpression']);
+        $this->Image($imageExpression,$x,$y,$width,$height);
     }
     public function draw_rectangle(string $uuid,array $prop)
     {
@@ -272,6 +268,9 @@ class Pdf extends \TCPDF implements ExportInterface
     {
         $w=$prop['width'];
         $h=$prop['height'];        
+        $x=$this->GetX();
+        $y=$this->GetY();
+        // $this->console("begining draw_staticText $x, $y");
         $forecolor = $this->convertColorStrToRGB($prop['forecolor']??'');
         $this->SetTextColor($forecolor["r"],$forecolor["g"],$forecolor["b"]);        
         $isfill=false;
@@ -316,6 +315,9 @@ class Pdf extends \TCPDF implements ExportInterface
         {
             $text = $prop['text'];
         }
+        $x=$this->GetX();
+        $y=$this->GetY();
+        // $this->console("intermediate draw_staticText $x, $y");
         $this->Cell($w,$h,$text,$border,0,$halign,$isfill);
     }
     public function draw_textField(string $uuid,array $prop)
@@ -323,6 +325,72 @@ class Pdf extends \TCPDF implements ExportInterface
         $this->draw_staticText($uuid,$prop,true);        
     }
 
+    public function draw_unsupportedElement(string $uuid,array $prop)
+    {
+
+        $type = $prop['type'];
+        $x=$this->GetX();
+        $y=$this->GetY();
+        $w=$prop['width'];
+        $h=$prop['height'];  
+        $this->SetFontSize(8);
+        $color1=100;
+        $color2=100;
+        $this->SetDrawColor($color1,$color2 , 0, 0);
+        $this->SetTextColor($color1, $color2, 0, 0);           
+        $style=[
+            'width'=> 1,
+            'dash'=>'',
+            'cap'=>'butt',
+            'join'=>'miter',
+        ];
+        $this->SetLineStyle($style);
+        $this->Rect($x,$y,$w ,$h);
+        $subtypetxt = '';
+        if(isset($prop['subtype']))
+        {
+            $subtypetxt = '('. $prop['subtype'].')';
+        }
+        $this->Cell($w,10,"element $type $subtypetxt is not support",0);          
+            // $offsetx = isset($offsets['x']) ? $offsets['x']: 0;
+            // $offsetx = (int)$offsetx;
+            // $offsety = isset($offsets['y']) ? $offsets['y']: 0 ;
+            // $offsety = (int)$offsety;
+            // $this->maxY=$offsety+$height;
+            // $this->currentY=$offsety;
+            // $this->SetXY($offsetx,$offsety);
+            // $offsets = ['x'=>$offsetx,'y'=>$offsety];
+            // if($this->debugband)
+            // {
+                
+            //     if(str_contains($bandname,$this->groupbandprefix))
+            //     {
+            //         $color1=100;
+            //         $color2=100;
+            //     }
+            //     else
+            //     {
+            //         $color1=50;
+            //         $color2=0;
+            //     }
+
+            //     if(in_array($bandname,['columnHeader','columnFooter']) || str_contains($bandname,$this->groupbandprefix) || str_contains($bandname,'detail_'))
+            //     {
+            //         $width = $this->columnWidth;
+            //     }
+            //     $this->printbandcount++;  
+            //     $this->SetFontSize(8);
+            //     $this->SetDrawColor($color1,$color2 , 0, 0);
+            //     $this->SetTextColor($color1, $color2, 0, 0);           
+            //     // $linestyle = ['dash'=>'','width'=>1];
+            //     // $this->SetLineStyle(); 
+            //     $this->Rect($offsetx,$offsety,$width ,$height);    
+            //     $this->lastBandEndY=$offsety+$height;; 
+            //     $this->Cell($width,10,$bandname."--$this->printbandcount",0);    
+            // }
+            
+        
+    }
     /****************************** draw all bands ********************************/
     /****************************** draw all bands ********************************/
     /****************************** draw all bands ********************************/
@@ -771,7 +839,7 @@ class Pdf extends \TCPDF implements ExportInterface
 
     /*************** misc function ****************/
     
-    protected function setPosition(int $x,int $y)
+    public function setPosition(int $x,int $y)
     {
         $this->SetXY($x,$y);
     }

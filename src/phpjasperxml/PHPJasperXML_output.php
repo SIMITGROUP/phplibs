@@ -150,8 +150,6 @@ trait PHPJasperXML_output
             {
                 $tmp = $element;
                 $isdisplayelement = true;
-                // $this->console("$uuid:  $element[printWhenExpression]");
-                // print_r($element);
                 if(isset($element['printWhenExpression']))
                 {                   
                     $printWhenExpression = (string)$element['printWhenExpression'];
@@ -161,11 +159,7 @@ trait PHPJasperXML_output
                 //only match printWhenExpression will draw element
                 if($isdisplayelement)
                 {
-                    if(isset($tmp['textFieldExpression']))
-                    {
-                        $tmp['textFieldExpression']=$this->executeExpression($tmp['textFieldExpression']);
-                    }
-                    $this->output->drawElement($uuid,$tmp,$offsetx,$offsety);
+                    $this->drawElement($uuid,$tmp,$offsetx,$offsety);
                 }                            
             }
         }
@@ -331,45 +325,6 @@ trait PHPJasperXML_output
     }
 
 
-    // protected function resetGroupIfRequire(int $rowno=null)
-    // {
-    //     $resettherest = false;        
-    //     foreach($this->groups as $groupname=>$groupsetting)
-    //     {
-    //         $groupExpression = $groupsetting['groupExpression'];
-    //         $lastgroupvalue = $groupsetting['value'];
-    //         $newgroupvalue = $this->parseExpression($groupExpression,$rowno);
-            
-    //         if($lastgroupvalue != $newgroupvalue)
-    //         {
-    //             $resettherest=true;
-    //             $this->groups[$groupname]['value'] = $newgroupvalue;                
-    //         }
-            
-
-    //         if($resettherest)
-    //         {                
-    //             $this->groups[$groupname]['count']=0;
-    //             $this->groups[$groupname]['ischange']=true;
-    //             $this->output->groups[$groupname]['ischange']=true;
-    //             //reset all variables under this group
-    //             foreach($this->variables as $varname=>$varsetting)
-    //             {
-    //                 $this->variables[$varname]['value']='--value reset--';
-    //                 $this->variables[$varname]['lastresetvalue']='--lastvalue reset--';
-    //             }
-                
-    //         }
-    //         else
-    //         {
-    //             $this->groups[$groupname]['ischange']=false;
-    //             $this->output->groups[$groupname]['ischange']=false;
-    //         }
-
-    //         $this->groups[$groupname]['count']++;
-            
-    //     }
-    // }
     protected function identifyGroupChange(): bool
     {
 

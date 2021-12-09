@@ -1,5 +1,8 @@
 <?php
 namespace Simitsdk\phpjasperxml;
+
+use SimpleXMLElement;
+
 trait PHPJasperXML_load
 {
     protected array $pageproperties=[];
@@ -15,6 +18,7 @@ trait PHPJasperXML_load
     protected string $filename ='';
     protected string $querystring = '';
     protected array $subdatasets=[];
+    protected array $styles=[];
     protected string $groupbandprefix = 'report_group_';
     /**
      * read jrxml file and load into memeory
@@ -37,7 +41,14 @@ trait PHPJasperXML_load
      */
     public function load_xml_string(string $jrxml): self
     {
-        $obj = simplexml_load_string($jrxml);
+        // $obj = simplexml_load_string($jrxml,SimpleXMLElement::class,LIBXML_NOCDATA);
+        // $obj = simplexml_load_string($jrxml,SimpleXMLElement::class,LIBXML_DTDVALID);
+        // $obj = simplexml_load_string($jrxml,SimpleXMLElement::class,LIBXML_DTDLOAD);
+        
+        $obj = simplexml_load_string($jrxml,SimpleXMLElement::class,LIBXML_HTML_NOIMPLIED);
+        // $obj = simplexml_load_string($jrxml,SimpleXMLElement::class,LIBXML_HTML_NODEFDTD);
+        // $obj = simplexml_load_string($jrxml,SimpleXMLElement::class,LIBXML_DTDATTR);
+        // $obj = simplexml_load_string($jrxml,SimpleXMLElement::class,LIBXML_COMPACT);
         $this->pageproperties = $this->prop($obj);
         $this->columnWidth=$this->pageproperties['columnWidth'];
         $this->columnCount=$this->pageproperties['columnCount']??1;
@@ -90,6 +101,9 @@ trait PHPJasperXML_load
                 case 'noData':
                     $this->addBand($k,$out);
                     break;
+                case 'style':
+                    $this->addStyle($name,$out);
+                    break;
                 default:
                     echo "$k is not supported, rendering stop\n";
                     die;
@@ -110,6 +124,13 @@ trait PHPJasperXML_load
         return $this;
     }
 
+    public function addStyle(string $name, object $element)
+    {
+        
+        $prop=$this->prop($element);        
+        $this->styles[$name] = $prop;
+        // <style name="Table_CH" mode="Opaque" backcolor="#BFE1FF">
+    }
     /**
      * register different band into band array
      * @param string $bandname

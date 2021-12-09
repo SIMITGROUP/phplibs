@@ -106,7 +106,7 @@ trait PHPJasperXML_outputhorizontal{
                     $this->maxDetailEndY=0;                    
                     // if($currentpage == $this->lastdetailpage)
                     {
-                        echo "\nnew page $currentpage == $totalpage\n"; 
+                        // echo "\nnew page $currentpage == $totalpage\n"; 
                         $this->newPage();
                         $this->output->setColumnNo($mycolumn);
                     }

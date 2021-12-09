@@ -18,7 +18,7 @@ trait PHPJasperXML_expression
         {
             $result = $this->executeExpression($expression);        
         }
-        $this->console("expression $expression === $result");
+        // $this->console("expression $expression === $result");
         return $result;
     }
     protected function executeExpression(string $expression,int $addrowqty=0): mixed

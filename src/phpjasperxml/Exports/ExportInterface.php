@@ -19,7 +19,7 @@ interface ExportInterface
     public function draw_lastPageFooter();
     public function draw_noData();
     //draw elements
-    public function drawElement(string $uuid, array $prop,int $offsetx,int $offsety);
+    // public function drawElement(string $uuid, array $prop,int $offsetx,int $offsety);
     public function draw_line(string $uuid,array $prop);
     public function draw_rectangle(string $uuid,array $prop);
     public function draw_ellipse(string $uuid,array $prop);
