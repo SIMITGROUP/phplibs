@@ -166,7 +166,11 @@ trait PHPJasperXML_elements
     protected function element_textField(array $prop, object $obj): array
     {      
         $prop = $this->element_staticText($prop,$obj);          
-        $prop['textFieldExpression']=$obj->textFieldExpression;        
+        $prop['textFieldExpression']=$obj->textFieldExpression;  
+        if(isset($obj->patternExpression))      
+        {
+            $prop['patternExpression']=(string)$obj->patternExpression;
+        }
         return $prop;
     }
 
@@ -178,6 +182,10 @@ trait PHPJasperXML_elements
     public function draw_textField(string $uuid,array $prop){
         $prop['textFieldExpression']=$this->executeExpression($prop['textFieldExpression']);
         $link = $prop['hyperlinkReferenceExpression']??'';        
+        if(!empty($prop['patternExpression']))
+        {
+            $prop['pattern']= $this->executeExpression($prop['patternExpression']);
+        }
         if(!empty($link))
         {
             $prop['hyperlinkReferenceExpression'] = $this->executeExpression($link);

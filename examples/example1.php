@@ -20,9 +20,11 @@ for($i=0;$i<1;$i++)
         'fullname' => $faker->name(),
         'email' => $faker->email(),
         'gender' => $faker->randomElement(['M', 'F']),
-        'globaluser_id'=> $i+100000000,
+        'globaluser_id'=> $i+100008,
         'description'=>$faker->text(),
-        'country_code'=>$faker->randomElement(['SG','AU','US','MY'])
+        'country_code'=>$faker->randomElement(['SG','AU','US','MY']),
+        'created'=>$faker->date("Y-m-d H:i:s")
+
     ];
     array_push($data,$tmp);
 }

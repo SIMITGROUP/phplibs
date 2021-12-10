@@ -271,7 +271,11 @@ class Pdf extends \TCPDF implements ExportInterface
         $mode = $prop['mode']  ?? 'Transparent';
         $x=$this->GetX();
         $y=$this->GetY();
+
+        // RotateObject
+        // $this->Rotate(90,$x,$y);
         // $this->console("begining draw_staticText $x, $y");
+        
         $forecolor = $this->convertColorStrToRGB($prop['forecolor']??'');
         $this->SetTextColor($forecolor["r"],$forecolor["g"],$forecolor["b"]);                
         $backcolor = $this->convertColorStrToRGB($prop['backcolor']??'');
@@ -284,9 +288,9 @@ class Pdf extends \TCPDF implements ExportInterface
         }
         $this->SetFillColor($backcolor['r'], $backcolor['g'],$backcolor['b']);
         $halign = !empty($prop['textAlignment']) ? $prop['textAlignment'] : 'L';
-        $halign = $this->left($halign,1);
-        //textAlignment="Right", L,C,R,J
-        $valign = !empty($prop['verticalAlignment']) ? $prop['verticalAlignment'] : 'T'; 
+        $halign = $this->left($halign,1);        
+        $valign = !empty($prop['verticalAlignment']) ? $prop['verticalAlignment'] : 'Top'; 
+        $valign = $this->left($valign,1);
         //B,C,T
         $markup = !empty($prop['markup']) ? $prop['markup'] : '';
         $prop['fontName'] = $prop['fontName']?? $this->defaultfont;
@@ -295,8 +299,39 @@ class Pdf extends \TCPDF implements ExportInterface
         $fontstyle.= !empty($prop['isBold']) ? 'B':'';
         $fontstyle.= !empty($prop['isItalic']) ? 'I':'';
         $fontstyle.= !empty($prop['isUnderline']) ? 'U':'';
-        $fontsize= !empty($prop['size']) ? $prop['size'] : 8;        
+        $fontstyle.= !empty($prop['isStrikeThrough']) ? 'D':'';
+        $fontsize= !empty($prop['size']) ? $prop['size'] : 8;     
+           
+        $rotation = $prop['rotation']?? '';
         
+        $this->StartTransform();
+        switch($rotation)
+        {
+            case 'Left':                
+                $this->SetXY($x,$y+$h);
+                $this->Rotate(90);
+                $tmpw=$w;
+                $w=$h;
+                $h=$tmpw;
+                
+                
+                
+                break;
+            case 'Right':
+                $this->SetXY($x+$w,$y);
+                $this->Rotate(270);
+                $tmpw=$w;
+                $w=$h;
+                $h=$tmpw;
+                // $this->SetY($y+$w/2);
+                break;
+            case 'UpsideDown':
+                $this->SetXY($x+$w,$y+$h);
+                $this->Rotate(180);
+                break;
+            default:
+            break;
+        }
         $topPenlineWidth = !empty($prop['topPenlineWidth']) ? $prop['topPenlineWidth'] : 0; 
         $bottomPenlineWidth = !empty($prop['bottomPenlineWidth']) ? $prop['bottomPenlineWidth'] : 0; 
         $leftPenlineWidth = !empty($prop['leftPenlineWidth']) ? $prop['leftPenlineWidth'] : 0; 
@@ -341,7 +376,7 @@ class Pdf extends \TCPDF implements ExportInterface
         }
         $x=$this->GetX();
         $y=$this->GetY();
-        if($prop['uuid']=='43dfadd2-8749-44a7-bff8-b0e6697cdb7d')
+        if($prop['uuid']=='724ac379-e567-49bf-8186-fff31392bf83')
         {
             $this->console("draw_staticText $x, $y");
             print_r($prop);
@@ -350,25 +385,41 @@ class Pdf extends \TCPDF implements ExportInterface
         $leftPadding=$prop['leftPadding']??0;
         $rightPadding=$prop['rightPadding']??0;
         $bottomPadding=$prop['bottomPadding']??0;
-
+        $prop['markup']=$prop['markup']??'';
         $link = $prop['hyperlinkReferenceExpression']??'';        
-        if(!empty($link))
+        $pattern = $prop['pattern']??'';
+        if(!empty($pattern))
         {
-
+            $text = $this->formatValue($text,$pattern);
         }
         $this->console("hyperlink $link");
         $this->setCellPaddings( $leftPadding, $topPadding, $rightPadding, $bottomPadding);
         $ishtml=0;
-        if(!empty($link))
+        if($prop['markup']=='html')
         {
-            $finaltxt = $this->convertToLink($text,$link);
             $ishtml=1;
+            $finaltxt=$text;
         }
+        else
+        {
+            if(!empty($link))
+            {
+                $finaltxt = $this->convertToLink($text,$link);
+                $ishtml=1;
+            }
+            else
+            {
+                $finaltxt=$text;
+            }
+        }
+        
 
         $stretchtype=0;
+        $maxheight=$h;
         if($textAdjust=='StretchHeight')
         {
             $stretchtype=0;
+            $maxheight=0;
         }
         else if($textAdjust=='ScaleFont')
         {           
@@ -379,7 +430,8 @@ class Pdf extends \TCPDF implements ExportInterface
             $stretchtype=0;
             $finaltxt = $this->convertToLink( $this->reduceString($text,$w),$link);
         }
-        $this->MultiCell($w,$h,$finaltxt,$border,$halign,$fill,0,$x,$y,true,$stretchtype,$ishtml);
+        $this->MultiCell($w,$h,$finaltxt,$border,$halign,$fill,0,$x,$y,true,$stretchtype,$ishtml,true,$maxheight,$valign);
+        $this->StopTransform();
     }
 
     public function draw_textField(string $uuid,array $prop)
@@ -580,11 +632,14 @@ class Pdf extends \TCPDF implements ExportInterface
                 }
                 $this->printbandcount++;  
                 $this->SetFontSize(8);
-                $this->SetDrawColor($color1,$color2 , 0, 0);
+                // $this->SetDrawColor($color1,$color2 , 0, 0);
+                
                 $this->SetTextColor($color1, $color2, 0, 0);           
                 // $linestyle = ['dash'=>'','width'=>1];
-                // $this->SetLineStyle(); 
-                $this->Rect($offsetx,$offsety,$width ,$height);    
+                
+                $style= $this->getLineStyle('Solid',1,'#cccccc');
+                // $this->SetLineStyle($style); 
+                $this->Rect($offsetx,$offsety,$width ,$height,'',['TBLR'=>$style]);    
                 $this->lastBandEndY=$offsety+$height;; 
                 $this->Cell($width,10,$bandname."--$this->printbandcount",0);    
             }
@@ -874,6 +929,29 @@ class Pdf extends \TCPDF implements ExportInterface
         return $groupcount = count($this->groups);
     }
 
+    protected function formatValue(mixed $value, string $pattern) : string
+    {
+        // scientific
+        $data = $value;
+        if(str_contains($pattern,'E0'))
+        {
+            
+        }
+        //date
+        else if(str_contains($pattern,'d') || str_contains($pattern,'h')|| str_contains($pattern,'H') || str_contains($pattern,'M')) //date
+        {
+
+        }
+        //number
+        else if(str_contains($pattern,'#') ) 
+        {
+            $fmt = numfmt_create( 'en_US', \NumberFormatter::DECIMAL );
+            numfmt_set_pattern($fmt,$pattern);
+            $data = numfmt_format($fmt,$value);
+
+        }
+        return $data;
+    }
     protected function convertToLink(string $text='',string $link='')
     {
         if(!empty($link))

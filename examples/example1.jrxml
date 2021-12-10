@@ -63,7 +63,7 @@
 		<property name="com.jaspersoft.studio.field.tree.path" value="global_user"/>
 	</field>
 	<detail>
-		<band height="519" splitType="Stretch">
+		<band height="600" splitType="Stretch">
 			<property name="com.jaspersoft.studio.layout" value="com.jaspersoft.studio.editor.layout.FreeLayout"/>
 			<textField>
 				<reportElement mode="Opaque" x="90" y="0" width="465" height="20" forecolor="#030000" backcolor="#FFFB05" uuid="9d37d0b4-6a5a-4dbe-a57a-9e0b1fa6e3df">
@@ -76,12 +76,12 @@
 					<bottomPen lineColor="#05FF05"/>
 					<rightPen lineWidth="1.0" lineStyle="Dotted" lineColor="#FF0537"/>
 				</box>
-				<textElement>
+				<textElement markup="none">
 					<font fontName="Arial Black" size="12" isBold="true" isItalic="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{fullname}]]></textFieldExpression>
 			</textField>
-			<textField hyperlinkType="RemotePage">
+			<textField textAdjust="StretchHeight" pattern="#,000.00######;#,000.00######-" hyperlinkType="RemotePage">
 				<reportElement x="0" y="0" width="80" height="20" uuid="641dffef-f501-4ae8-b8f4-080539d8db5a"/>
 				<box topPadding="8" leftPadding="8" bottomPadding="8" rightPadding="8">
 					<pen lineWidth="0.0" lineStyle="Double" lineColor="#09FF05"/>
@@ -90,18 +90,19 @@
 					<bottomPen lineWidth="1.0" lineStyle="Double" lineColor="#09FF05"/>
 					<rightPen lineWidth="1.0" lineStyle="Double" lineColor="#09FF05"/>
 				</box>
+				<textElement markup="none"/>
 				<textFieldExpression><![CDATA[$V{REPORT_COUNT}]]></textFieldExpression>
 				<hyperlinkReferenceExpression><![CDATA["https://www.google.com/"]]></hyperlinkReferenceExpression>
 			</textField>
 			<textField>
-				<reportElement x="70" y="35" width="410" height="30" uuid="c5786b1c-50a5-46be-bb71-11c8258df1bd"/>
+				<reportElement x="60" y="370" width="410" height="120" uuid="c5786b1c-50a5-46be-bb71-11c8258df1bd"/>
 				<box>
-					<topPen lineWidth="2.25" lineStyle="Solid" lineColor="#000000"/>
+					<topPen lineWidth="2.25" lineStyle="Solid" lineColor="#E6FF05"/>
 					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 					<bottomPen lineWidth="2.25" lineStyle="Solid" lineColor="#000000"/>
 					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
-				<textElement textAlignment="Center">
+				<textElement textAlignment="Right" verticalAlignment="Bottom" markup="none">
 					<font fontName="Bradley Hand" size="19" isBold="false"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{email}]]></textFieldExpression>
@@ -134,49 +135,102 @@
 					<pen lineWidth="7.0" lineStyle="Dotted" lineColor="#05FF2B"/>
 				</graphicElement>
 			</line>
-			<image>
-				<reportElement x="10" y="187" width="160" height="123" uuid="4afc3ddf-099e-4478-8e81-ea8acf4bcd84"/>
-				<imageExpression><![CDATA["https://tinyjpg.com/images/social/website.jpg"]]></imageExpression>
-			</image>
-			<areaChart>
-				<chart evaluationTime="Report">
-					<reportElement x="10" y="319" width="200" height="200" uuid="8f05a109-8825-4071-8028-9f5b9269928f"/>
-					<chartTitle/>
-					<chartSubtitle/>
-					<chartLegend/>
-				</chart>
-				<categoryDataset>
-					<dataset resetType="Report"/>
-					<categorySeries>
-						<seriesExpression><![CDATA["SERIES 1"]]></seriesExpression>
-						<categoryExpression><![CDATA[0]]></categoryExpression>
-						<valueExpression><![CDATA[0]]></valueExpression>
-					</categorySeries>
-				</categoryDataset>
-				<areaPlot>
-					<plot/>
-					<categoryAxisFormat>
-						<axisFormat/>
-					</categoryAxisFormat>
-					<valueAxisFormat>
-						<axisFormat/>
-					</valueAxisFormat>
-				</areaPlot>
-			</areaChart>
-			<textField hyperlinkType="RemotePage" hyperlinkTarget="Blank">
-				<reportElement mode="Transparent" x="257" y="195" width="133" height="75" backcolor="#0516FF" uuid="43dfadd2-8749-44a7-bff8-b0e6697cdb7d">
+			<textField textAdjust="StretchHeight" hyperlinkType="Reference" hyperlinkTarget="Blank">
+				<reportElement mode="Transparent" x="1" y="50" width="140" height="90" forecolor="#FF7E05" backcolor="#FFFFFF" uuid="43dfadd2-8749-44a7-bff8-b0e6697cdb7d">
+					<property name="com.jaspersoft.studio.unit.y" value="px"/>
 					<printWhenExpression><![CDATA["2"=="2"]]></printWhenExpression>
 				</reportElement>
 				<box topPadding="0" leftPadding="0">
-					<pen lineWidth="1.25" lineStyle="Solid"/>
-					<topPen lineWidth="3.5" lineColor="#B8FF05"/>
-					<leftPen lineWidth="1.75" lineStyle="Dotted" lineColor="#B85606"/>
-					<bottomPen lineWidth="1.25" lineStyle="Dashed" lineColor="#6505FF"/>
-					<rightPen lineWidth="1.75" lineColor="#030303"/>
+					<pen lineWidth="2.5" lineStyle="Solid"/>
+					<topPen lineWidth="1.75" lineStyle="Solid" lineColor="#FF7E05"/>
+					<leftPen lineWidth="1.75" lineStyle="Solid" lineColor="#FF7E05"/>
+					<bottomPen lineWidth="1.75" lineStyle="Solid" lineColor="#FF7E05"/>
+					<rightPen lineWidth="1.75" lineStyle="Solid" lineColor="#FF7E05"/>
 				</box>
-				<textElement markup="none"/>
+				<textElement textAlignment="Left" rotation="Left" markup="none">
+					<font fontName="Serif" isBold="false" isItalic="false" isUnderline="true" isStrikeThrough="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["1---"+$F{description}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="10" y="140" width="90" height="110" forecolor="#FF05FF" uuid="1fa8ca13-3cff-4196-817e-5cf930dcdfee"/>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#FF05FF"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#FF05FF"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#FF05FF"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#FF05FF"/>
+				</box>
+				<textElement textAlignment="Center" rotation="Right" markup="none">
+					<font fontName="Bradley Hand" size="19" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA["1--"+$F{description}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="1" y="251" width="200" height="110" forecolor="#2BFF05" uuid="a2b64952-a231-4459-9b9c-8a7c68f3d00d"/>
+				<box>
+					<topPen lineWidth="1.75" lineStyle="Solid" lineColor="#2BFF05"/>
+					<leftPen lineWidth="1.75" lineStyle="Solid" lineColor="#2BFF05"/>
+					<bottomPen lineWidth="1.75" lineStyle="Solid" lineColor="#2BFF05"/>
+					<rightPen lineWidth="1.75" lineStyle="Solid" lineColor="#2BFF05"/>
+				</box>
+				<textElement textAlignment="Center" rotation="UpsideDown" markup="none">
+					<font fontName="Bradley Hand" size="19" isBold="false"/>
+				</textElement>
 				<textFieldExpression><![CDATA[$F{description}]]></textFieldExpression>
-				<hyperlinkReferenceExpression><![CDATA["https://www.google.com/"]]></hyperlinkReferenceExpression>
+			</textField>
+			<textField textAdjust="StretchHeight" hyperlinkType="Reference" hyperlinkTarget="Blank">
+				<reportElement mode="Transparent" x="411" y="50" width="140" height="90" forecolor="#FF7E05" backcolor="#FFFFFF" uuid="5749a3f2-be2d-45e0-b653-63c8617def71">
+					<property name="com.jaspersoft.studio.unit.y" value="px"/>
+					<printWhenExpression><![CDATA["2"=="2"]]></printWhenExpression>
+				</reportElement>
+				<box topPadding="0" leftPadding="0">
+					<pen lineWidth="2.5" lineStyle="Solid"/>
+					<topPen lineWidth="1.75" lineStyle="Solid" lineColor="#FF7E05"/>
+					<leftPen lineWidth="1.75" lineStyle="Solid" lineColor="#FF7E05"/>
+					<bottomPen lineWidth="1.75" lineStyle="Solid" lineColor="#FF7E05"/>
+					<rightPen lineWidth="1.75" lineStyle="Solid" lineColor="#FF7E05"/>
+				</box>
+				<textElement textAlignment="Left" rotation="Left" markup="none">
+					<font fontName="Serif" isBold="true" isItalic="true" isUnderline="false" isStrikeThrough="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["2---"+$F{description}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="230" y="140" width="90" height="110" forecolor="#FF05FF" uuid="37a80ff8-1f3e-4036-b25b-35090671f630"/>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#FF05FF"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#FF05FF"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#FF05FF"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#FF05FF"/>
+				</box>
+				<textElement textAlignment="Center" rotation="Right" markup="none">
+					<font fontName="Bradley Hand" size="19" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA["2--"+$F{description}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="460" y="141" width="90" height="110" forecolor="#FF05FF" uuid="307c8b32-3bca-4118-9d5a-2ef6eac25087"/>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#FF05FF"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#FF05FF"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#FF05FF"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#FF05FF"/>
+				</box>
+				<textElement textAlignment="Center" rotation="Right" markup="none">
+					<font fontName="Bradley Hand" size="19" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA["3--"+$F{description}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.###;#,##0.###-">
+				<reportElement x="272" y="285" width="100" height="30" uuid="2611ec11-7a2c-4f7c-92d2-051139d0e777"/>
+				<textElement markup="none"/>
+				<textFieldExpression><![CDATA[$F{globaluser_id}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="273" y="316" width="100" height="30" uuid="724ac379-e567-49bf-8186-fff31392bf83"/>
+				<textElement markup="none"/>
+				<textFieldExpression><![CDATA[$F{globaluser_id}]]></textFieldExpression>
+				<patternExpression><![CDATA["#,##0.###;#,##0.###-"]]></patternExpression>
 			</textField>
 		</band>
 	</detail>

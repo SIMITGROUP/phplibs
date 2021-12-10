@@ -57,12 +57,15 @@ x | :white_check_mark: |
 y | :white_check_mark: | 
 w | :white_check_mark: | 
 h | :white_check_mark: | 
-position type | :x: | 
-stretch type | :x: |
+position type | :x: | use Fix relative to top
+stretch type | :x: | use Not stretch
 Forecolor | :white_check_mark: | 
 Backcolor | :white_check_mark: | 
+Font  | :exclamation: | upstream tcpdf not support lot of fonts. manual add is tedious
 Transparent | :white_check_mark: | 
-Print Repeated Value | :x: |
+Print Repeated Value | :x: | Default = True
+Label | :x: |
+Key | :x: |
 Remove Line When Blank | :x: |
 Print First Whole Band | :x: |
 Detail Overflow | :x: |
@@ -71,14 +74,14 @@ Print When Expression | :white_check_mark: |
 Paddings | :white_check_mark: | 
 Borders | :white_check_mark: | 
 Expressions | :white_check_mark: | 
-Text Adjust | :white_check_mark: |  ScaleFont is not supported
+Text Adjust | :white_check_mark: |  ScaleFont look differently compare to jasperreport
 Text Align Horizontal | :white_check_mark: | 
-Text Align Vertical | :white_check_mark: | 
+Text Align Vertical | :white_check_mark: | not work when Stretch Type = StretchHeight
 Text Rotation | :white_check_mark: | 
-Pattern | :x: |
-Pattern Expression | :x: |
-Markup | :x: |
-Hyperlink Reference Expression | :x: |
+Pattern | :exclamation: | only support number
+Pattern Expression | :exclamation: | only support number
+Markup | :exclamation: | No markup, or html only
+Hyperlink Reference Expression | :white_check_mark: | Link Type = Reference, will convert become html cell with hyperlink. Some format may lose
 
 
 
