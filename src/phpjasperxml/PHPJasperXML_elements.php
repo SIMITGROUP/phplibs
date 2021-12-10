@@ -147,6 +147,13 @@ trait PHPJasperXML_elements
      * @param array $prop
      */
     public function draw_staticText(string $uuid,array $prop,bool $isTextField=false){
+        $link = $prop['hyperlinkReferenceExpression']??'';
+        
+        if(!empty($link))
+        {
+            $this->console("link $link");
+            $prop['hyperlinkReferenceExpression'] = $this->executeExpression($link);
+        }
         $this->output->draw_staticText($uuid,$prop);
     }
 
@@ -170,6 +177,11 @@ trait PHPJasperXML_elements
      */
     public function draw_textField(string $uuid,array $prop){
         $prop['textFieldExpression']=$this->executeExpression($prop['textFieldExpression']);
+        $link = $prop['hyperlinkReferenceExpression']??'';        
+        if(!empty($link))
+        {
+            $prop['hyperlinkReferenceExpression'] = $this->executeExpression($link);
+        }
         $this->output->draw_textField($uuid,$prop);
     }
 
@@ -234,7 +246,15 @@ trait PHPJasperXML_elements
         $this->output->draw_unsupportedElement($uuid,$prop);
     }
     
-    
+    public function element_chart(array $prop, object $obj): array
+    {        
+        return $prop;
+    }
+
+    public function draw_chart(string $uuid,array $prop)
+    {
+        $this->output->draw_unsupportedElement($uuid,$prop);
+    }
 
     
     

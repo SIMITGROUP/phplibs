@@ -267,18 +267,21 @@ class Pdf extends \TCPDF implements ExportInterface
     public function draw_staticText(string $uuid,array $prop,bool $isTextField=false)
     {
         $w=$prop['width'];
-        $h=$prop['height'];        
+        $h=$prop['height'];       
+        $mode = $prop['mode']  ?? 'Transparent';
         $x=$this->GetX();
         $y=$this->GetY();
         // $this->console("begining draw_staticText $x, $y");
         $forecolor = $this->convertColorStrToRGB($prop['forecolor']??'');
-        $this->SetTextColor($forecolor["r"],$forecolor["g"],$forecolor["b"]);        
-        $isfill=false;
-        if(!empty($prop['backcolor']))
-        {
-            $isfill = true;
-        }
+        $this->SetTextColor($forecolor["r"],$forecolor["g"],$forecolor["b"]);                
         $backcolor = $this->convertColorStrToRGB($prop['backcolor']??'');
+        $fill=false;
+        $prop['mode'] = $prop['mode']?? 'Transparent';
+        
+        if($prop['mode'] == 'Opaque')
+        {
+            $fill = $backcolor;
+        }
         $this->SetFillColor($backcolor['r'], $backcolor['g'],$backcolor['b']);
         $halign = !empty($prop['textAlignment']) ? $prop['textAlignment'] : 'L';
         $halign = $this->left($halign,1);
@@ -298,12 +301,33 @@ class Pdf extends \TCPDF implements ExportInterface
         $bottomPenlineWidth = !empty($prop['bottomPenlineWidth']) ? $prop['bottomPenlineWidth'] : 0; 
         $leftPenlineWidth = !empty($prop['leftPenlineWidth']) ? $prop['leftPenlineWidth'] : 0; 
         $rightPenlineWidth = !empty($prop['rightPenlineWidth']) ? $prop['rightPenlineWidth'] : 0; 
-        $border='';
+        $textAdjust = !empty($prop['textAdjust']) ? $prop['textAdjust'] : ''; 
+        $border=[];
+        if($topPenlineWidth>0)
+        {
+            $penlineStyle = $prop['topPenlineStyle']??'';
+            $penlineColor = $prop['topPenlineColor']??'';
+            $border['T'] = $this->getLineStyle($penlineStyle,$topPenlineWidth,$penlineColor); 
+        }
+        if($bottomPenlineWidth>0)
+        {
+            $penlineStyle = $prop['bottomPenlineStyle']??'';
+            $penlineColor = $prop['bottomPenlineColor']??'';
+            $border['B']= $this->getLineStyle($penlineStyle,$bottomPenlineWidth,$penlineColor); 
+        }
+        if($rightPenlineWidth>0)
+        {
+            $penlineStyle = $prop['rightPenlineStyle']??'';
+            $penlineColor = $prop['rightPenlineColor']??'';
+            $border['R']= $this->getLineStyle($penlineStyle,$leftPenlineWidth,$penlineColor); 
+        }
+        if($leftPenlineWidth>0)
+        {
+            $penlineStyle = $prop['leftPenlineStyle']??'';
+            $penlineColor = $prop['leftPenlineColor']??'';
+            $border['L']= $this->getLineStyle($penlineStyle,$rightPenlineWidth,$penlineColor); 
+        }
         
-        $border.= ($topPenlineWidth>0)?'T':'';   
-        $border.= ($bottomPenlineWidth>0)?'B':'';   
-        $border.= ($leftPenlineWidth>0)?'L':'';   
-        $border.= ($rightPenlineWidth>0)?'R':'';   
         
         $this->useFont($fontName, $fontstyle, $fontsize);
         
@@ -317,14 +341,61 @@ class Pdf extends \TCPDF implements ExportInterface
         }
         $x=$this->GetX();
         $y=$this->GetY();
-        // $this->console("intermediate draw_staticText $x, $y");
-        $this->Cell($w,$h,$text,$border,0,$halign,$isfill);
+        if($prop['uuid']=='43dfadd2-8749-44a7-bff8-b0e6697cdb7d')
+        {
+            $this->console("draw_staticText $x, $y");
+            print_r($prop);
+        }
+        $topPadding=$prop['topPadding']??0;
+        $leftPadding=$prop['leftPadding']??0;
+        $rightPadding=$prop['rightPadding']??0;
+        $bottomPadding=$prop['bottomPadding']??0;
+
+        $link = $prop['hyperlinkReferenceExpression']??'';        
+        if(!empty($link))
+        {
+
+        }
+        $this->console("hyperlink $link");
+        $this->setCellPaddings( $leftPadding, $topPadding, $rightPadding, $bottomPadding);
+        $ishtml=0;
+        if(!empty($link))
+        {
+            $finaltxt = $this->convertToLink($text,$link);
+            $ishtml=1;
+        }
+
+        $stretchtype=0;
+        if($textAdjust=='StretchHeight')
+        {
+            $stretchtype=0;
+        }
+        else if($textAdjust=='ScaleFont')
+        {           
+            $stretchtype=2;
+        }
+        else
+        {
+            $stretchtype=0;
+            $finaltxt = $this->convertToLink( $this->reduceString($text,$w),$link);
+        }
+        $this->MultiCell($w,$h,$finaltxt,$border,$halign,$fill,0,$x,$y,true,$stretchtype,$ishtml);
     }
+
     public function draw_textField(string $uuid,array $prop)
     {
         $this->draw_staticText($uuid,$prop,true);        
     }
 
+    public function reduceString(mixed $txt, int $width): string
+    {
+        $txt = (string)$txt;
+        while($this->GetStringWidth($txt) > $width) 
+        {          
+            $txt=substr_replace($txt,"",-1);                            
+        }
+        return $txt;
+    }
     public function draw_unsupportedElement(string $uuid,array $prop)
     {
 
@@ -744,99 +815,6 @@ class Pdf extends \TCPDF implements ExportInterface
     }
 
 
-    // public function draw_group2(string $bandname)
-    // {        
-    //     $groupname = str_replace([$this->groupbandprefix,'_header','_footer'],'',$bandname);
-
-    //     $groupno = $this->groups[$groupname]['groupno'];
-
-    //     //print header
-    //     if(str_contains($bandname,'_header'))
-    //     {
-    //         //if continue print from previous group
-    //         if($this->groupCount()==1)
-    //         {                
-    //             if($this->currentRowNo == 0)
-    //             {
-    //                 $this->currentY=$offsety = $this->bands['columnHeader']['endY'];                    
-    //             }   
-    //             else
-    //             {                    
-    //                 $headerbandname = $this->groupbandprefix.$groupname.'_footer';                    
-    //                 $this->currentY=$offsety = $this->bands[$headerbandname]['endY'];                    
-    //             }
-    //         }
-    //         else if($groupno > 0)
-    //         {
-    //             $prevgroupno = $groupno-1;
-    //             echo "\ngetHashkeyFromIndex prevgroupno $prevgroupno\n";
-    //             $prevgroupname = $this->getHashkeyFromIndex($this->groups,$prevgroupno);
-    //             echo "\nprevgroupnae $prevgroupname\n";
-    //             $prebandname =$this->groupbandprefix.$prevgroupname.'_header';
-    //             $prevband=$this->bands[$prebandname];
-    //             $this->currentY=$offsety = $prevband['endY'];    
-    //         }                            
-    //         else
-    //         {
-                
-    //             $nextgroupno = $groupno+1;                
-    //             $nextgroupname = $this->getHashkeyFromIndex($this->groups,$nextgroupno  );
-                
-    //             if($this->currentRowNo == 0)
-    //             {
-    //                 $this->currentY=$offsety = $this->bands['columnHeader']['endY'];                    
-    //             }   
-    //             else
-    //             {
-                    
-    //                 $headerbandname = $this->groupbandprefix.$nextgroupname.'_footer';
-                    
-    //                 $this->currentY=$offsety = $this->bands[$headerbandname]['endY'];                    
-    //                 echo "\nheaderbandname $headerbandname $offsety\n";
-    //             }
-                
-    //         }
-                
-            
-    //     }
-    //     else if(str_contains($bandname,'_footer')) //print group footer
-    //     {
-             
-    //         $lastgroup = $this->groups[$this->getLastGroupName()];
-    //         $lastgroupno = $lastgroup['groupno'];
-    //         echo "\nlastgroup: groupno = $groupno lastgroupno = $lastgroupno\n";
-    //         // print_r($lastgroup);
-    //         if($this->groupCount()==1)
-    //         {
-    //             $bandname =$this->groupbandprefix.$groupname.'_header';
-    //             $band=$this->bands[$bandname];
-    //             $this->currentY=$offsety = $band['endY'];  
-    //         }
-    //         else if($groupno == $lastgroupno )
-    //         {
-                
-    //             $this->currentY=$offsety = $this->bands[$this->lastdetailband]['endY'];
-    //         }
-    //         else
-    //         {
-                
-    //             $nextgroupno = $groupno + 1;
-    //             $nextgroupname = $this->getHashKeyFromIndex($this->groups,$nextgroupno);
-    //             $nextbandname =$this->groupbandprefix.$nextgroupname.'_footer';
-    //             $nextband=$this->bands[$nextbandname];
-    //             echo "\nnextgroupname $nextgroupname $nextbandname\n";
-    //             print_r($this->bands);
-    //             $this->currentY=$offsety = $nextband['endY'];    
-    //         }
-
-    //     }
-        
-    //     $offsety = $this->currentY;
-    //     $offset = ['x'=>$this->pagesettings['leftMargin'],'y'=>$offsety];
-    //     return $offset;
-    // }
-
-
     /*************** misc function ****************/
     
     public function setPosition(int $x,int $y)
@@ -844,14 +822,38 @@ class Pdf extends \TCPDF implements ExportInterface
         $this->SetXY($x,$y);
     }
 
-    
-    public function __call($methodname,$args)
+    protected function getLineStyle(string $lineStyle,float $lineWidth=8,string $lineColor='')
     {
-        if(!method_exists($this,$methodname))
+        $forecolor = $this->convertColorStrToRGB($lineColor);        
+        switch($lineStyle)
         {
-            echo "\n$methodname() does not exists\n";
+            case "Dotted":
+                $dash=sprintf("%d,%d",$lineWidth,$lineWidth);
+            break;
+            case "Dashed":
+                $dash=sprintf("%d,%d",$lineWidth*4,$lineWidth*2);
+                break;
+            default:
+                $dash="";
+            break;
         }
+        
+        $style=[
+            'width'=> $lineWidth,
+            'color'=>$forecolor,
+            'dash'=>$dash,
+            'cap'=>'butt',
+            'join'=>'miter',
+        ];
+        return $style;
     }
+    // public function __call($methodname,$args)
+    // {
+    //     if(!method_exists($this,$methodname))
+    //     {
+    //         echo "\n$methodname() does not exists\n";
+    //     }
+    // }
 
     public function columnCount(): int
     {
@@ -870,6 +872,18 @@ class Pdf extends \TCPDF implements ExportInterface
     public function groupCount(): int
     {
         return $groupcount = count($this->groups);
+    }
+
+    protected function convertToLink(string $text='',string $link='')
+    {
+        if(!empty($link))
+        {
+            return '<a href="'.$link.'">'.$text.'</a>';
+        }
+        else
+        {
+            return $text;
+        }
     }
     
 }

@@ -104,8 +104,8 @@ trait PHPJasperXML_load
                 case 'style':
                     $this->addStyle($name,$out);
                     break;
-                default:
-                    echo "$k is not supported, rendering stop\n";
+                default:                    
+                    echo "$k is not supported, rendering stop\n";                    
                     die;
                     break;
             }
@@ -199,9 +199,6 @@ trait PHPJasperXML_load
     }
   
     
-
-
-    
     protected function toValue(mixed $data): mixed
     {
         return json_decode(json_encode($data),true);
@@ -212,54 +209,66 @@ trait PHPJasperXML_load
     protected function getBandChildren($els)
     {
         $data=[];
-        // foreach($obj->band as $k => $els )
-        // {
-            foreach($els as $elementtype => $objvalue)
+        foreach($els as $elementtype => $obj)
+        {
+            // $this->console($elementtype);
+            // print_r($obj);
+            if(str_contains($elementtype,'Chart'))
             {
+                $methodname = 'element_chart';//all chart share same
+                $objvalue = $obj->chart;                    
+                $type='chart';
                 
-                if(isset($objvalue->reportElement))
+            }
+            else
+            {
+                $methodname = 'element_'.$elementtype; //prepare elements setting    
+                $objvalue = $obj ;                
+                $type=$elementtype;
+            }
+            
+            $reportelement = $objvalue->reportElement;
+            $setting = $this->prop($reportelement);
+            
+            if(!empty($setting['uuid']))
+            {                                                
+                $uuid = $setting['uuid'];
+                $objvalue->type = $type;             
+                if(method_exists($this,$methodname))
                 {
-                    
-                    $setting = $this->prop($objvalue->reportElement);                    
-                    $uuid = $setting['uuid'];
-                    $objvalue->type = $elementtype;
-                    $methodname = 'element_'.$elementtype; //prepare elements setting
-                    if(method_exists($this,$methodname))
-                    {
-                        $prop = $this->prop($objvalue);
-                        $prop['type']=$elementtype;
+                    $prop = $this->prop($reportelement);
+                    $prop = $this->appendprop($prop,$objvalue);
+                    $prop['type']=$type;
 
-                        
-    
-                        foreach($objvalue as $k=>$values)
-                        {
-                            $subprops = $this->prop($values);
-                            foreach($subprops as $key=>$val)
-                            {
-                                $prop[$key]=$val;
-                            }
-                        }                                                
-                        
-                        if(isset($objvalue->reportElement->printWhenExpression))
-                        {
-                            $prop['printWhenExpression']=(string)$objvalue->reportElement->printWhenExpression;
-                        }
-                        $prop = call_user_func([$this,$methodname],$prop,$objvalue);      
-                        $data[$uuid] = $prop;
-                    }
-                    else
+                    
+
+                    foreach($objvalue as $k=>$values)
                     {
-                        echo "\nElement $elementtype is not supported due to $methodname() is not exists\n";
+                        $prop = $this->appendprop($prop,$values);
+                    }                                                
+                    
+                    if(isset($reportelement->printWhenExpression))
+                    {
+                        $prop['printWhenExpression']=(string)$reportelement->printWhenExpression;
                     }
-                    
-                    
+                    if(isset($objvalue->hyperlinkReferenceExpression))
+                    {
+                        $prop['hyperlinkReferenceExpression']=(string)$objvalue->hyperlinkReferenceExpression;
+                    }
+
+                    $prop = call_user_func([$this,$methodname],$prop,$objvalue);      
+                    $data[$uuid] = $prop;
                 }
                 else
                 {
-                    //elementGroup, tmp not supported
+                    echo "\nElement $elementtype is not supported due to $methodname() is not exists\n";
                 }
-            }            
-        // }
+                
+                
+            }
+            
+        }            
+        
         return $data;
     }
 

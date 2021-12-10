@@ -48,6 +48,42 @@ note | :x: |
 custom visualzation | :x: | 
 map | :x: | 
 
+## TextField and StaticText
+TextField and Static Text is most important element in report. Below is the compatibility detail.
+
+Setting   | Status | Description
+--------- | ------ | -----------
+x | :white_check_mark: | 
+y | :white_check_mark: | 
+w | :white_check_mark: | 
+h | :white_check_mark: | 
+position type | :x: | 
+stretch type | :x: |
+Forecolor | :white_check_mark: | 
+Backcolor | :white_check_mark: | 
+Transparent | :white_check_mark: | 
+Print Repeated Value | :x: |
+Remove Line When Blank | :x: |
+Print First Whole Band | :x: |
+Detail Overflow | :x: |
+Group Changes | :x: |
+Print When Expression | :white_check_mark: | 
+Paddings | :white_check_mark: | 
+Borders | :white_check_mark: | 
+Expressions | :white_check_mark: | 
+Text Adjust | :white_check_mark: |  ScaleFont is not supported
+Text Align Horizontal | :white_check_mark: | 
+Text Align Vertical | :white_check_mark: | 
+Text Rotation | :white_check_mark: | 
+Pattern | :x: |
+Pattern Expression | :x: |
+Markup | :x: |
+Hyperlink Reference Expression | :x: |
+
+
+
+
+
 ## Outputs
 PHPJasperxml going to output report into several format.
 

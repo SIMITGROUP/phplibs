@@ -14,7 +14,7 @@ $filename = __DIR__.'/example1.jrxml';
 
 $data = [];
 $faker = Faker\Factory::create();
-for($i=0;$i<20;$i++)
+for($i=0;$i<1;$i++)
 {
     $tmp=[
         'fullname' => $faker->name(),
