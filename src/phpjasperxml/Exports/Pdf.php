@@ -23,7 +23,7 @@ class Pdf extends \TCPDF implements ExportInterface
     protected int $columnCount;
     protected string $defaultfont='helvetica';
     protected int $currentRowNo=0;
-    protected bool $debugband=true;
+    protected bool $debugband=false;
     protected string $groupbandprefix = 'report_group_';
     protected int $printbandcount=0;
     public function __construct($prop)
@@ -192,7 +192,64 @@ class Pdf extends \TCPDF implements ExportInterface
         $height = $prop['height'];
         $width = $prop['width'];
         $imageExpression = str_replace('"','',$prop['imageExpression']);
-        $this->Image($imageExpression,$x,$y,$width,$height);
+        // $border=['TLBR'];
+        $scaleImage = $prop['scaleImage']?? 'RetainShape';
+        $hAlign = $prop['hAlign']?? 'Left';
+        $hAlign =  $this->left($hAlign,1);        
+        $vAlign = $prop['vAlign']?? 'Top';
+        $vAlign =  $this->left($vAlign,1);        
+        $fitbox = $hAlign.$vAlign;
+        // $fitbox = '';
+
+        $link = $prop['hyperlinkReferenceExpression']?? '';
+        $this->console($link);
+        $border = $this->getBorderStyles($prop,1);
+        // $this->console("draw image, resize: $resize ");
+        $imageh=$height;
+        $imagew = $width;
+        switch($scaleImage)
+        {
+            //if the dimensions of the actual image do not fit those specified for the image element that displays it, 
+            //the image is forced to obey them and stretch itself so that it fits in the designated output area. It will be deformed if necessary.
+            case 'FillFrame':
+                $resize=1;
+                $fitbox=false;
+                break;
+            //if the actual image does not fit into the image element, it can be adapted to those dimensions while keeping its original undeformed proportions.
+            case 'RetainShape':
+                $resize=true; 
+                break;
+                
+            //if the actual image is larger than the image element size, it will be cut off so that it keeps its original resolution, 
+            //and only the region that fits the specified size will be displayed.
+            case 'Clip':
+                $resize=false;          
+                die("image $uuid use scaleImage method Clip which is not supported");      
+            break;            
+            //the image can be stretched vertically to match the actual image height, while preserving the declared width of the image element.
+            case 'RealHeight':
+                $resize=true;
+                // $imagew=0;
+                die("image $uuid use scaleImage method RealHeight which is not supported");
+                break;
+            //the image can be stretched vertically to match the actual image height, while adjusting the width of the image element to match the actual image width.
+            case 'RealSize':
+                // $resize=true;
+                die("image $uuid use scaleImage method RealSize which is not supported");
+                break;
+            default:
+                $resize=true;
+                $imagew=0;
+            break;
+        }
+        $palign=false;
+        $ismask=false;
+        $imgmask = false;
+        $dpi = 300;
+        $align = '';
+        $imagetype='';
+        $this->Image( $imageExpression,$x,$y,$imagew,$imageh,$imagetype,$link,$align,$resize,$dpi,$palign,$ismask,$imgmask,$border,$fitbox);
+        
     }
     public function draw_rectangle(string $uuid,array $prop)
     {
@@ -208,9 +265,6 @@ class Pdf extends \TCPDF implements ExportInterface
         $lineWidth = $prop['lineWidth']??1;
         $lineStyle = $prop['lineStyle']??'';
         $radius=$prop['radius']??0;
-        // $fillcolors = [$backcolor['r'], $backcolor['g'],$backcolor['b']];
-        // $this->SetDrawColor($forecolor['r'], $forecolor['g'],$forecolor['b']);        
-        // $this->SetFillColor($backcolor['r'], $backcolor['g'],$backcolor['b']);
 
         if(isset($prop['mode']) && $prop['mode'] == 'Transparent')
         {
@@ -220,22 +274,35 @@ class Pdf extends \TCPDF implements ExportInterface
         {
             $style='FD';
         }        
-        $borderstyle =[ 'TBLR'=> $this->getLineStyle($lineStyle,$lineWidth,$lineColor) ];
-        // if($prop['uuid']=='8eb2d7e0-d5b1-471c-8cfe-e112511fbbd5')
-        // {
-        //     $this->console("draw_rectangle $x, $y");
-        //     print_r($prop);
-        //     print_r($borderstyle);
-        // }
-
-
-        // $this->Rect($x,$y,$w,$h,$style,$borderstyle,$backcolor);      
-
-        
-
-
-
+        $borderstyle =[ 'TBLR'=> $this->getLineStyle($lineStyle,$lineWidth,$lineColor) ];      
         $this->RoundedRect($x,$y,$w,$h,$radius,'1111',$style,$borderstyle,$backcolor);
+    }
+    public function draw_frame(string $uuid,array $prop)
+    {
+        $x=$this->GetX();
+        $y=$this->GetY();
+        $w = $prop['width'];
+        $h = $prop['height'];
+        $prop['forecolor'] = $prop['forecolor'] ??'';
+        $prop['backcolor'] = $prop['backcolor'] ??'#FFFFFF';
+        $lineColor = $prop['lineColor'] ?? $prop['forecolor'];
+        // $color = $this->convertColorStrToRGB($lineColor);
+        $backcolor = $this->convertColorStrToRGB($prop['backcolor']);        
+        // $lineWidth = $prop['lineWidth']??1;
+        // $lineStyle = $prop['lineStyle']??'';
+        $radius=$prop['radius']??0;
+
+        if(isset($prop['mode']) && $prop['mode'] == 'Transparent')
+        {
+            $style='';
+        }
+        else
+        {
+            $style='FD';
+        }        
+        // $borderstyle =[ 'TBLR'=> $this->getLineStyle($lineStyle,$lineWidth,$lineColor) ];      
+        $border = $this->getBorderStyles($prop,1);
+        $this->RoundedRect($x,$y,$w,$h,$radius,'1111',$style,$border,$backcolor);
     }
     public function draw_ellipse(string $uuid,array $prop)
     {
@@ -363,31 +430,7 @@ class Pdf extends \TCPDF implements ExportInterface
         $leftPenlineWidth = !empty($prop['leftPenlineWidth']) ? $prop['leftPenlineWidth'] : 0; 
         $rightPenlineWidth = !empty($prop['rightPenlineWidth']) ? $prop['rightPenlineWidth'] : 0; 
         $textAdjust = !empty($prop['textAdjust']) ? $prop['textAdjust'] : ''; 
-        $border=[];
-        if($topPenlineWidth>0)
-        {
-            $penlineStyle = $prop['topPenlineStyle']??'';
-            $penlineColor = $prop['topPenlineColor']??'';
-            $border['T'] = $this->getLineStyle($penlineStyle,$topPenlineWidth,$penlineColor); 
-        }
-        if($bottomPenlineWidth>0)
-        {
-            $penlineStyle = $prop['bottomPenlineStyle']??'';
-            $penlineColor = $prop['bottomPenlineColor']??'';
-            $border['B']= $this->getLineStyle($penlineStyle,$bottomPenlineWidth,$penlineColor); 
-        }
-        if($rightPenlineWidth>0)
-        {
-            $penlineStyle = $prop['rightPenlineStyle']??'';
-            $penlineColor = $prop['rightPenlineColor']??'';
-            $border['R']= $this->getLineStyle($penlineStyle,$leftPenlineWidth,$penlineColor); 
-        }
-        if($leftPenlineWidth>0)
-        {
-            $penlineStyle = $prop['leftPenlineStyle']??'';
-            $penlineColor = $prop['leftPenlineColor']??'';
-            $border['L']= $this->getLineStyle($penlineStyle,$rightPenlineWidth,$penlineColor); 
-        }
+        $border = $this->getBorderStyles($prop,1);
         
         
         $this->useFont($fontName, $fontstyle, $fontsize);
@@ -460,6 +503,32 @@ class Pdf extends \TCPDF implements ExportInterface
         $this->StopTransform();
     }
 
+    public function getBorderStyles(array $prop=[],string $sides=''): array
+    {
+        $style=[];
+        if(empty($sides))
+        {
+            $style = $this->getLineStyle( $prop['lineStyle'],$prop['lineWidth'],$prop['lineColor']);
+        }
+        else
+        {
+            $borders=['T'=>'top','L'=>'left','R'=>'right','B'=>'bottom'];
+            foreach($borders as $borderkey=>$bordername)
+            {
+                $width_name= $bordername.'PenlineWidth';
+                $color_name= $bordername.'PenlineColor';
+                $style_name= $bordername.'PenlineStyle';
+
+                if(!empty($prop[$width_name]))
+                {
+                    $style[$borderkey] = $this->getLineStyle( $prop[$style_name],$prop[$width_name],$prop[$color_name]);
+                }
+
+            }
+
+        }
+        return $style;
+    }
     public function draw_textField(string $uuid,array $prop)
     {
         $this->draw_staticText($uuid,$prop,true);        
@@ -500,7 +569,7 @@ class Pdf extends \TCPDF implements ExportInterface
         {
             $subtypetxt = '('. $prop['subtype'].')';
         }
-        $this->Cell($w,10,"element $type $subtypetxt is not support",0);          
+        $this->MultiCell($w,10,"element $type $subtypetxt is not support",0);          
             // $offsetx = isset($offsets['x']) ? $offsets['x']: 0;
             // $offsetx = (int)$offsetx;
             // $offsety = isset($offsets['y']) ? $offsets['y']: 0 ;

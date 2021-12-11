@@ -89,7 +89,7 @@ trait PHPJasperXML_elements
     protected function element_image(array $prop, object $obj): array
     {
         $prop['imageExpression']= (string)$obj->imageExpression;
-        
+        $prop = $this->addBorders($prop,$obj);
         return $prop;
     }
 
@@ -101,6 +101,10 @@ trait PHPJasperXML_elements
     protected function draw_image(string $uuid,array $prop)
     {
         $prop['imageExpression'] = $this->executeExpression($prop['imageExpression']);
+        // $prop['hyperlinkReferenceExpression'] = $prop['hyperlinkReferenceExpression']?? '';
+        
+        
+        
         $this->output->draw_image($uuid,$prop);
     }
 
@@ -151,13 +155,13 @@ trait PHPJasperXML_elements
      * @param array $prop
      */
     public function draw_staticText(string $uuid,array $prop,bool $isTextField=false){
-        $link = $prop['hyperlinkReferenceExpression']??'';
+        // $link = $prop['hyperlinkReferenceExpression']??'';
         
-        if(!empty($link))
-        {
-            // $this->console("link $link");
-            $prop['hyperlinkReferenceExpression'] = $this->executeExpression($link);
-        }
+        // if(!empty($link))
+        // {
+        //     // $this->console("link $link");
+        //     $prop['hyperlinkReferenceExpression'] = $this->executeExpression($link);
+        // }
         $this->output->draw_staticText($uuid,$prop);
     }
 
@@ -185,15 +189,15 @@ trait PHPJasperXML_elements
      */
     public function draw_textField(string $uuid,array $prop){
         $prop['textFieldExpression']=$this->executeExpression($prop['textFieldExpression']);
-        $link = $prop['hyperlinkReferenceExpression']??'';        
+        // $link = $prop['hyperlinkReferenceExpression']??'';        
         if(!empty($prop['patternExpression']))
         {
             $prop['pattern']= $this->executeExpression($prop['patternExpression']);
         }
-        if(!empty($link))
-        {
-            $prop['hyperlinkReferenceExpression'] = $this->executeExpression($link);
-        }
+        // if(!empty($link))
+        // {
+        //     $prop['hyperlinkReferenceExpression'] = $this->executeExpression($link);
+        // }
         $this->output->draw_textField($uuid,$prop);
     }
 
@@ -205,14 +209,15 @@ trait PHPJasperXML_elements
      */
     protected function element_frame(array $prop, object $obj): array
     {
-        if(isset($obj->box))
-        {
-            $prop=$this->appendprop($prop,$obj->box);
-            if(isset($obj->box->pen))
-            {
-                $prop=$this->appendprop($prop,$obj->box->pen);
-            }         
-        }        
+        $prop = $this->addBorders($prop,$obj);
+        // if(isset($obj->box))
+        // {
+        //     $prop=$this->appendprop($prop,$obj->box);
+        //     if(isset($obj->box->pen))
+        //     {
+        //         $prop=$this->appendprop($prop,$obj->box->pen);
+        //     }         
+        // }        
         return $prop;
     }
 
@@ -227,7 +232,7 @@ trait PHPJasperXML_elements
      * @param array $prop
      */
     public function draw_frame(string $uuid,array $prop){
-        $this->output->draw_rectangle($uuid,$prop);
+        $this->output->draw_frame($uuid,$prop);
     }
     
 
@@ -273,7 +278,7 @@ trait PHPJasperXML_elements
                
             }  
         }
-        print_r($prop);
+        // print_r($prop);
         return $prop;
     }
     public function draw_componentElement(string $uuid,array $prop)
@@ -321,6 +326,10 @@ trait PHPJasperXML_elements
                 $width = $prop['width'];
         
                 // $this->console("early draw element $uuid x=$x, y=$y\n");
+                if(isset($prop['hyperlinkReferenceExpression']))
+                {
+                    $prop['hyperlinkReferenceExpression'] = $this->executeExpression($prop['hyperlinkReferenceExpression']);
+                }
                 $this->output->setPosition($x,$y);                
                 $methodname = 'draw_'.$prop['type'];
                 call_user_func([$this,$methodname],$uuid,$prop);

@@ -39,7 +39,7 @@ staticText | :white_check_mark: |
 line | :white_check_mark: | Double line not supported
 rectangle | :white_check_mark: | 
 circle | :white_check_mark: | 
-image | :white_check_mark: | 
+image | :white_check_mark: | :exclamation: Some scaleImage is not supported (Clip,RealHeight,RealSize)
 barcode | :white_check_mark: | 
 break | :white_check_mark: | 
 subreport | :x: | plan to do
