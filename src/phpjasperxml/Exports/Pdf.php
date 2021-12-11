@@ -202,13 +202,15 @@ class Pdf extends \TCPDF implements ExportInterface
         $h = $prop['height'];
         $prop['forecolor'] = $prop['forecolor'] ??'';
         $prop['backcolor'] = $prop['backcolor'] ??'#FFFFFF';
-        $forecolor = $this->convertColorStrToRGB($prop['forecolor']);
+        $lineColor = $prop['lineColor'] ?? $prop['forecolor'];
+        $color = $this->convertColorStrToRGB($lineColor);
         $backcolor = $this->convertColorStrToRGB($prop['backcolor']);        
-        
-        
+        $lineWidth = $prop['lineWidth']??1;
+        $lineStyle = $prop['lineStyle']??'';
+        $radius=$prop['radius']??0;
         // $fillcolors = [$backcolor['r'], $backcolor['g'],$backcolor['b']];
-        $this->SetDrawColor($forecolor['r'], $forecolor['g'],$forecolor['b']);        
-        $this->SetFillColor($backcolor['r'], $backcolor['g'],$backcolor['b']);
+        // $this->SetDrawColor($forecolor['r'], $forecolor['g'],$forecolor['b']);        
+        // $this->SetFillColor($backcolor['r'], $backcolor['g'],$backcolor['b']);
 
         if(isset($prop['mode']) && $prop['mode'] == 'Transparent')
         {
@@ -218,7 +220,22 @@ class Pdf extends \TCPDF implements ExportInterface
         {
             $style='FD';
         }        
-        $this->Rect($x,$y,$w,$h,$style,[]);        
+        $borderstyle =[ 'TBLR'=> $this->getLineStyle($lineStyle,$lineWidth,$lineColor) ];
+        // if($prop['uuid']=='8eb2d7e0-d5b1-471c-8cfe-e112511fbbd5')
+        // {
+        //     $this->console("draw_rectangle $x, $y");
+        //     print_r($prop);
+        //     print_r($borderstyle);
+        // }
+
+
+        // $this->Rect($x,$y,$w,$h,$style,$borderstyle,$backcolor);      
+
+        
+
+
+
+        $this->RoundedRect($x,$y,$w,$h,$radius,'1111',$style,$borderstyle,$backcolor);
     }
     public function draw_ellipse(string $uuid,array $prop)
     {
@@ -232,9 +249,12 @@ class Pdf extends \TCPDF implements ExportInterface
     
         $prop['forecolor'] = $prop['forecolor'] ??'';
         $prop['backcolor'] = $prop['backcolor'] ??'#FFFFFF';
+        $lineWidth = $prop['lineWidth']??1;
+        $lineStyle = $prop['lineStyle']??'';
+        $lineColor = $prop['lineColor']?? $prop['forecolor'];
         $forecolor = $this->convertColorStrToRGB($prop['forecolor']);
         $backcolor = $this->convertColorStrToRGB($prop['backcolor']);
-
+        
         // $fillcolors = [$backcolor['r'], $backcolor['g'],$backcolor['b']];
         $this->SetDrawColor($forecolor['r'], $forecolor['g'],$forecolor['b']);        
         $this->SetFillColor($backcolor['r'], $backcolor['g'],$backcolor['b']);
@@ -245,9 +265,15 @@ class Pdf extends \TCPDF implements ExportInterface
         else
         {
             $style='FD';
+        } 
+        $ellipsestyle = $this->getLineStyle($lineStyle,$lineWidth,$lineColor) ;
+        if($prop['uuid']=='dc63d535-bbe8-4c76-8a7c-27b733429e22')
+        {
+            $this->console("draw_rectangle $x, $y");
+            print_r($prop);
+            print_r($ellipsestyle);
         }
-
-        $this->Ellipse($x,$y,$rx,$ry,0,0,360,$style);
+        $this->Ellipse($x,$y,$rx,$ry,0,0,360,$style,$ellipsestyle);
     }
     protected function useFont(string $fontName, string $fontstyle, int $fontsize=8)
     {
@@ -376,11 +402,11 @@ class Pdf extends \TCPDF implements ExportInterface
         }
         $x=$this->GetX();
         $y=$this->GetY();
-        if($prop['uuid']=='724ac379-e567-49bf-8186-fff31392bf83')
-        {
-            $this->console("draw_staticText $x, $y");
-            print_r($prop);
-        }
+        // if($prop['uuid']=='724ac379-e567-49bf-8186-fff31392bf83')
+        // {
+        //     $this->console("draw_staticText $x, $y");
+        //     print_r($prop);
+        // }
         $topPadding=$prop['topPadding']??0;
         $leftPadding=$prop['leftPadding']??0;
         $rightPadding=$prop['rightPadding']??0;

@@ -26,6 +26,11 @@ groups | :white_check_mark: | multiple group supported, in both vertical/horizon
 
 ## Elements
 Basic element for generate pdf is ready. Some element rely on additional datasets or 3rd party technology will not support.
+Some universal properties is ignore:
+1. position type (default "Fix relative to top")
+2. stretch type (default "use Not stretch")
+
+
 
 Element   | Status | Description
 --------- | ------ | -----------
@@ -57,8 +62,6 @@ x | :white_check_mark: |
 y | :white_check_mark: | 
 w | :white_check_mark: | 
 h | :white_check_mark: | 
-position type | :x: | use Fix relative to top
-stretch type | :x: | use Not stretch
 Forecolor | :white_check_mark: | 
 Backcolor | :white_check_mark: | 
 Font  | :exclamation: | upstream tcpdf not support lot of fonts. manual add is tedious
@@ -83,8 +86,49 @@ Pattern Expression | :exclamation: | only support number
 Markup | :exclamation: | No markup, or html only
 Hyperlink Reference Expression | :white_check_mark: | Link Type = Reference, will convert become html cell with hyperlink. Some format may lose
 
+## Line
+Setting   | Status | Description
+--------- | ------ | -----------
+x | :white_check_mark: | 
+y | :white_check_mark: | 
+w | :white_check_mark: | 
+h | :white_check_mark: | 
+Width | :white_check_mark: | 
+Color | :white_check_mark: | 
+Style | :white_check_mark: | Double line is not supported
+Print When Expression | :white_check_mark: | 
 
+## Rectangle
+Setting   | Status | Description
+--------- | ------ | -----------
+x | :white_check_mark: | 
+y | :white_check_mark: | 
+w | :white_check_mark: | 
+h | :white_check_mark: | 
+Print When Expression | :white_check_mark: | 
+Forecolor | :white_check_mark: | Line color override Forecolor
+Backcolor | :white_check_mark: | 
+Transparent | :white_check_mark: | 
+Line Color | :white_check_mark: |  Line color override Forecolor
+Line Style | :white_check_mark: | 
+Line Width | :white_check_mark: | 
+Border Radius | :white_check_mark: | 
 
+## Ellipse
+Setting   | Status | Description
+--------- | ------ | -----------
+x | :white_check_mark: | 
+y | :white_check_mark: | 
+w | :white_check_mark: | 
+h | :white_check_mark: | 
+Print When Expression | :white_check_mark: | 
+Forecolor | :white_check_mark: | Line color override Forecolor
+Backcolor | :white_check_mark: | 
+Transparent | :white_check_mark: | 
+Line Color | :white_check_mark: |  Line color override Forecolor
+Line Style | :white_check_mark: | 
+Line Width | :white_check_mark: | 
+Border Radius | :white_check_mark: | 
 
 
 ## Outputs
@@ -121,7 +165,7 @@ Variable is important, but very language dependent.
 Below is unsupported features:
 * Increment Type
 
-Calculation Function
+## Calculation Function
 
 Calculation   | Status | Description
 --------- | ------ | -----------
@@ -136,7 +180,8 @@ Standard Deviation | :x: |  coming future
 Count | :x: |  coming future
 Distinct Count | :x: |  coming future
 
-Reset Types
+## Reset Types
+
 Reset Type   | Status | Description
 ------------ | ------ | -----------
 Report | :white_check_mark: |

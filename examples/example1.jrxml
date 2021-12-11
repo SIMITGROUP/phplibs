@@ -95,7 +95,7 @@
 				<hyperlinkReferenceExpression><![CDATA["https://www.google.com/"]]></hyperlinkReferenceExpression>
 			</textField>
 			<textField>
-				<reportElement x="60" y="370" width="410" height="120" uuid="c5786b1c-50a5-46be-bb71-11c8258df1bd"/>
+				<reportElement x="200" y="281" width="290" height="80" uuid="c5786b1c-50a5-46be-bb71-11c8258df1bd"/>
 				<box>
 					<topPen lineWidth="2.25" lineStyle="Solid" lineColor="#E6FF05"/>
 					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
@@ -222,16 +222,56 @@
 				<textFieldExpression><![CDATA["3--"+$F{description}]]></textFieldExpression>
 			</textField>
 			<textField pattern="#,##0.###;#,##0.###-">
-				<reportElement x="272" y="285" width="100" height="30" uuid="2611ec11-7a2c-4f7c-92d2-051139d0e777"/>
+				<reportElement x="200" y="251" width="100" height="30" uuid="2611ec11-7a2c-4f7c-92d2-051139d0e777"/>
 				<textElement markup="none"/>
 				<textFieldExpression><![CDATA[$F{globaluser_id}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="273" y="316" width="100" height="30" uuid="724ac379-e567-49bf-8186-fff31392bf83"/>
+				<reportElement x="300" y="251" width="100" height="30" uuid="724ac379-e567-49bf-8186-fff31392bf83"/>
 				<textElement markup="none"/>
 				<textFieldExpression><![CDATA[$F{globaluser_id}]]></textFieldExpression>
 				<patternExpression><![CDATA["#,##0.###;#,##0.###-"]]></patternExpression>
 			</textField>
+			<rectangle>
+				<reportElement mode="Opaque" x="1" y="380" width="179" height="50" forecolor="#054CFF" backcolor="#D92E3F" uuid="e7bfbcea-b134-4665-99be-b98265772bf9"/>
+				<graphicElement>
+					<pen lineWidth="4.0" lineStyle="Dotted"/>
+				</graphicElement>
+			</rectangle>
+			<rectangle>
+				<reportElement key="dddd sv " mode="Opaque" x="190" y="380" width="179" height="50" forecolor="#E605FF" backcolor="#E2FF05" uuid="edfae283-d42c-4330-9443-8f8a3eec7005"/>
+				<graphicElement>
+					<pen lineWidth="4.0" lineStyle="Dashed" lineColor="#0A2BFF"/>
+				</graphicElement>
+			</rectangle>
+			<rectangle radius="32">
+				<reportElement mode="Transparent" x="380" y="380" width="179" height="50" forecolor="#E605FF" backcolor="#E2FF05" uuid="8eb2d7e0-d5b1-471c-8cfe-e112511fbbd5">
+					<property name="com.jaspersoft.studio.element.name" value="radiusrect"/>
+				</reportElement>
+				<graphicElement>
+					<pen lineWidth="4.0" lineStyle="Solid" lineColor="#230AFF"/>
+				</graphicElement>
+			</rectangle>
+			<ellipse>
+				<reportElement mode="Opaque" x="15" y="471" width="135" height="119" backcolor="#D2FF08" uuid="29ecb22a-43f6-4971-81b4-5eaa6fd9c53d"/>
+				<graphicElement>
+					<pen lineWidth="5.0" lineColor="#0FFF7B"/>
+				</graphicElement>
+			</ellipse>
+			<ellipse>
+				<reportElement mode="Transparent" x="120" y="485" width="140" height="80" uuid="628d5278-d0ac-45ec-98f8-8aa05197b24f"/>
+				<graphicElement>
+					<pen lineWidth="4.0" lineStyle="Dashed" lineColor="#030303"/>
+				</graphicElement>
+			</ellipse>
+			<ellipse>
+				<reportElement key="" mode="Opaque" x="236" y="505" width="82" height="60" forecolor="#FF8205" backcolor="#FFF705" uuid="dc63d535-bbe8-4c76-8a7c-27b733429e22">
+					<property name="com.jaspersoft.studio.element.name" value="ellipse1"/>
+				</reportElement>
+				<graphicElement>
+					<pen lineColor="#0A2BFF"/>
+				</graphicElement>
+			</ellipse>
 		</band>
 	</detail>
 </jasperReport>

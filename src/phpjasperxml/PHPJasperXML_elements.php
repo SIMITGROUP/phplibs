@@ -44,6 +44,7 @@ trait PHPJasperXML_elements
      */
     protected function element_rectangle(array $prop, object $obj): array
     {
+        $prop=$this->appendprop($prop,$obj->graphicElement->pen);        
         return $prop;
     }
 
@@ -64,6 +65,7 @@ trait PHPJasperXML_elements
      */
     protected function element_ellipse(array $prop, object $obj): array
     {
+        $prop=$this->appendprop($prop,$obj->graphicElement->pen);        
         return $prop;
     }
 
@@ -72,7 +74,9 @@ trait PHPJasperXML_elements
      * @param string $uuid unique id
      * @param array $prop
      */
-    public function draw_ellipse(string $uuid,array $prop){
+    public function draw_ellipse(string $uuid,array $prop)
+    {
+        
         $this->output->draw_ellipse($uuid,$prop);
     }
 
