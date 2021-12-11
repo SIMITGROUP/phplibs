@@ -266,6 +266,7 @@ trait PHPJasperXML_load
                         $subdata=$this->getBandChildren($obj->children());
                         foreach($subdata as $subuuid => $subprop)
                         {
+                            $subprop['frame']=$uuid;
                             $subprop['x']+=$prop['x'];
                             $subprop['y']+=$prop['y'];
                             $data[$subuuid]=$subprop;

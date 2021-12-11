@@ -253,7 +253,9 @@
 				</graphicElement>
 			</rectangle>
 			<frame>
-				<reportElement x="1" y="460" width="200" height="200" uuid="6369e557-a726-45ef-838f-ede37e08dcec"/>
+				<reportElement x="1" y="460" width="200" height="200" uuid="6369e557-a726-45ef-838f-ede37e08dcec">
+					<printWhenExpression><![CDATA["1" == "1"]]></printWhenExpression>
+				</reportElement>
 				<box topPadding="0" leftPadding="0" bottomPadding="0" rightPadding="0">
 					<pen lineWidth="1.75"/>
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>

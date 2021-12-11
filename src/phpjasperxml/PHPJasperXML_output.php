@@ -146,19 +146,31 @@ trait PHPJasperXML_output
         $height = $this->bands[$bandname]['height'];
         if($height>0)
         {
+            
             foreach($this->elements[$bandname] as $uuid =>$element)
             {
                 $tmp = $element;
                 $isdisplayelement = true;
+                $framedisplay = true;
                 if(isset($element['printWhenExpression']))
                 {                   
                     $printWhenExpression = (string)$element['printWhenExpression'];
                     $isdisplayelement = $this->isDisplay($printWhenExpression);
+                    
+                }
+                $this->elements[$bandname][$uuid]['show']=$isdisplayelement;
+
+                //if this element is within frame, depend on frame appear or not
+                if(isset($this->elements[$bandname][$uuid]['frame']))
+                {
+                    $frameuuid =$this->elements[$bandname][$uuid]['frame'];
+                    $isdisplayelement = $this->elements[$bandname][$frameuuid]['show'];
                 }
 
                 //only match printWhenExpression will draw element
-                if($isdisplayelement)
+                if($isdisplayelement && $framedisplay)
                 {
+                    
                     $this->drawElement($uuid,$tmp,$offsetx,$offsety);
                 }                            
             }

@@ -47,7 +47,7 @@ chart | :x: | plan to do
 spiderchart | :x: |  plan to do
 list | :x: |  plan to do
 table | :x: |  plan to do
-frame | :white_check_mark: | :exclamation: print when expression not apply to children yet
+frame | :white_check_mark: | 
 generic | :x: | 
 note | :x: | 
 custom visualzation | :x: | 
