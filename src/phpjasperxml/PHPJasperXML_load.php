@@ -256,8 +256,26 @@ trait PHPJasperXML_load
                         $prop['hyperlinkReferenceExpression']=(string)$objvalue->hyperlinkReferenceExpression;
                     }
 
-                    $prop = call_user_func([$this,$methodname],$prop,$objvalue);      
+                    
+                    $prop = call_user_func([$this,$methodname],$prop,$objvalue);                          
                     $data[$uuid] = $prop;
+                    if($type=='frame')                    
+                    {
+                        unset($obj->reportElement);
+                        unset($obj->box);
+                        $subdata=$this->getBandChildren($obj->children());
+                        foreach($subdata as $subuuid => $subprop)
+                        {
+                            $subprop['x']+=$prop['x'];
+                            $subprop['y']+=$prop['y'];
+                            $data[$subuuid]=$subprop;
+                        }
+                        // $this->console('subdata');
+                        // print_r($obj->children());
+                        // print_r($subdata);
+                    }
+                    
+                    
                 }
                 else
                 {

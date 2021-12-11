@@ -47,7 +47,7 @@ chart | :x: | plan to do
 spiderchart | :x: |  plan to do
 list | :x: |  plan to do
 table | :x: |  plan to do
-frame | :x: |  plan to do
+frame | :white_check_mark: | :exclamation: print when expression not apply to children yet
 generic | :x: | 
 note | :x: | 
 custom visualzation | :x: | 
@@ -81,10 +81,10 @@ Text Adjust | :white_check_mark: |  ScaleFont look differently compare to jasper
 Text Align Horizontal | :white_check_mark: | 
 Text Align Vertical | :white_check_mark: | not work when Stretch Type = StretchHeight
 Text Rotation | :white_check_mark: | 
-Pattern | :exclamation: | only support number
-Pattern Expression | :exclamation: | only support number
-Markup | :exclamation: | No markup, or html only
-Hyperlink Reference Expression | :white_check_mark: | Link Type = Reference, will convert become html cell with hyperlink. Some format may lose
+Pattern | :white_check_mark: | :exclamation: only support number
+Pattern Expression | :white_check_mark: | :exclamation: only support number
+Markup | :white_check_mark: | :exclamation: No markup, or html only
+Hyperlink Reference Expression | :white_check_mark: | Link Type = Reference, will convert become html cell with hyperlink.  :exclamation: Some format may lose
 
 ## Line
 Setting   | Status | Description
@@ -128,7 +128,6 @@ Transparent | :white_check_mark: |
 Line Color | :white_check_mark: |  Line color override Forecolor
 Line Style | :white_check_mark: | 
 Line Width | :white_check_mark: | 
-Border Radius | :white_check_mark: | 
 
 
 ## Outputs

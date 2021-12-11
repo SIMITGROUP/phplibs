@@ -267,12 +267,12 @@ class Pdf extends \TCPDF implements ExportInterface
             $style='FD';
         } 
         $ellipsestyle = $this->getLineStyle($lineStyle,$lineWidth,$lineColor) ;
-        if($prop['uuid']=='dc63d535-bbe8-4c76-8a7c-27b733429e22')
-        {
-            $this->console("draw_rectangle $x, $y");
-            print_r($prop);
-            print_r($ellipsestyle);
-        }
+        // if($prop['uuid']=='dc63d535-bbe8-4c76-8a7c-27b733429e22')
+        // {
+            // $this->console("draw_rectangle $x, $y");
+            // print_r($prop);
+            // print_r($ellipsestyle);
+        // }
         $this->Ellipse($x,$y,$rx,$ry,0,0,360,$style,$ellipsestyle);
     }
     protected function useFont(string $fontName, string $fontstyle, int $fontsize=8)
@@ -418,7 +418,7 @@ class Pdf extends \TCPDF implements ExportInterface
         {
             $text = $this->formatValue($text,$pattern);
         }
-        $this->console("hyperlink $link");
+        // $this->console("hyperlink $link");
         $this->setCellPaddings( $leftPadding, $topPadding, $rightPadding, $bottomPadding);
         $ishtml=0;
         if($prop['markup']=='html')

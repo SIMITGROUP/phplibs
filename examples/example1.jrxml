@@ -63,7 +63,7 @@
 		<property name="com.jaspersoft.studio.field.tree.path" value="global_user"/>
 	</field>
 	<detail>
-		<band height="600" splitType="Stretch">
+		<band height="676" splitType="Stretch">
 			<property name="com.jaspersoft.studio.layout" value="com.jaspersoft.studio.editor.layout.FreeLayout"/>
 			<textField>
 				<reportElement mode="Opaque" x="90" y="0" width="465" height="20" forecolor="#030000" backcolor="#FFFB05" uuid="9d37d0b4-6a5a-4dbe-a57a-9e0b1fa6e3df">
@@ -252,26 +252,58 @@
 					<pen lineWidth="4.0" lineStyle="Solid" lineColor="#230AFF"/>
 				</graphicElement>
 			</rectangle>
-			<ellipse>
-				<reportElement mode="Opaque" x="15" y="471" width="135" height="119" backcolor="#D2FF08" uuid="29ecb22a-43f6-4971-81b4-5eaa6fd9c53d"/>
-				<graphicElement>
-					<pen lineWidth="5.0" lineColor="#0FFF7B"/>
-				</graphicElement>
-			</ellipse>
-			<ellipse>
-				<reportElement mode="Transparent" x="120" y="485" width="140" height="80" uuid="628d5278-d0ac-45ec-98f8-8aa05197b24f"/>
-				<graphicElement>
-					<pen lineWidth="4.0" lineStyle="Dashed" lineColor="#030303"/>
-				</graphicElement>
-			</ellipse>
-			<ellipse>
-				<reportElement key="" mode="Opaque" x="236" y="505" width="82" height="60" forecolor="#FF8205" backcolor="#FFF705" uuid="dc63d535-bbe8-4c76-8a7c-27b733429e22">
-					<property name="com.jaspersoft.studio.element.name" value="ellipse1"/>
-				</reportElement>
-				<graphicElement>
-					<pen lineColor="#0A2BFF"/>
-				</graphicElement>
-			</ellipse>
+			<frame>
+				<reportElement x="1" y="460" width="200" height="200" uuid="6369e557-a726-45ef-838f-ede37e08dcec"/>
+				<box topPadding="0" leftPadding="0" bottomPadding="0" rightPadding="0">
+					<pen lineWidth="1.75"/>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<ellipse>
+					<reportElement mode="Opaque" x="29" y="30" width="135" height="119" backcolor="#D2FF08" uuid="29ecb22a-43f6-4971-81b4-5eaa6fd9c53d"/>
+					<graphicElement>
+						<pen lineWidth="5.0" lineColor="#0FFF7B"/>
+					</graphicElement>
+				</ellipse>
+				<ellipse>
+					<reportElement key="" mode="Opaque" x="19" y="30" width="82" height="60" forecolor="#FF8205" backcolor="#FFF705" uuid="dc63d535-bbe8-4c76-8a7c-27b733429e22">
+						<property name="com.jaspersoft.studio.element.name" value="ellipse1"/>
+					</reportElement>
+					<graphicElement>
+						<pen lineColor="#0A2BFF"/>
+					</graphicElement>
+				</ellipse>
+				<ellipse>
+					<reportElement mode="Transparent" x="49" y="75" width="140" height="80" uuid="628d5278-d0ac-45ec-98f8-8aa05197b24f"/>
+					<graphicElement>
+						<pen lineWidth="4.0" lineStyle="Dashed" lineColor="#030303"/>
+					</graphicElement>
+				</ellipse>
+			</frame>
+			<componentElement>
+				<reportElement x="208" y="460" width="85" height="77" uuid="8c6c1c1c-b9db-475c-a866-affa5297c91a"/>
+				<jr:QRCode xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd">
+					<jr:codeExpression><![CDATA["123456789"]]></jr:codeExpression>
+				</jr:QRCode>
+			</componentElement>
+			<componentElement>
+				<reportElement x="210" y="540" width="100" height="30" uuid="250a4ca1-e62f-4937-9158-8fc71db1ebd0"/>
+				<jr:barbecue xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" type="Code128" drawText="false" checksumRequired="false">
+					<jr:codeExpression><![CDATA["1234"]]></jr:codeExpression>
+				</jr:barbecue>
+			</componentElement>
+			<componentElement>
+				<reportElement x="210" y="580" width="100" height="30" uuid="f97fb014-27b1-49af-a6ee-828107dcb731"/>
+				<jr:DataMatrix xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd">
+					<jr:codeExpression><![CDATA["123456789"]]></jr:codeExpression>
+				</jr:DataMatrix>
+			</componentElement>
+			<subreport>
+				<reportElement x="340" y="460" width="200" height="200" uuid="c026ea5e-9b31-48d1-902a-e429d02c66ff"/>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+			</subreport>
 		</band>
 	</detail>
 </jasperReport>

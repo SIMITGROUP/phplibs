@@ -155,7 +155,7 @@ trait PHPJasperXML_elements
         
         if(!empty($link))
         {
-            $this->console("link $link");
+            // $this->console("link $link");
             $prop['hyperlinkReferenceExpression'] = $this->executeExpression($link);
         }
         $this->output->draw_staticText($uuid,$prop);
@@ -197,6 +197,38 @@ trait PHPJasperXML_elements
         $this->output->draw_textField($uuid,$prop);
     }
 
+    /**
+     * initialize frame element's parameter in report, combine simple xml object attribute into $prop
+     * @param array $prop properties setting
+     * @param object $obj element object in simplexml 
+     * @return array $prop 
+     */
+    protected function element_frame(array $prop, object $obj): array
+    {
+        if(isset($obj->box))
+        {
+            $prop=$this->appendprop($prop,$obj->box);
+            if(isset($obj->box->pen))
+            {
+                $prop=$this->appendprop($prop,$obj->box->pen);
+            }         
+        }        
+        return $prop;
+    }
+
+    /**
+     * draw line frame in report
+     * @param string $uuid unique id
+     * @param array $prop
+     */
+    /**
+     * draw rectangle element in report
+     * @param string $uuid unique id
+     * @param array $prop
+     */
+    public function draw_frame(string $uuid,array $prop){
+        $this->output->draw_rectangle($uuid,$prop);
+    }
     
 
     /**************************************************************************************/
@@ -211,14 +243,14 @@ trait PHPJasperXML_elements
         $this->output->draw_unsupportedElement($uuid,$prop);
     }
 
-    protected function element_frame(array $prop, object $obj): array
-    {
-        return $prop;
-    }
-    public function draw_frame(string $uuid,array $prop)
-    {
-        $this->output->draw_unsupportedElement($uuid,$prop);
-    }
+    // protected function element_frame(array $prop, object $obj): array
+    // {
+    //     return $prop;
+    // }
+    // public function draw_frame(string $uuid,array $prop)
+    // {
+    //     $this->output->draw_unsupportedElement($uuid,$prop);
+    // }
     protected function element_subreport(array $prop, object $obj): array
     {
         return $prop;
