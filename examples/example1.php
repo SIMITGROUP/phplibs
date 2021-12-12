@@ -5,12 +5,15 @@ use Simitsdk\phpjasperxml\PHPJasperXML;
 $filename = __DIR__.'/example1.jrxml';
 // $filename = __DIR__.'/multicolumn-vertical.jrxml';
 // $filename = __DIR__.'/multicolumn-horizontal.jrxml';
-// $filename = __DIR__.'/je.jrxml';
-// $filename = __DIR__.'/rc.jrxml';
+// $filename = __DIR__.'/multipleelements.jrxml';
+$filename = __DIR__.'/barcodes.jrxml';
 // $filename = __DIR__.'/statement.jrxml';
 // $filename = __DIR__.'/uat.jrxml';
 
-
+function getS3($a)
+{
+    return "hi hi hi ".$a;
+}
 
 $data = [];
 $faker = Faker\Factory::create();
@@ -26,7 +29,7 @@ for($i=0;$i<1;$i++)
         'created'=>$faker->date("Y-m-d H:i:s")
 
     ];
-    array_push($data,$tmp);
+    $data[$i]=$tmp;
 }
 
 

@@ -105,7 +105,19 @@ trait PHPJasperXML_expression
         $value=null;
         if(!isset($this->parameters[$key]))
         {
-            if($this->validate)
+            if(str_contains($key,'_SCRIPTLET'))
+            {
+                $scriptletname = str_replace('_SCRIPTLET','',$key);                
+                if(isset($this->scriptlets[$scriptletname]))
+                {                    
+                    $value = $this->executeExpression($this->scriptlets[$scriptletname]);
+                }
+                else
+                {
+                    die("Scriptlet $scriptletname undefined!");
+                }
+            }
+            else if($this->validate)
             {
                 die("parameter \"$key\" is not defined in report");
             }
@@ -116,9 +128,10 @@ trait PHPJasperXML_expression
         }
         else
         {
+            
             $value = $this->parameters[$key]['value'];
         } 
-        $datatype = $this->parameters[$key]['datatype'];
+        $datatype = $this->parameters[$key]['datatype']??'string';
         $value = $this->escapeIfRequire($value,$datatype);
         return $value ; 
     }

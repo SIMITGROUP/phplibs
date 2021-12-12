@@ -20,14 +20,19 @@ trait PHPJasperXML_load
     protected array $subdatasets=[];
     protected array $styles=[];
     protected string $groupbandprefix = 'report_group_';
+    protected array $sortFields=[];
+    protected string $path = '';
+    protected array $scriptlets=[];
     /**
      * read jrxml file and load into memeory
      * @param string $filename
      * @return self
      */
     public function load_xml_file(string $file ): self
-    {   
-        $this->filename = pathinfo($file)['basename'];     
+    {           
+        $pathinfo = pathinfo($file);
+        $this->filename = $pathinfo['basename'];     
+        $this->path = $pathinfo['dirname'];
         $xml =  file_get_contents($file);                  
         $this->load_xml_string($xml);      
         // print_r($this->bandelements);
@@ -60,11 +65,9 @@ trait PHPJasperXML_load
             switch($k)
             {
                 case 'property':
-                    $this->pageproperties[$name]=$setting;
-                    
-                    
+                    $this->pageproperties[$name]=$setting;                                        
                     break;
-                case 'field':
+                case 'field':                
                 case 'parameter':
                 case 'variable':
                     $attributename = $k.'s';                                        
@@ -79,6 +82,12 @@ trait PHPJasperXML_load
                     }
                     $this->$attributename[$name]=$setting;                    
                     break;                    
+                case 'scriptlet':
+                    $this->scriptlets[$name]=(string)$out->scriptletDescription;
+                    break;
+                case 'sortField':
+                    $this->sortFields[$name]=$setting;
+                    break;
                 case 'queryString':
                     $this->setQueryString($out);
                     break;
@@ -109,7 +118,7 @@ trait PHPJasperXML_load
                     die;
                     break;
             }
-        }                   
+        }                    
         return $this;
     }
 
@@ -164,9 +173,25 @@ trait PHPJasperXML_load
             $this->bands[$newbandname]['height'] = $this->bands[$newbandname]['height']??0;
             $this->bands[$newbandname]['originalheight'] = $this->bands[$newbandname]['height']; //hide is dynamically change depends on printwhen expression or scale.
             $this->elements[$newbandname] = $this->getBandChildren($bandobj);
+            $this->sortElements($newbandname);          
             $count++;
-        }            
+        }  
+        
 
+    }
+    protected function sortElements(string $bandname)
+    {
+        $ypositions =[];        
+        foreach($this->elements[$bandname] as $uuid => $prop)
+        {            
+            $y = $prop['y'];
+            $ypositions[$uuid]= $y;         
+        }
+        
+        array_multisort($ypositions, SORT_ASC, SORT_NUMERIC, $this->elements[$bandname]);
+        
+        
+        
     }
 
     /**
@@ -233,12 +258,12 @@ trait PHPJasperXML_load
             if(!empty($setting['uuid']))
             {                                                
                 $uuid = $setting['uuid'];
-                $objvalue->type = $type;             
+                $objvalue->elementtype = $type;             
                 if(method_exists($this,$methodname))
                 {
                     $prop = $this->prop($reportelement);
                     $prop = $this->appendprop($prop,$objvalue);
-                    $prop['type']=$type;
+                    $prop['elementtype']=$type;
 
                     
 

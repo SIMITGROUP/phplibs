@@ -18,8 +18,9 @@ trait PHPJasperXML_output
         $this->output->defineBands($this->bands,$this->elements,$this->groups);
         if($this->rowcount>0)
         {
+            $this->sortData();
             foreach($this->rows as $i=>$r)
-            {
+            {                
                 $this->setRow($i);
                 if($i==0)
                 {
@@ -53,6 +54,45 @@ trait PHPJasperXML_output
         }
         
     }
+
+    protected function sortData()
+    {
+        if(count($this->sortFields)>0)
+        {
+            $sortcols=[];
+            foreach($this->sortFields as $fieldname =>$setting)
+            {
+                $this->sortFields[$fieldname]['order'] = $this->sortFields[$fieldname]['order']??'Ascending';
+                $sortcols[$fieldname]=[];
+            }
+            
+            foreach($this->rows as $i => $r)
+            {
+                // $globaluser_id[$i]=$r;
+                foreach($sortcols as $fieldname =>$tmp)
+                {                    
+                    $sortcols[$fieldname][$i]=$r[$fieldname];
+                }
+            }
+            
+            $sortparas=[];
+            foreach($sortcols as $fieldname =>$tmp)
+            {
+                $sort=SORT_ASC;
+                if(isset($this->sortFields[$fieldname]['order']) && $this->sortFields[$fieldname]['order'] == 'Descending')
+                {
+                    $sort = SORT_DESC;
+                }
+                array_push($sortparas,$tmp,$sort,SORT_REGULAR);
+            }
+                        
+            $arr = $this->rows;
+            $sortparas[]=&$arr;            
+            call_user_func_array('array_multisort',$sortparas);
+            $this->rows = $arr;
+        }
+        
+    }
     protected function newBlankPage()
     {
         $this->output->AddPage();     
@@ -77,20 +117,29 @@ trait PHPJasperXML_output
         $this->prepareColumn();
         $this->draw_columnHeader();
         
+        
     }
     protected function nextColumn()
     {
-        
-        if($this->output->getColumnNo()<$this->columnCount-1 )
+        if($this->columnCount==1)
         {
-            $this->draw_columnFooter();
-            $this->output->nextColumn();
-            $this->draw_columnHeader();
+            $this->newPage();
         }
         else
         {
-            $this->output->setColumnNo(0);
+            if($this->output->getColumnNo()<$this->columnCount-1 )
+            {
+                $this->draw_columnFooter();
+                $this->output->nextColumn();
+                $this->draw_columnHeader();
+            }
+            else
+            {
+                $this->output->setColumnNo(0);
+            }
         }
+        
+        
         
     }
     protected function prepareColumn()

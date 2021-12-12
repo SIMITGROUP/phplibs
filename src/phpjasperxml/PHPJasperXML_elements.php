@@ -5,8 +5,7 @@ namespace Simitsdk\phpjasperxml;
 use SimpleXMLElement;
 
 trait PHPJasperXML_elements
-{
-
+{    
 
     /************************************************************************************/
     /*************************** supported elements *************************************/
@@ -88,7 +87,7 @@ trait PHPJasperXML_elements
      */
     protected function element_image(array $prop, object $obj): array
     {
-        $prop['imageExpression']= (string)$obj->imageExpression;
+        $prop['imageExpression']= (string)$obj->imageExpression;        
         $prop = $this->addBorders($prop,$obj);
         return $prop;
     }
@@ -100,11 +99,33 @@ trait PHPJasperXML_elements
      */
     protected function draw_image(string $uuid,array $prop)
     {
-        $prop['imageExpression'] = $this->executeExpression($prop['imageExpression']);
-        // $prop['hyperlinkReferenceExpression'] = $prop['hyperlinkReferenceExpression']?? '';
-        
-        
-        
+        $imgsrc = $this->executeExpression($prop['imageExpression']);
+        // $imgsrc = $prop['imageExpression'];
+        $this->path;
+        // $this->console(strlen($imgsrc));
+        $testpath = $this->path.'/'.$imgsrc;
+        if($this->left($imgsrc,4)=='http')
+        {
+            $prop['imageExpression'] = $imgsrc;
+        }
+        else if(file_exists($imgsrc))
+        {
+            $prop['imageExpression'] = $imgsrc;
+        }
+        else if(file_exists($testpath))
+        {
+            $prop['imageExpression']= $testpath;
+        }
+        else if(strlen($imgsrc) > 500) //highly possible base64image
+        {
+            $replace_plus = '----plus-----';
+            $tmpstr = str_replace('+',$replace_plus,$prop['imageExpression']);
+            $tmpstr = $this->executeExpression($tmpstr);
+            $tmpstr = str_replace($replace_plus,'+',$tmpstr);
+            $tmpbase64 = str_replace(['data:image/jpeg;base64,','data:image/png;base64,','data:image/png;base64,'],'',$tmpstr);
+            $imgdata = base64_decode($tmpbase64);
+            $prop['imageExpression'] ='@'.$imgdata;
+        }        
         $this->output->draw_image($uuid,$prop);
     }
 
@@ -116,6 +137,7 @@ trait PHPJasperXML_elements
      */
     protected function element_break(array $prop, object $obj): array
     {
+        print_r($prop);
         return $prop;
     }
     
@@ -125,7 +147,21 @@ trait PHPJasperXML_elements
      * @param array $prop
      */
     public function draw_break(string $uuid,array $prop){
-        $this->output->draw_break($uuid,$prop);
+        $type = $prop['type'];
+        $this->output->draw_break($uuid,$prop,function() use ($type)
+        {
+            if($type=='Column')
+            {
+                $this->nextColumn();
+            }
+            else
+            {
+                $this->newPage();
+            }
+
+            
+        });
+        
     }
     
     /**
@@ -270,20 +306,69 @@ trait PHPJasperXML_elements
         $childtypes = ['jr','c','sc','cvc'];
         foreach($childtypes as $childtype)
         {
-            $children = $obj->children($childtype,true);
+            $children = $obj->children($childtype,true);            
             foreach($children as $k=>$v)
             {
                 $subtype=$k;
                 $prop['subtype']=$k;
-               
+                
+                switch($k)
+                {   
+                    case 'list':
+                    case 'table':
+                    case 'map':
+                    case 'spiderChart':
+                    case 'customvisualization':
+                        //misc component
+                    break;
+
+                    //all the rest is barcode
+                    case 'barbecue':                        
+                        //checksumRequired
+                        //drawText
+                        //barWidth
+                        //barHeight
+                        //rotation : Left, UpsideDown, None, Right,''
+                        $barcodeprop = $this->prop($v);
+                        $barcodeprop['codeExpression']=(string)$v->codeExpression;                        
+                        $barcodeprop['barcodetype']=$barcodeprop['type'];
+                        foreach($barcodeprop as $key=>$value)
+                        {
+                            $prop[$key]=$value;
+                        }
+                    break;                    
+                    default: 
+
+                        //orientation: down, left, right, up,''
+                        //drawText
+                        $barcodeprop = $this->prop($v);
+                        $barcodeprop['barcodetype']=$k;                    
+                        $barcodeprop['codeExpression']=(string)$v->codeExpression;
+                        $barcodeprop['drawText']=false;
+                        foreach($barcodeprop as $key=>$value)
+                        {
+                            $prop[$key]=$value;
+                        }
+                    break;
+                }
             }  
         }
-        // print_r($prop);
+        
+        
         return $prop;
     }
     public function draw_componentElement(string $uuid,array $prop)
     {
-        $this->output->draw_unsupportedElement($uuid,$prop);
+        if(isset($prop['barcodetype']) && isset($prop['codeExpression']))
+        {
+            $prop['codeExpression'] = $this->executeExpression($prop['codeExpression']);
+            $this->output->draw_barcode($uuid,$prop);
+        }
+        else
+        {
+            $this->output->draw_unsupportedElement($uuid,$prop);
+        }
+        
     }
 
     protected function element_crosstab(array $prop, object $obj): array
@@ -331,7 +416,7 @@ trait PHPJasperXML_elements
                     $prop['hyperlinkReferenceExpression'] = $this->executeExpression($prop['hyperlinkReferenceExpression']);
                 }
                 $this->output->setPosition($x,$y);                
-                $methodname = 'draw_'.$prop['type'];
+                $methodname = 'draw_'.$prop['elementtype'];
                 call_user_func([$this,$methodname],$uuid,$prop);
     }
 

@@ -39,8 +39,8 @@ staticText | :white_check_mark: |
 line | :white_check_mark: | Double line not supported
 rectangle | :white_check_mark: | 
 circle | :white_check_mark: | 
-image | :white_check_mark: | :exclamation: Some scaleImage is not supported (Clip,RealHeight,RealSize)
-barcode | :white_check_mark: | 
+image | :white_check_mark: | :exclamation: Some scaleImage is not supported (Clip,RealHeight,RealSize). You can define image expression with base64 string too
+barcode | :white_check_mark: |  :exclamation: some standard is not supported, refer barcode example.
 break | :white_check_mark: | 
 subreport | :x: | plan to do
 chart | :x: | plan to do
@@ -191,3 +191,11 @@ None | :white_check_mark: |
 Master | :x: | No plan
 
 
+# Sort Fields
+SortField support fields ASC and DESC. Variables/Function is not support
+
+# Scriptlet
+Scriptlet is a method to allow report fetch specific value from existing functions. To compatible with jasperstudio as much as possible, we use expression method to define php code in Scriptlet description so in jasperstudio not complain. Then in phpjasperxml we will execute and put the value into scriptlet parameter. Refer script from jasperreport to know more.
+
+# :x: Styles
+Style template is ignore, and not effect element at the moment.

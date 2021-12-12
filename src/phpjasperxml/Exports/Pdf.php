@@ -2,6 +2,7 @@
 namespace Simitsdk\phpjasperxml\Exports;
 
 use Com\Tecnick\Color\Model\Rgb;
+use Throwable;
 
 // use \tecnickcom\tcpdf;
 
@@ -147,7 +148,7 @@ class Pdf extends \TCPDF implements ExportInterface
 
     //     // echo "draw element $uuid $obj->type:".print_r($prop,true)."\n";
     //     $this->setPosition($x,$y);
-    //     $methodname = 'draw_'.$prop['type'];
+    //     $methodname = 'draw_'.$prop['elementtype'];
     //     call_user_func([$this,$methodname],$uuid,$prop);
         
     // }
@@ -191,7 +192,7 @@ class Pdf extends \TCPDF implements ExportInterface
         $y=$this->GetY();
         $height = $prop['height'];
         $width = $prop['width'];
-        $imageExpression = str_replace('"','',$prop['imageExpression']);
+        $imageExpression = $prop['imageExpression'];//str_replace('"','',$prop['imageExpression']);
         // $border=['TLBR'];
         $scaleImage = $prop['scaleImage']?? 'RetainShape';
         $hAlign = $prop['hAlign']?? 'Left';
@@ -202,7 +203,7 @@ class Pdf extends \TCPDF implements ExportInterface
         // $fitbox = '';
 
         $link = $prop['hyperlinkReferenceExpression']?? '';
-        $this->console($link);
+        // $this->console($link);
         $border = $this->getBorderStyles($prop,1);
         // $this->console("draw image, resize: $resize ");
         $imageh=$height;
@@ -248,9 +249,157 @@ class Pdf extends \TCPDF implements ExportInterface
         $dpi = 300;
         $align = '';
         $imagetype='';
-        $this->Image( $imageExpression,$x,$y,$imagew,$imageh,$imagetype,$link,$align,$resize,$dpi,$palign,$ismask,$imgmask,$border,$fitbox);
+        if($this->left($imageExpression,1) =='@')
+        {
+            // echo "\n\n".$imageExpression."\n\n";
+            $this->Image( $imageExpression,$x,$y,$imagew,$imageh,$imagetype,$link);
+        }
+        else
+        {
+            $this->Image( $imageExpression,$x,$y,$imagew,$imageh,$imagetype,$link,$align,$resize,$dpi,$palign,$ismask,$imgmask,$border,$fitbox);
+        }
+        
         
     }
+
+    public function draw_barcode(string $uuid,array $prop)
+    {
+        
+        $barcodetype = str_replace('Code128','C128',$prop['barcodetype']);
+        $barcodetype = str_replace('Code39 (Extended)','C39+',$barcodetype);
+        $barcodetype = str_replace('Code39','C39',$barcodetype);
+        $barcodetype = str_replace('USPSIntelligentMail','IMB',$barcodetype);
+        $barcodetype = str_replace('USPS','IMB',$barcodetype);
+        
+        
+        $prop['barcodetype'] = strtoupper($barcodetype);
+        $this->console("$uuid draw_barcode ".$prop['barcodetype']);
+        print_r($prop);
+        switch($prop['barcodetype'])
+        {
+            case 'C39':    
+            case 'C39+':    
+            case 'CODABAR':
+            case 'UPCA':
+            case 'UPCE':
+            case 'C128':    
+            case 'C128A':    
+            case 'C128B':
+            case 'C128C':       
+            case 'EAN13':
+            case 'POSTNET':            
+            case 'IMB':
+            
+                    $this->draw_barcode1D($uuid,$prop);
+                break;
+            case 'QRCODE':            
+            case 'DATAMATRIX':            
+            case 'PDF417':
+                $this->draw_barcode2D($uuid,$prop);
+            break;
+            case 'USD3':
+            case 'USD4':
+            case 'NW7':
+            case 'MONARCH':
+            case 'BOOKLAND':
+            case '3OF9':
+            case '2OF7':
+            case 'STD2OF5':
+            case 'SSCC18':
+            case 'EAN128':     
+            case 'GLOBALTRADEOTEMNUMBER':
+            case 'ROYALMAILCUSTOMER':
+            case 'INT2OF5':
+            case 'UCC128':
+            default:
+                $this->draw_unsupportedElement($uuid,$prop);
+            break;
+        }
+        
+    }
+    public function draw_barcode1D(string $uuid,array $prop)
+    {
+        $code=$prop['codeExpression'];
+        $barcodetype=$prop['barcodetype'];
+        
+        $x=$prop['x'];
+        $y=$prop['y'];
+        $w=$prop['width'];
+        $h=$prop['height'];
+        $x+=$w/2;
+        $y+=$h/2;
+        $xres=0.4;//$prop[''];
+        $style=$style = array(
+            'position' => '',
+            'align' => 'C',
+            'stretch' => false,
+            'fitwidth' => true,
+            'cellfitalign' => '',
+            'border' => true,
+            'hpadding' => 'auto',
+            'vpadding' => 'auto',
+            'fgcolor' => array(0,0,0),
+            'bgcolor' => false, //array(255,255,255),
+            'text' => true,
+            'font' => 'helvetica',
+            'fontsize' => 8,
+            'stretchtext' => 4
+        );
+        $align='N';//$prop[''];
+        try{
+            $this->write1DBarcode($code, $barcodetype, $x , $y, $w, $h , $xres, $style , $align );
+        }
+        catch(Throwable $e)
+        {
+            $this->console("draw_barcode1D $uuid, $barcodetype value:  $code failed");
+        }        
+    }
+
+    public function draw_barcode2D(string $uuid,array $prop)
+    {
+        $code=$prop['codeExpression'];
+        $barcodetype=$prop['barcodetype'];
+        
+        $x=$prop['x'];
+        $y=$prop['y'];
+        $w=$prop['width'];
+        $h=$prop['height'];
+        $x+=$w/2;
+        $y+=$h/2;
+        $style = array(
+            'border' => 2,
+            'padding' => 'auto',
+            // 'fgcolor' => array(0,0,255),
+            // 'bgcolor' => array(255,255,64)
+        );
+        // $style=$style = array(
+        //     'position' => '',
+        //     'align' => 'C',
+        //     'stretch' => false,
+        //     'fitwidth' => true,
+        //     'cellfitalign' => '',
+        //     'border' => true,
+        //     'hpadding' => 'auto',
+        //     'vpadding' => 'auto',
+        //     'fgcolor' => array(0,0,0),
+        //     'bgcolor' => false, //array(255,255,255),
+        //     'text' => true,
+        //     'font' => 'helvetica',
+        //     'fontsize' => 8,
+        //     'stretchtext' => 4
+        // );
+        $align='N';//$prop[''];
+        try{
+            // $this->write1DBarcode($code, $barcodetype, $x , $y, $w, $h , $xres, $style , $align );
+            $this->write2DBarcode($code, $barcodetype, $x, $y, $w, $h, $style, '');
+
+        }
+        catch(Throwable $e)
+        {
+            $this->console("draw_barcode1D $uuid, $barcodetype value:  $code failed");
+        }        
+    }
+
     public function draw_rectangle(string $uuid,array $prop)
     {
         $x=$this->GetX();
@@ -347,9 +496,14 @@ class Pdf extends \TCPDF implements ExportInterface
         $fontName=$this->defaultfont;
         $this->SetFont($fontName, $fontstyle, $fontsize);
     }
-    public function draw_break(string $uuid,array $prop)
+    public function draw_break(string $uuid,array $prop,mixed $callback=null)
     {
-        $this->AddPage();
+        if(gettype($callback)!='Null')
+        {
+            $callback();
+            // $this->SetY(10);
+        }
+        // $this->AddPage();
         // $x=$this->GetX();
         // $y=$this->GetY();
         // $w = $prop['width'];
@@ -546,7 +700,7 @@ class Pdf extends \TCPDF implements ExportInterface
     public function draw_unsupportedElement(string $uuid,array $prop)
     {
 
-        $type = $prop['type'];
+        $type = $prop['elementtype'];
         $x=$this->GetX();
         $y=$this->GetY();
         $w=$prop['width'];
@@ -567,7 +721,15 @@ class Pdf extends \TCPDF implements ExportInterface
         $subtypetxt = '';
         if(isset($prop['subtype']))
         {
-            $subtypetxt = '('. $prop['subtype'].')';
+            $subtypetxt =  $prop['subtype'];            
+        }
+        if(isset($prop['barcodetype']))
+        {
+            $subtypetxt .= ' - '. $prop['barcodetype'];    
+        }
+        if(!empty($subtypetxt))
+        {
+            $subtypetxt = "($subtypetxt)";
         }
         $this->MultiCell($w,10,"element $type $subtypetxt is not support",0);          
             // $offsetx = isset($offsets['x']) ? $offsets['x']: 0;
@@ -1042,7 +1204,14 @@ class Pdf extends \TCPDF implements ExportInterface
         {
             $fmt = numfmt_create( 'en_US', \NumberFormatter::DECIMAL );
             numfmt_set_pattern($fmt,$pattern);
-            $data = numfmt_format($fmt,$value);
+            try{
+                $data = numfmt_format($fmt,$value);
+            }
+            catch(Throwable $e)
+            {
+                return $data;
+            }
+            
 
         }
         return $data;
