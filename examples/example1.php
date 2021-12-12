@@ -5,8 +5,8 @@ use Simitsdk\phpjasperxml\PHPJasperXML;
 $filename = __DIR__.'/example1.jrxml';
 // $filename = __DIR__.'/multicolumn-vertical.jrxml';
 // $filename = __DIR__.'/multicolumn-horizontal.jrxml';
-// $filename = __DIR__.'/multipleelements.jrxml';
-$filename = __DIR__.'/barcodes.jrxml';
+$filename = __DIR__.'/multipleelements.jrxml';
+// $filename = __DIR__.'/barcodes.jrxml';
 // $filename = __DIR__.'/statement.jrxml';
 // $filename = __DIR__.'/uat.jrxml';
 

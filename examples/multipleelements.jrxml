@@ -80,7 +80,7 @@
 					<rightPen lineWidth="1.0" lineStyle="Dotted" lineColor="#FF0537"/>
 				</box>
 				<textElement markup="none">
-					<font fontName="Arial Black" size="12" isBold="true" isItalic="true"/>
+					<font fontName="Times" size="12" isBold="true" isItalic="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{fullname}]]></textFieldExpression>
 				<hyperlinkReferenceExpression><![CDATA["http://www.yahoo.com"]]></hyperlinkReferenceExpression>
@@ -94,7 +94,9 @@
 					<bottomPen lineWidth="1.0" lineStyle="Double" lineColor="#09FF05"/>
 					<rightPen lineWidth="1.0" lineStyle="Double" lineColor="#09FF05"/>
 				</box>
-				<textElement markup="none"/>
+				<textElement markup="none">
+					<font fontName="Times"/>
+				</textElement>
 				<textFieldExpression><![CDATA[$V{REPORT_COUNT}]]></textFieldExpression>
 				<hyperlinkReferenceExpression><![CDATA["https://www.google.com/"]]></hyperlinkReferenceExpression>
 			</textField>
@@ -107,7 +109,7 @@
 					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Right" verticalAlignment="Bottom" markup="none">
-					<font fontName="Bradley Hand" size="19" isBold="false"/>
+					<font fontName="Times" size="19" isBold="false"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{email}]]></textFieldExpression>
 			</textField>
@@ -152,7 +154,7 @@
 					<rightPen lineWidth="1.75" lineStyle="Solid" lineColor="#FF7E05"/>
 				</box>
 				<textElement textAlignment="Left" rotation="Left" markup="none">
-					<font fontName="Serif" isBold="false" isItalic="false" isUnderline="true" isStrikeThrough="true"/>
+					<font fontName="Times" isBold="false" isItalic="false" isUnderline="true" isStrikeThrough="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA["1---"+$F{description}]]></textFieldExpression>
 			</textField>
@@ -165,7 +167,7 @@
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#FF05FF"/>
 				</box>
 				<textElement textAlignment="Center" rotation="Right" markup="none">
-					<font fontName="Bradley Hand" size="19" isBold="false"/>
+					<font fontName="Times" size="19" isBold="false"/>
 				</textElement>
 				<textFieldExpression><![CDATA["1--"+$F{description}]]></textFieldExpression>
 			</textField>
@@ -178,7 +180,7 @@
 					<rightPen lineWidth="1.75" lineStyle="Solid" lineColor="#2BFF05"/>
 				</box>
 				<textElement textAlignment="Center" rotation="UpsideDown" markup="none">
-					<font fontName="Bradley Hand" size="19" isBold="false"/>
+					<font fontName="Times" size="19" isBold="false"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{description}]]></textFieldExpression>
 			</textField>
@@ -195,7 +197,7 @@
 					<rightPen lineWidth="1.75" lineStyle="Solid" lineColor="#FF7E05"/>
 				</box>
 				<textElement textAlignment="Left" rotation="Left" markup="none">
-					<font fontName="Serif" isBold="true" isItalic="true" isUnderline="false" isStrikeThrough="true"/>
+					<font fontName="Times" isBold="true" isItalic="true" isUnderline="false" isStrikeThrough="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA["2---"+$F{description}]]></textFieldExpression>
 			</textField>
@@ -208,7 +210,7 @@
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#FF05FF"/>
 				</box>
 				<textElement textAlignment="Center" rotation="Right" markup="none">
-					<font fontName="Bradley Hand" size="19" isBold="false"/>
+					<font fontName="Times" size="19" isBold="false"/>
 				</textElement>
 				<textFieldExpression><![CDATA["2--"+$F{description}]]></textFieldExpression>
 			</textField>
@@ -221,18 +223,22 @@
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#FF05FF"/>
 				</box>
 				<textElement textAlignment="Center" rotation="Right" markup="none">
-					<font fontName="Bradley Hand" size="19" isBold="false"/>
+					<font fontName="Times" size="19" isBold="false"/>
 				</textElement>
 				<textFieldExpression><![CDATA["3--"+$F{description}]]></textFieldExpression>
 			</textField>
 			<textField pattern="#,##0.###;#,##0.###-">
 				<reportElement x="120" y="181" width="100" height="30" uuid="2611ec11-7a2c-4f7c-92d2-051139d0e777"/>
-				<textElement markup="none"/>
+				<textElement markup="none">
+					<font fontName="Times"/>
+				</textElement>
 				<textFieldExpression><![CDATA[$F{globaluser_id}+"a"]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="350" y="190" width="100" height="30" uuid="724ac379-e567-49bf-8186-fff31392bf83"/>
-				<textElement markup="none"/>
+				<textElement markup="none">
+					<font fontName="Times"/>
+				</textElement>
 				<textFieldExpression><![CDATA[$F{globaluser_id}+"b"]]></textFieldExpression>
 				<patternExpression><![CDATA["#,##0.###;#,##0.###-"]]></patternExpression>
 			</textField>
@@ -320,16 +326,22 @@
 			</staticText>
 			<textField>
 				<reportElement x="90" y="20" width="100" height="30" uuid="b00638e8-f3f8-44ba-8cd5-e884344036bc"/>
+				<textElement>
+					<font fontName="Times"/>
+				</textElement>
 				<textFieldExpression><![CDATA[$F{gender}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="330" y="760" width="100" height="30" uuid="3d8301f4-ede6-4fd5-a5ca-2fce72d83496"/>
 				<textFieldExpression><![CDATA[$P{gets3file_SCRIPTLET}]]></textFieldExpression>
 			</textField>
-			<image>
-				<reportElement x="317" y="474" width="50" height="50" uuid="20e549b6-ec0a-461a-8bdf-2cee2506109c"/>
-				<imageExpression><![CDATA["data:image/png;base64,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"]]></imageExpression>
-			</image>
+			<textField>
+				<reportElement x="426" y="466" width="100" height="30" uuid="4ae63e00-8516-4c89-9b61-66ea49f2361d"/>
+				<textElement>
+					<font fontName="Times"/>
+				</textElement>
+				<textFieldExpression><![CDATA["w我喜欢吃大便"]]></textFieldExpression>
+			</textField>
 		</band>
 	</detail>
 </jasperReport>

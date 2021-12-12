@@ -410,7 +410,7 @@ trait PHPJasperXML_elements
                 $height = $prop['height'];
                 $width = $prop['width'];
         
-                // $this->console("early draw element $uuid x=$x, y=$y\n");
+                $this->console("early draw element $uuid x=$x, y=$y\n");
                 if(isset($prop['hyperlinkReferenceExpression']))
                 {
                     $prop['hyperlinkReferenceExpression'] = $this->executeExpression($prop['hyperlinkReferenceExpression']);

@@ -341,7 +341,7 @@ class Pdf extends \TCPDF implements ExportInterface
             'fgcolor' => array(0,0,0),
             'bgcolor' => false, //array(255,255,255),
             'text' => true,
-            'font' => 'helvetica',
+            'font' => $this->defaultfont,
             'fontsize' => 8,
             'stretchtext' => 4
         );
@@ -491,9 +491,65 @@ class Pdf extends \TCPDF implements ExportInterface
         // }
         $this->Ellipse($x,$y,$rx,$ry,0,0,360,$style,$ellipsestyle);
     }
-    protected function useFont(string $fontName, string $fontstyle, int $fontsize=8)
+    protected function useFont(string $fontName, string $fontstyle, int $fontsize=8,mixed $text)
     {
-        $fontName=$this->defaultfont;
+        // \p{Common}
+        // \p{Arabic}
+        // \p{Armenian}
+        // \p{Bengali}
+        // \p{Bopomofo}
+        // \p{Braille}
+        // \p{Buhid}
+        // \p{CanadianAboriginal}
+        // \p{Cherokee}
+        // \p{Cyrillic}
+        // \p{Devanagari}
+        // \p{Ethiopic}
+        // \p{Georgian}
+        // \p{Greek}
+        // \p{Gujarati}
+        // \p{Gurmukhi}
+        // \p{Han}
+        // \p{Hangul}
+        // \p{Hanunoo}
+        // \p{Hebrew}
+        // \p{Hiragana}
+        // \p{Inherited}
+        // \p{Kannada}
+        // \p{Katakana}
+        // \p{Khmer}
+        // \p{Lao}
+        // \p{Latin}
+        // \p{Limbu}
+        // \p{Malayalam}
+        // \p{Mongolian}
+        // \p{Myanmar}
+        // \p{Ogham}
+        // \p{Oriya}
+        // \p{Runic}
+        // \p{Sinhala}
+        // \p{Syriac}
+        // \p{Tagalog}
+        // \p{Tagbanwa}
+        // \p{TaiLe}
+        // \p{Tamil}
+        // \p{Telugu}
+        // \p{Thaana}
+        // \p{Thai}
+        // \p{Tibetan}
+        // \p{Yi}
+
+        $fontName = $fontName ?? $this->defaultfont;
+        
+        if(preg_match("/\p{Han}+/u", $text)){
+            $fontName="cid0cs";
+        }        
+        else if(preg_match("/\p{Katakana}+/u", $text) || preg_match("/\p{Hiragana}+/u", $text)){
+            $fontName="cid0jp";
+        }            
+        else if(preg_match("/\p{Hangul}+/u", $text)){
+            $fontName="cid0kr";
+        }                        
         $this->SetFont($fontName, $fontstyle, $fontsize);
     }
     public function draw_break(string $uuid,array $prop,mixed $callback=null)
@@ -587,7 +643,7 @@ class Pdf extends \TCPDF implements ExportInterface
         $border = $this->getBorderStyles($prop,1);
         
         
-        $this->useFont($fontName, $fontstyle, $fontsize);
+        
         
         if($isTextField)
         {
@@ -597,6 +653,8 @@ class Pdf extends \TCPDF implements ExportInterface
         {
             $text = $prop['text'];
         }
+
+        $this->useFont($fontName, $fontstyle, $fontsize,$text);
         $x=$this->GetX();
         $y=$this->GetY();
         // if($prop['uuid']=='724ac379-e567-49bf-8186-fff31392bf83')
@@ -657,6 +715,10 @@ class Pdf extends \TCPDF implements ExportInterface
         $this->StopTransform();
     }
 
+    protected function writeText($finaltxt)
+    {
+        
+    }
     public function getBorderStyles(array $prop=[],string $sides=''): array
     {
         $style=[];

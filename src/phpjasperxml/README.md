@@ -64,7 +64,7 @@ w | :white_check_mark: |
 h | :white_check_mark: | 
 Forecolor | :white_check_mark: | 
 Backcolor | :white_check_mark: | 
-Font  | :exclamation: | upstream tcpdf not support lot of fonts. manual add is tedious
+Font  | :white_check_mark: | :exclamation: Font is configurable, but upstream (tcpdf) not support lot of fonts. Developer shall manually add font into yourproject/vendor/tecnickcom/tcpdf/fonts. Unicode character for Chinese, Japanese, Korean detected will replace as fixed font(So it display the content instead of show '?'. However, you have no way to change the their font ).
 Transparent | :white_check_mark: | 
 Print Repeated Value | :x: | Default = True
 Label | :x: |
