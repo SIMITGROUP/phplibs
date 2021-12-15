@@ -142,7 +142,7 @@
 				</graphicElement>
 			</line>
 			<textField textAdjust="StretchHeight" hyperlinkType="Reference" hyperlinkTarget="Blank">
-				<reportElement mode="Transparent" x="1" y="50" width="140" height="90" forecolor="#FF7E05" backcolor="#FFFFFF" uuid="43dfadd2-8749-44a7-bff8-b0e6697cdb7d">
+				<reportElement mode="Transparent" x="1" y="50" width="49" height="90" forecolor="#FF7E05" backcolor="#FFFFFF" uuid="43dfadd2-8749-44a7-bff8-b0e6697cdb7d">
 					<property name="com.jaspersoft.studio.unit.y" value="px"/>
 					<printWhenExpression><![CDATA["2"=="2"]]></printWhenExpression>
 				</reportElement>
@@ -171,7 +171,7 @@
 				</textElement>
 				<textFieldExpression><![CDATA["1--"+$F{description}]]></textFieldExpression>
 			</textField>
-			<textField>
+			<textField textAdjust="StretchHeight">
 				<reportElement x="1" y="251" width="200" height="110" forecolor="#2BFF05" uuid="a2b64952-a231-4459-9b9c-8a7c68f3d00d"/>
 				<box>
 					<topPen lineWidth="1.75" lineStyle="Solid" lineColor="#2BFF05"/>
@@ -201,7 +201,7 @@
 				</textElement>
 				<textFieldExpression><![CDATA["2---"+$F{description}]]></textFieldExpression>
 			</textField>
-			<textField>
+			<textField textAdjust="StretchHeight">
 				<reportElement x="230" y="140" width="90" height="110" forecolor="#FF05FF" uuid="37a80ff8-1f3e-4036-b25b-35090671f630"/>
 				<box>
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#FF05FF"/>
@@ -341,6 +341,19 @@
 					<font fontName="Times"/>
 				</textElement>
 				<textFieldExpression><![CDATA["w我喜欢吃大便"]]></textFieldExpression>
+			</textField>
+			<textField textAdjust="StretchHeight">
+				<reportElement x="300" y="494" width="200" height="110" forecolor="#2BFF05" uuid="bda4dd5b-fe06-443e-aa4e-25dde67c296c"/>
+				<box>
+					<topPen lineWidth="1.75" lineStyle="Solid" lineColor="#2BFF05"/>
+					<leftPen lineWidth="1.75" lineStyle="Solid" lineColor="#2BFF05"/>
+					<bottomPen lineWidth="1.75" lineStyle="Solid" lineColor="#2BFF05"/>
+					<rightPen lineWidth="1.75" lineStyle="Solid" lineColor="#2BFF05"/>
+				</box>
+				<textElement textAlignment="Center" rotation="None" markup="none">
+					<font fontName="Times" size="19" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{description}]]></textFieldExpression>
 			</textField>
 		</band>
 	</detail>

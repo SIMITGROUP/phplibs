@@ -24,11 +24,10 @@ summary| :white_check_mark: |
 no data| :white_check_mark: |
 groups | :white_check_mark: | multiple group supported, in both vertical/horizontal print order
 
-## Elements
-Basic element for generate pdf is ready. Some element rely on additional datasets or 3rd party technology will not support.
-Some universal properties is ignore:
-1. position type (default "Fix relative to top")
-2. stretch type (default "use Not stretch")
+:exclamation: According try & error, there is some band like page header, column footer, page footer not allow grow according textField "stretchHeight". To make life easier phpjasperxml rules:
+1. only detail band will grow
+2. position type (default "Fix relative to top")
+3. stretch type (default "use Not stretch")
 
 
 

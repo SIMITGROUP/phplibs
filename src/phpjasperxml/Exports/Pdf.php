@@ -1,12 +1,14 @@
 <?php
 namespace Simitsdk\phpjasperxml\Exports;
-
 use Com\Tecnick\Color\Model\Rgb;
 use Throwable;
-
+use TCPDF;
+use TCPDF_FONT_DATA;
+use TCPDF_FONTS;
+use TCPDF_STATIC;
 // use \tecnickcom\tcpdf;
 
-class Pdf extends \TCPDF implements ExportInterface
+class Pdf extends TCPDF implements ExportInterface
 {
     use \Simitsdk\phpjasperxml\Tools\Toolbox;
     protected array $pagesettings=[];
@@ -24,9 +26,16 @@ class Pdf extends \TCPDF implements ExportInterface
     protected int $columnCount;
     protected string $defaultfont='helvetica';
     protected int $currentRowNo=0;
-    protected bool $debugband=false;
+    protected bool $debugband=true;
     protected string $groupbandprefix = 'report_group_';
     protected int $printbandcount=0;
+    public bool $islastrow = false;
+    protected string $balancetext='';
+    protected $limitY=0;
+    protected $limitY_last=0;
+    protected $longtextrepeatcount = 0 ;
+    protected $parentobj = null;
+    protected $drawtarget = null;
     public function __construct($prop)
     {           
         $this->pagesettings=$prop;
@@ -45,6 +54,7 @@ class Pdf extends \TCPDF implements ExportInterface
         $this->SetTitle('sample pdf');
         $this->SetSubject('subject1');
         $this->SetKeywords('keyword1');
+        $this->drawtarget = $this;
     }
 
     public function setLastBandEndY(int $lastBandEndY)
@@ -96,6 +106,10 @@ class Pdf extends \TCPDF implements ExportInterface
                 $this->lastdetailband = $b;
             }
         }  
+        $page = $this->pagesettings;              
+        $this->limitY = $page['pageHeight'] - $page['bottomMargin'] - $this->bands['columnFooter']['height'] - $this->bands['pageFooter']['height'];
+        $laspageheight = $this->bands['lastPageFooter']['height'] >0 ? $this->bands['lastPageFooter']['height'] :$this->bands['pageFooter']['height'] ;
+        $this->limitY_last = $page['pageHeight'] - $page['bottomMargin'] - $this->bands['columnFooter']['height'] - $laspageheight;
     }
     public function getMargin(string $location)
     {
@@ -161,7 +175,7 @@ class Pdf extends \TCPDF implements ExportInterface
         $y2=$y1+$prop['height'];
         $forecolor = $this->convertColorStrToRGB($prop['lineColor']??'');        
         $dash="";
-        $lineWidth = $prop['lineWidth'];
+        $lineWidth = $prop['lineWidth']?? '1';
         $prop["lineStyle"]=$prop["lineStyle"]?? '';
         switch($prop["lineStyle"])
         {
@@ -183,7 +197,7 @@ class Pdf extends \TCPDF implements ExportInterface
             'cap'=>'butt',
             'join'=>'miter',
         ];
-        $this->Line($x1,$y1,$x2,$y2,$style);        
+        $this->drawtarget->Line($x1,$y1,$x2,$y2,$style);        
     }
 
     public function draw_image(string $uuid,array $prop)
@@ -252,11 +266,11 @@ class Pdf extends \TCPDF implements ExportInterface
         if($this->left($imageExpression,1) =='@')
         {
             // echo "\n\n".$imageExpression."\n\n";
-            $this->Image( $imageExpression,$x,$y,$imagew,$imageh,$imagetype,$link);
+            $this->drawtarget->Image( $imageExpression,$x,$y,$imagew,$imageh,$imagetype,$link);
         }
         else
         {
-            $this->Image( $imageExpression,$x,$y,$imagew,$imageh,$imagetype,$link,$align,$resize,$dpi,$palign,$ismask,$imgmask,$border,$fitbox);
+            $this->drawtarget->Image( $imageExpression,$x,$y,$imagew,$imageh,$imagetype,$link,$align,$resize,$dpi,$palign,$ismask,$imgmask,$border,$fitbox);
         }
         
         
@@ -274,7 +288,7 @@ class Pdf extends \TCPDF implements ExportInterface
         
         $prop['barcodetype'] = strtoupper($barcodetype);
         $this->console("$uuid draw_barcode ".$prop['barcodetype']);
-        print_r($prop);
+        // print_r($prop);
         switch($prop['barcodetype'])
         {
             case 'C39':    
@@ -347,7 +361,7 @@ class Pdf extends \TCPDF implements ExportInterface
         );
         $align='N';//$prop[''];
         try{
-            $this->write1DBarcode($code, $barcodetype, $x , $y, $w, $h , $xres, $style , $align );
+            $this->drawtarget->write1DBarcode($code, $barcodetype, $x , $y, $w, $h , $xres, $style , $align );
         }
         catch(Throwable $e)
         {
@@ -391,7 +405,7 @@ class Pdf extends \TCPDF implements ExportInterface
         $align='N';//$prop[''];
         try{
             // $this->write1DBarcode($code, $barcodetype, $x , $y, $w, $h , $xres, $style , $align );
-            $this->write2DBarcode($code, $barcodetype, $x, $y, $w, $h, $style, '');
+            $this->drawtarget->write2DBarcode($code, $barcodetype, $x, $y, $w, $h, $style, '');
 
         }
         catch(Throwable $e)
@@ -424,7 +438,7 @@ class Pdf extends \TCPDF implements ExportInterface
             $style='FD';
         }        
         $borderstyle =[ 'TBLR'=> $this->getLineStyle($lineStyle,$lineWidth,$lineColor) ];      
-        $this->RoundedRect($x,$y,$w,$h,$radius,'1111',$style,$borderstyle,$backcolor);
+        $this->drawtarget->RoundedRect($x,$y,$w,$h,$radius,'1111',$style,$borderstyle,$backcolor);
     }
     public function draw_frame(string $uuid,array $prop)
     {
@@ -451,7 +465,7 @@ class Pdf extends \TCPDF implements ExportInterface
         }        
         // $borderstyle =[ 'TBLR'=> $this->getLineStyle($lineStyle,$lineWidth,$lineColor) ];      
         $border = $this->getBorderStyles($prop,1);
-        $this->RoundedRect($x,$y,$w,$h,$radius,'1111',$style,$border,$backcolor);
+        $this->drawtarget->RoundedRect($x,$y,$w,$h,$radius,'1111',$style,$border,$backcolor);
     }
     public function draw_ellipse(string $uuid,array $prop)
     {
@@ -491,7 +505,7 @@ class Pdf extends \TCPDF implements ExportInterface
         // }
         $this->Ellipse($x,$y,$rx,$ry,0,0,360,$style,$ellipsestyle);
     }
-    protected function useFont(string $fontName, string $fontstyle, int $fontsize=8,mixed $text)
+    protected function useFont(string $fontName, string $fontstyle, int $fontsize,mixed $text)
     {
         // \p{Common}
         // \p{Arabic}
@@ -550,7 +564,7 @@ class Pdf extends \TCPDF implements ExportInterface
         else if(preg_match("/\p{Hangul}+/u", $text)){
             $fontName="cid0kr";
         }                        
-        $this->SetFont($fontName, $fontstyle, $fontsize);
+        $this->drawtarget->SetFont($fontName, $fontstyle, $fontsize);
     }
     public function draw_break(string $uuid,array $prop,mixed $callback=null)
     {
@@ -567,29 +581,23 @@ class Pdf extends \TCPDF implements ExportInterface
         // $this->Rect($x,$y,$w,$h);
         // echo "\ndraw_rectangle  $uuid ".print_r($prop,true)."\n";
     }
-    public function draw_staticText(string $uuid,array $prop,bool $isTextField=false)
+    public function draw_staticText(string $uuid,array $prop,bool $isTextField=false,mixed $callback=null)
     {
         $w=$prop['width'];
         $h=$prop['height'];       
-        $mode = $prop['mode']  ?? 'Transparent';
         $x=$this->GetX();
         $y=$this->GetY();
-
-        // RotateObject
-        // $this->Rotate(90,$x,$y);
-        // $this->console("begining draw_staticText $x, $y");
-        
+        $target = $this->drawtarget;
         $forecolor = $this->convertColorStrToRGB($prop['forecolor']??'');
-        $this->SetTextColor($forecolor["r"],$forecolor["g"],$forecolor["b"]);                
+        $target->SetTextColor($forecolor["r"],$forecolor["g"],$forecolor["b"]);                
         $backcolor = $this->convertColorStrToRGB($prop['backcolor']??'');
         $fill=false;
-        $prop['mode'] = $prop['mode']?? 'Transparent';
-        
+        $prop['mode'] = $prop['mode']?? 'Transparent';        
         if($prop['mode'] == 'Opaque')
         {
             $fill = $backcolor;
         }
-        $this->SetFillColor($backcolor['r'], $backcolor['g'],$backcolor['b']);
+        $target->SetFillColor($backcolor['r'], $backcolor['g'],$backcolor['b']);
         $halign = !empty($prop['textAlignment']) ? $prop['textAlignment'] : 'L';
         $halign = $this->left($halign,1);        
         $valign = !empty($prop['verticalAlignment']) ? $prop['verticalAlignment'] : 'Top'; 
@@ -603,11 +611,63 @@ class Pdf extends \TCPDF implements ExportInterface
         $fontstyle.= !empty($prop['isItalic']) ? 'I':'';
         $fontstyle.= !empty($prop['isUnderline']) ? 'U':'';
         $fontstyle.= !empty($prop['isStrikeThrough']) ? 'D':'';
-        $fontsize= !empty($prop['size']) ? $prop['size'] : 8;     
-           
-        $rotation = $prop['rotation']?? '';
+        $fontsize= !empty($prop['size']) ? $prop['size'] : 8;                
         
-        $this->StartTransform();
+        //text can scale at detail and summary band only
+        if(! (str_contains($prop['band'],'detail_') || $prop['band'] == 'summary'))
+        {
+            $prop['textAdjust']='';
+        }
+        
+        $textAdjust = !empty($prop['textAdjust']) ? $prop['textAdjust'] : ''; 
+        $border = $this->getBorderStyles($prop,1);
+        
+        
+        
+        if($isTextField)
+        {
+            $text = $prop['textFieldExpression'];
+        }
+        else
+        {
+            $text = $prop['text'];
+        }
+
+        $target->useFont($fontName, $fontstyle, $fontsize,$text);        
+        $topPadding=$prop['topPadding']??0;
+        $leftPadding=$prop['leftPadding']??0;
+        $rightPadding=$prop['rightPadding']??0;
+        $bottomPadding=$prop['bottomPadding']??0;
+        $prop['markup']=$prop['markup']??'';
+        $link = $prop['hyperlinkReferenceExpression']??'';        
+        $pattern = $prop['pattern']??'';
+        if(!empty($pattern))
+        {
+            $text = $this->formatValue($text,$pattern);
+        }
+        // $this->console("hyperlink $link");
+        $target->setCellPaddings( $leftPadding, $topPadding, $rightPadding, $bottomPadding);
+        $ishtml=0;
+        if($prop['markup']=='html')
+        {
+            $ishtml=1;
+            $finaltxt=$text;
+        }
+        else
+        {
+            if(!empty($link))
+            {
+                $finaltxt = $this->convertToLink($text,$link);
+                $ishtml=1;
+            }
+            else
+            {
+                $finaltxt=$text;
+            }
+        }
+        
+        $rotation = $prop['rotation']?? '';        
+        $target->StartTransform();
         switch($rotation)
         {
             case 'Left':                
@@ -635,89 +695,88 @@ class Pdf extends \TCPDF implements ExportInterface
             default:
             break;
         }
-        $topPenlineWidth = !empty($prop['topPenlineWidth']) ? $prop['topPenlineWidth'] : 0; 
-        $bottomPenlineWidth = !empty($prop['bottomPenlineWidth']) ? $prop['bottomPenlineWidth'] : 0; 
-        $leftPenlineWidth = !empty($prop['leftPenlineWidth']) ? $prop['leftPenlineWidth'] : 0; 
-        $rightPenlineWidth = !empty($prop['rightPenlineWidth']) ? $prop['rightPenlineWidth'] : 0; 
-        $textAdjust = !empty($prop['textAdjust']) ? $prop['textAdjust'] : ''; 
-        $border = $this->getBorderStyles($prop,1);
-        
-        
-        
-        
-        if($isTextField)
-        {
-            $text = $prop['textFieldExpression'];
-        }
-        else
-        {
-            $text = $prop['text'];
-        }
-
-        $this->useFont($fontName, $fontstyle, $fontsize,$text);
-        $x=$this->GetX();
-        $y=$this->GetY();
-        // if($prop['uuid']=='724ac379-e567-49bf-8186-fff31392bf83')
-        // {
-        //     $this->console("draw_staticText $x, $y");
-        //     print_r($prop);
-        // }
-        $topPadding=$prop['topPadding']??0;
-        $leftPadding=$prop['leftPadding']??0;
-        $rightPadding=$prop['rightPadding']??0;
-        $bottomPadding=$prop['bottomPadding']??0;
-        $prop['markup']=$prop['markup']??'';
-        $link = $prop['hyperlinkReferenceExpression']??'';        
-        $pattern = $prop['pattern']??'';
-        if(!empty($pattern))
-        {
-            $text = $this->formatValue($text,$pattern);
-        }
-        // $this->console("hyperlink $link");
-        $this->setCellPaddings( $leftPadding, $topPadding, $rightPadding, $bottomPadding);
-        $ishtml=0;
-        if($prop['markup']=='html')
-        {
-            $ishtml=1;
-            $finaltxt=$text;
-        }
-        else
-        {
-            if(!empty($link))
-            {
-                $finaltxt = $this->convertToLink($text,$link);
-                $ishtml=1;
-            }
-            else
-            {
-                $finaltxt=$text;
-            }
-        }
-        
-
         $stretchtype=0;
-        $maxheight=$h;
+        $limitY = $this->islastrow ?  $this->limitY_last: $this->limitY;
+        $estimateline = $this->estimateHeight($w,$finaltxt);
+        
         if($textAdjust=='StretchHeight')
         {
             $stretchtype=0;
-            $maxheight=0;
+            $maxheight = $limitY-$y;//         
+            $allowscale=true;
         }
         else if($textAdjust=='ScaleFont')
-        {           
+        {     
+            $maxheight=$h;      
             $stretchtype=2;
+            $allowscale=false;
         }
         else
         {
+            $maxheight=$h;
             $stretchtype=0;
-            $finaltxt = $this->convertToLink( $this->reduceString($text,$w),$link);
+            $allowscale=false;
         }
-        $this->MultiCell($w,$h,$finaltxt,$border,$halign,$fill,0,$x,$y,true,$stretchtype,$ishtml,true,$maxheight,$valign);
-        $this->StopTransform();
-    }
-
-    protected function writeText($finaltxt)
-    {
         
+        // if($textAdjust=='StretchHeight')
+        // {
+            // $this->console("print $this->lastBand, UUID : $uuid, length ".strlen(($text)).", h:$h,  max height: $maxheight ");
+            // $this->console($text);
+        // }
+        // if(!empty($this->parentobj))
+        // {
+            $totalline = $target->MultiCell($w,$h,$finaltxt,$border,$halign,$fill,2,$x,$y,true,$stretchtype,$ishtml,true,$maxheight,$valign);
+        // }
+        // else
+        // {
+        //     $totalline = $this->MultiCell($w,$h,$finaltxt,$border,$halign,$fill,2,$x,$y,true,$stretchtype,$ishtml,true,$maxheight,$valign);
+        // }
+        
+        //$totalline
+        
+        $balancetxtlength = strlen($this->balancetext);
+        
+
+        // if($textAdjust=='StretchHeight' && $balancetxtlength)
+        // {
+            // $this->console("totalline $totalline / $estimateline estimateline");            
+            // $this->console("$textAdjust balancetxt $uuid ".strlen(($this->balancetext)));
+            // $this->console("maxheight = $maxheight, balance txt = '$this->balancetext'");
+        // }
+        
+        $target->StopTransform();
+        $newY=$this->GetY();
+        if($newY > $this->lastBandEndY)
+        {
+            $this->lastBandEndY = $newY;
+        }
+        
+        // $balancetxtlength=0;
+        // $allowscale=false;
+        if($balancetxtlength > 0 && $allowscale==true)
+        {            
+                $this->longtextrepeatcount++;                
+                $prop['textFieldExpression'] =$this->balancetext;                
+            //     // $this->AddPage();
+                // $this->console("Print balancetext $this->longtextrepeatcount : $this->balancetext");
+                
+                if(gettype($callback)=='object')
+                {
+                    // $this->console("$this->longtextrepeatcount balance $uuid text go next page: $this->balancetext");
+                    
+                    $callback();
+                }
+                $this->balancetext='';
+                // $prop['y']=0;
+                
+                $this->SetXY($x,$this->lastBandEndY);
+                $this->draw_staticText($uuid,$prop,$isTextField,$callback);           
+        }
+    }
+    public function setParentObj($parentobj)
+    {
+        $this->parentobj = $parentobj;
+        $this->drawtarget = $parentobj;
     }
     public function getBorderStyles(array $prop=[],string $sides=''): array
     {
@@ -737,6 +796,8 @@ class Pdf extends \TCPDF implements ExportInterface
 
                 if(!empty($prop[$width_name]))
                 {
+                    $prop[$style_name]=$prop[$style_name]??'';
+                    $prop[$color_name]=$prop[$color_name]??'';
                     $style[$borderkey] = $this->getLineStyle( $prop[$style_name],$prop[$width_name],$prop[$color_name]);
                 }
 
@@ -745,9 +806,9 @@ class Pdf extends \TCPDF implements ExportInterface
         }
         return $style;
     }
-    public function draw_textField(string $uuid,array $prop)
+    public function draw_textField(string $uuid,array $prop,mixed $callback=null)
     {
-        $this->draw_staticText($uuid,$prop,true);        
+        $this->draw_staticText($uuid,$prop,true,$callback);        
     }
 
     public function reduceString(mixed $txt, int $width): string
@@ -793,7 +854,7 @@ class Pdf extends \TCPDF implements ExportInterface
         {
             $subtypetxt = "($subtypetxt)";
         }
-        $this->MultiCell($w,10,"element $type $subtypetxt is not support",0);          
+        $target->MultiCell($w,10,"element $type $subtypetxt is not support",0);          
             // $offsetx = isset($offsets['x']) ? $offsets['x']: 0;
             // $offsetx = (int)$offsetx;
             // $offsety = isset($offsets['y']) ? $offsets['y']: 0 ;
@@ -844,27 +905,33 @@ class Pdf extends \TCPDF implements ExportInterface
         $x = $this->columnno * $this->columnWidth + $this->pagesettings['leftMargin'];
         return $x;
     }
-    public function prepareColumn(int $columnCount,mixed $columnWidth)
+    public function defineColumns(int $columnCount,mixed $columnWidth)
     {
         $this->columnWidth = $columnWidth;
         $this->columnCount = $columnCount;
+    }
+    public function prepareColumn()
+    {
+        
         $beginY=$this->bands['pageHeader']['endY'];
         $this->columnno=0;
         $endY=$this->draw_columnFooter()['y']+$this->bands['columnFooter']['height'];
         $this->SetDrawColor(40,10,10,0);
         $this->SetTextColor(40,10,10,0);
-
+        $columnCount = $this->columnCount;
+        $columnWidth = $this->columnWidth;
         if($this->debugband)
         {        
+            $target = $this->drawtarget;
             for($i=0;$i<$columnCount;$i++)
             {
                 $colname='column '.$i;
                 $x=$this->pagesettings['leftMargin'] + $i*$columnWidth;
-                $this->SetAlpha(0.5);
-                $this->Rect($x,$beginY,$columnWidth ,($endY - $beginY),'FD','',[5,5,5,0.1] );     
-                $this->SetAlpha(1);
-                $this->SetXY($x,$beginY);
-                $this->Cell($columnWidth,10,$colname,0,'','C');    
+                $target->SetAlpha(0.5);
+                $target->Rect($x,$beginY,$columnWidth ,($endY - $beginY),'FD','',[5,5,5,0.1] );     
+                $target->SetAlpha(1);
+                $target->SetXY($x,$beginY);
+                $target->Cell($columnWidth,10,$colname,0,'','C');    
             }
         }
     }
@@ -876,7 +943,8 @@ class Pdf extends \TCPDF implements ExportInterface
     {      
         
         $offsets=[];
-        // echo "\nprepareband $bandname, $this->groupbandprefix\n";
+        $this->lastBand=$bandname;
+        
         if(str_contains($bandname,'detail'))
         {
             $methodname = 'draw_detail';
@@ -897,15 +965,8 @@ class Pdf extends \TCPDF implements ExportInterface
             {
                 $offsets = $this->draw_groupHeader($bandname,$callback);
             }
-            // $offsets = call_user_func([$this,$methodname],$bandname,$callback);
         }        
-        // else if(in_array($bandname,['summary']))
-        // {
-            
-        //     $methodname = 'draw_'.$bandname;
-        //     $band = $this->bands[$bandname];
-        //     $offsets = call_user_func([$this,$methodname],$callback);
-        // }
+  
         else
         {
             $methodname = 'draw_'.$bandname;
@@ -914,13 +975,14 @@ class Pdf extends \TCPDF implements ExportInterface
             
         }
         $offsetx=0;
-        // echo "\n$methodname\n";
-        // print_r($offsets);
         
 
         $width = $this->getPageWidth() - $this->pagesettings['leftMargin'] - $this->pagesettings['rightMargin'];
         $height = isset($band['height'])? $band['height'] : 0;
         $offsety=$this->pagesettings['topMargin'];
+
+        
+
         if($height>0)
         {
             $offsetx = isset($offsets['x']) ? $offsets['x']: 0;
@@ -933,7 +995,7 @@ class Pdf extends \TCPDF implements ExportInterface
             $offsets = ['x'=>$offsetx,'y'=>$offsety];
             if($this->debugband)
             {
-                
+                $target = $this->drawtarget;
                 if(str_contains($bandname,$this->groupbandprefix))
                 {
                     $color1=100;
@@ -950,17 +1012,17 @@ class Pdf extends \TCPDF implements ExportInterface
                     $width = $this->columnWidth;
                 }
                 $this->printbandcount++;  
-                $this->SetFontSize(8);
+                $target->SetFontSize(8);
                 // $this->SetDrawColor($color1,$color2 , 0, 0);
                 
-                $this->SetTextColor($color1, $color2, 0, 0);           
+                $target->SetTextColor($color1, $color2, 0, 0);           
                 // $linestyle = ['dash'=>'','width'=>1];
                 
                 $style= $this->getLineStyle('Solid',1,'#cccccc');
                 // $this->SetLineStyle($style); 
-                $this->Rect($offsetx,$offsety,$width ,$height,'',['TBLR'=>$style]);    
+                $target->Rect($offsetx,$offsety,$width ,$height,'',['TBLR'=>$style]);    
                 $this->lastBandEndY=$offsety+$height;; 
-                $this->Cell($width,10,$bandname."--$this->printbandcount",0);    
+                $target->Cell($width,10,$bandname."--$this->printbandcount",0);    
             }
             
         }
@@ -1290,4 +1352,481 @@ class Pdf extends \TCPDF implements ExportInterface
         }
     }
     
+
+    public function estimateHeight(mixed $w,mixed $txt)
+    {
+        return $this->getNumLines($txt,$w);
+        // return $this->getStringHeight($w, $txt, $reseth = false, $autopadding = true, $cellMargin = '', $lineWidth = '');
+    }
+
+
+    /***************************************************************************************************************/
+    /***************************************************************************************************************/
+    /****************************************** override tcpdf *****************************************************/
+    /***************************************************************************************************************/
+    /***************************************************************************************************************/
+    /**
+	 * This method prints text from the current position.<br />
+	 * @param float $h Line height
+	 * @param string $txt String to print
+	 * @param mixed $link URL or identifier returned by AddLink()
+	 * @param boolean $fill Indicates if the cell background must be painted (true) or transparent (false).
+	 * @param string $align Allows to center or align the text. Possible values are:<ul><li>L or empty string: left align (default value)</li><li>C: center</li><li>R: right align</li><li>J: justify</li></ul>
+	 * @param boolean $ln if true set cursor at the bottom of the line, otherwise set cursor at the top of the line.
+	 * @param int $stretch font stretch mode: <ul><li>0 = disabled</li><li>1 = horizontal scaling only if text is larger than cell width</li><li>2 = forced horizontal scaling to fit cell width</li><li>3 = character spacing only if text is larger than cell width</li><li>4 = forced character spacing to fit cell width</li></ul> General font stretching and scaling values will be preserved when possible.
+	 * @param boolean $firstline if true prints only the first line and return the remaining string.
+	 * @param boolean $firstblock if true the string is the starting of a line.
+	 * @param float $maxh maximum height. It should be >= $h and less then remaining space to the bottom of the page, or 0 for disable this feature.
+	 * @param float $wadj first line width will be reduced by this amount (used in HTML mode).
+	 * @param array $margin margin array of the parent container
+	 * @return mixed Return the number of cells or the remaining string if $firstline = true.
+	 * @public
+	 * @since 1.5
+	 */
+	public function Write($h, $txt, $link='', $fill=false, $align='', $ln=false, $stretch=0, $firstline=false, $firstblock=false, $maxh=0, $wadj=0, $margin='') {
+		// check page for no-write regions and adapt page margins if necessary
+		list($this->x, $this->y) = $this->checkPageRegions($h, $this->x, $this->y);
+        
+        // $this->console("       tmpy = $tmpy");
+		if (strlen($txt) == 0) {
+			// fix empty text
+			$txt = ' ';
+		}
+		if ($margin === '') {
+			// set default margins
+			$margin = $this->cell_margin;
+		}
+		// remove carriage returns
+		$s = str_replace("\r", '', $txt);
+		// check if string contains arabic text
+		if (preg_match(TCPDF_FONT_DATA::$uni_RE_PATTERN_ARABIC, $s)) {
+			$arabic = true;
+		} else {
+			$arabic = false;
+		}
+		// check if string contains RTL text
+		if ($arabic OR ($this->tmprtl == 'R') OR preg_match(TCPDF_FONT_DATA::$uni_RE_PATTERN_RTL, $s)) {
+			$rtlmode = true;
+		} else {
+			$rtlmode = false;
+		}
+		// get a char width
+		$chrwidth = $this->GetCharWidth(46); // dot character
+		// get array of unicode values
+		$chars = TCPDF_FONTS::UTF8StringToArray($s, $this->isunicode, $this->CurrentFont);
+		// calculate maximum width for a single character on string
+		$chrw = $this->GetArrStringWidth($chars, '', '', 0, true);
+		array_walk($chrw, array($this, 'getRawCharWidth'));
+		$maxchwidth = max($chrw);
+		// get array of chars
+		$uchars = TCPDF_FONTS::UTF8ArrayToUniArray($chars, $this->isunicode);
+		// get the number of characters
+		$nb = count($chars);
+		// replacement for SHY character (minus symbol)
+		$shy_replacement = 45;
+		$shy_replacement_char = TCPDF_FONTS::unichr($shy_replacement, $this->isunicode);
+		// widht for SHY replacement
+		$shy_replacement_width = $this->GetCharWidth($shy_replacement);
+		// page width
+		$pw = $w = $this->w - $this->lMargin - $this->rMargin;
+		// calculate remaining line width ($w)
+		if ($this->rtl) {
+			$w = $this->x - $this->lMargin;
+		} else {
+			$w = $this->w - $this->rMargin - $this->x;
+		}
+		// max column width
+		$wmax = ($w - $wadj);
+		if (!$firstline) {
+			$wmax -= ($this->cell_padding['L'] + $this->cell_padding['R']);
+		}
+		if ((!$firstline) AND (($chrwidth > $wmax) OR ($maxchwidth > $wmax))) {
+			// the maximum width character do not fit on column
+			return '';
+		}
+		// minimum row height
+		$row_height = max($h, $this->getCellHeight($this->FontSize));
+		// max Y
+		$maxy = $this->y + $maxh - max($row_height, $h);
+		$start_page = $this->page;
+		$i = 0; // character position
+		$j = 0; // current starting position
+		$sep = -1; // position of the last blank space
+		$prevsep = $sep; // previous separator
+		$shy = false; // true if the last blank is a soft hypen (SHY)
+		$prevshy = $shy; // previous shy mode
+		$l = 0; // current string length
+		$nl = 0; //number of lines
+		$linebreak = false;
+		$pc = 0; // previous character
+		// for each character
+        $last_i=0;
+		while ($i < $nb) {
+            $last_i++;
+            
+			if (($maxh > 0) AND ($this->y > $maxy) ) {
+                $this->balancetext=TCPDF_FONTS::UniArrSubString($uchars,$i); //phpjasperxml code
+                // $this->console("     (maxh $maxh > 0) AND (this->y $this->y >  $maxy maxy) ");
+                // $this->console("     write text, balance text (i=$i,j=$j,last_i=$last_i,nb=$nb,nl=$nl)= $this->balancetext");
+				break;
+			}
+			//Get the current character
+			$c = $chars[$i];
+            
+			if ($c == 10) { // 10 = "\n" = new line
+				//Explicit line break
+                
+				if ($align == 'J') {
+					if ($this->rtl) {
+						$talign = 'R';
+					} else {
+						$talign = 'L';
+					}
+				} else {
+					$talign = $align;
+				}
+                
+				$tmpstr = TCPDF_FONTS::UniArrSubString($uchars, $j, $i);
+                
+				if ($firstline) {
+					$startx = $this->x;
+					$tmparr = array_slice($chars, $j, ($i - $j));
+					if ($rtlmode) {
+						$tmparr = TCPDF_FONTS::utf8Bidi($tmparr, $tmpstr, $this->tmprtl, $this->isunicode, $this->CurrentFont);
+					}
+					$linew = $this->GetArrStringWidth($tmparr);
+					unset($tmparr);
+					if ($this->rtl) {
+						$this->endlinex = $startx - $linew;
+					} else {
+						$this->endlinex = $startx + $linew;
+					}
+					$w = $linew;
+					$tmpcellpadding = $this->cell_padding;
+					if ($maxh == 0) {
+						$this->SetCellPadding(0);
+					}
+				}
+				if ($firstblock AND $this->isRTLTextDir()) {
+					$tmpstr = $this->stringRightTrim($tmpstr);
+				}
+				// Skip newlines at the beginning of a page or column
+				if (!empty($tmpstr) OR ($this->y < ($this->PageBreakTrigger - $row_height))) {
+					$this->Cell($w, $h, $tmpstr, 0, 1, $talign, $fill, $link, $stretch);
+				}
+				unset($tmpstr);
+				if ($firstline) {
+					$this->cell_padding = $tmpcellpadding;
+					return (TCPDF_FONTS::UniArrSubString($uchars, $i));
+				}
+				++$nl;
+				$j = $i + 1;
+				$l = 0;
+				$sep = -1;
+				$prevsep = $sep;
+				$shy = false;
+				// account for margin changes
+				if ((($this->y + $this->lasth) > $this->PageBreakTrigger) AND ($this->inPageBody())) {
+					$this->AcceptPageBreak();
+                    
+					if ($this->rtl) {
+						$this->x -= $margin['R'];
+					} else {
+						$this->x += $margin['L'];
+					}
+					$this->lMargin += $margin['L'];
+					$this->rMargin += $margin['R'];
+				}
+				$w = $this->getRemainingWidth();
+				$wmax = ($w - $this->cell_padding['L'] - $this->cell_padding['R']);
+			} 
+            else {
+				// 160 is the non-breaking space.
+				// 173 is SHY (Soft Hypen).
+				// \p{Z} or \p{Separator}: any kind of Unicode whitespace or invisible separator.
+				// \p{Lo} or \p{Other_Letter}: a Unicode letter or ideograph that does not have lowercase and uppercase variants.
+				// \p{Lo} is needed because Chinese characters are packed next to each other without spaces in between.
+				if (($c != 160)
+					AND (($c == 173)
+						OR preg_match($this->re_spaces, TCPDF_FONTS::unichr($c, $this->isunicode))
+						OR (($c == 45)
+							AND ($i < ($nb - 1))
+							AND @preg_match('/[\p{L}]/'.$this->re_space['m'], TCPDF_FONTS::unichr($pc, $this->isunicode))
+							AND @preg_match('/[\p{L}]/'.$this->re_space['m'], TCPDF_FONTS::unichr($chars[($i + 1)], $this->isunicode))
+						)
+					)
+				) {
+                    
+					// update last blank space position
+					$prevsep = $sep;
+					$sep = $i;
+					// check if is a SHY
+					if (($c == 173) OR ($c == 45)) {
+						$prevshy = $shy;
+						$shy = true;
+						if ($pc == 45) {
+							$tmp_shy_replacement_width = 0;
+							$tmp_shy_replacement_char = '';
+						} else {
+							$tmp_shy_replacement_width = $shy_replacement_width;
+							$tmp_shy_replacement_char = $shy_replacement_char;
+						}
+					} else {
+						$shy = false;
+					}
+				}
+				// update string length
+				if ($this->isUnicodeFont() AND ($arabic)) {
+					// with bidirectional algorithm some chars may be changed affecting the line length
+					// *** very slow ***
+					$l = $this->GetArrStringWidth(TCPDF_FONTS::utf8Bidi(array_slice($chars, $j, ($i - $j)), '', $this->tmprtl, $this->isunicode, $this->CurrentFont));
+				} else {
+					$l += $this->GetCharWidth($c, ($i+1 < $nb));
+				}
+                
+				if (($l > $wmax) OR (($c == 173) AND (($l + $tmp_shy_replacement_width) >= $wmax))) {
+					if (($c == 173) AND (($l + $tmp_shy_replacement_width) > $wmax)) {
+						$sep = $prevsep;
+						$shy = $prevshy;
+					}
+					// we have reached the end of column
+					if ($sep == -1) {
+						// check if the line was already started
+						if (($this->rtl AND ($this->x <= ($this->w - $this->rMargin - $this->cell_padding['R'] - $margin['R'] - $chrwidth)))
+							OR ((!$this->rtl) AND ($this->x >= ($this->lMargin + $this->cell_padding['L'] + $margin['L'] + $chrwidth)))) {
+							// print a void cell and go to next line
+							$this->Cell($w, $h, '', 0, 1);
+							$linebreak = true;
+							if ($firstline) {
+								return (TCPDF_FONTS::UniArrSubString($uchars, $j));
+							}
+						} else {
+							// truncate the word because do not fit on column
+							$tmpstr = TCPDF_FONTS::UniArrSubString($uchars, $j, $i);
+							if ($firstline) {
+								$startx = $this->x;
+								$tmparr = array_slice($chars, $j, ($i - $j));
+								if ($rtlmode) {
+									$tmparr = TCPDF_FONTS::utf8Bidi($tmparr, $tmpstr, $this->tmprtl, $this->isunicode, $this->CurrentFont);
+								}
+								$linew = $this->GetArrStringWidth($tmparr);
+								unset($tmparr);
+								if ($this->rtl) {
+									$this->endlinex = $startx - $linew;
+								} else {
+									$this->endlinex = $startx + $linew;
+								}
+								$w = $linew;
+								$tmpcellpadding = $this->cell_padding;
+								if ($maxh == 0) {
+									$this->SetCellPadding(0);
+								}
+							}
+							if ($firstblock AND $this->isRTLTextDir()) {
+								$tmpstr = $this->stringRightTrim($tmpstr);
+							}
+							$this->Cell($w, $h, $tmpstr, 0, 1, $align, $fill, $link, $stretch);
+							unset($tmpstr);
+							if ($firstline) {
+								$this->cell_padding = $tmpcellpadding;
+								return (TCPDF_FONTS::UniArrSubString($uchars, $i));
+							}
+							$j = $i;
+							--$i;
+						}
+					} else {
+						// word wrapping
+						if ($this->rtl AND (!$firstblock) AND ($sep < $i)) {
+							$endspace = 1;
+						} else {
+							$endspace = 0;
+						}
+						// check the length of the next string
+						$strrest = TCPDF_FONTS::UniArrSubString($uchars, ($sep + $endspace));
+						$nextstr = TCPDF_STATIC::pregSplit('/'.$this->re_space['p'].'/', $this->re_space['m'], $this->stringTrim($strrest));
+						if (isset($nextstr[0]) AND ($this->GetStringWidth($nextstr[0]) > $pw)) {
+							// truncate the word because do not fit on a full page width
+							$tmpstr = TCPDF_FONTS::UniArrSubString($uchars, $j, $i);
+							if ($firstline) {
+								$startx = $this->x;
+								$tmparr = array_slice($chars, $j, ($i - $j));
+								if ($rtlmode) {
+									$tmparr = TCPDF_FONTS::utf8Bidi($tmparr, $tmpstr, $this->tmprtl, $this->isunicode, $this->CurrentFont);
+								}
+								$linew = $this->GetArrStringWidth($tmparr);
+								unset($tmparr);
+								if ($this->rtl) {
+									$this->endlinex = ($startx - $linew);
+								} else {
+									$this->endlinex = ($startx + $linew);
+								}
+								$w = $linew;
+								$tmpcellpadding = $this->cell_padding;
+								if ($maxh == 0) {
+									$this->SetCellPadding(0);
+								}
+							}
+							if ($firstblock AND $this->isRTLTextDir()) {
+								$tmpstr = $this->stringRightTrim($tmpstr);
+							}
+							$this->Cell($w, $h, $tmpstr, 0, 1, $align, $fill, $link, $stretch);
+							unset($tmpstr);
+							if ($firstline) {
+								$this->cell_padding = $tmpcellpadding;
+								return (TCPDF_FONTS::UniArrSubString($uchars, $i));
+							}
+							$j = $i;
+							--$i;
+						} else {
+							// word wrapping
+							if ($shy) {
+								// add hypen (minus symbol) at the end of the line
+								$shy_width = $tmp_shy_replacement_width;
+								if ($this->rtl) {
+									$shy_char_left = $tmp_shy_replacement_char;
+									$shy_char_right = '';
+								} else {
+									$shy_char_left = '';
+									$shy_char_right = $tmp_shy_replacement_char;
+								}
+							} else {
+								$shy_width = 0;
+								$shy_char_left = '';
+								$shy_char_right = '';
+							}
+							$tmpstr = TCPDF_FONTS::UniArrSubString($uchars, $j, ($sep + $endspace));
+							if ($firstline) {
+								$startx = $this->x;
+								$tmparr = array_slice($chars, $j, (($sep + $endspace) - $j));
+								if ($rtlmode) {
+									$tmparr = TCPDF_FONTS::utf8Bidi($tmparr, $tmpstr, $this->tmprtl, $this->isunicode, $this->CurrentFont);
+								}
+								$linew = $this->GetArrStringWidth($tmparr);
+								unset($tmparr);
+								if ($this->rtl) {
+									$this->endlinex = $startx - $linew - $shy_width;
+								} else {
+									$this->endlinex = $startx + $linew + $shy_width;
+								}
+								$w = $linew;
+								$tmpcellpadding = $this->cell_padding;
+								if ($maxh == 0) {
+									$this->SetCellPadding(0);
+								}
+							}
+							// print the line
+							if ($firstblock AND $this->isRTLTextDir()) {
+								$tmpstr = $this->stringRightTrim($tmpstr);
+							}
+							$this->Cell($w, $h, $shy_char_left.$tmpstr.$shy_char_right, 0, 1, $align, $fill, $link, $stretch);
+							unset($tmpstr);
+							if ($firstline) {
+								if ($chars[$sep] == 45) {
+									$endspace += 1;
+								}
+								// return the remaining text
+								$this->cell_padding = $tmpcellpadding;
+								return (TCPDF_FONTS::UniArrSubString($uchars, ($sep + $endspace)));
+							}
+							$i = $sep;
+							$sep = -1;
+							$shy = false;
+							$j = ($i + 1);
+						}
+					}
+                    
+					// account for margin changes
+					if ((($this->y + $this->lasth) > $this->PageBreakTrigger) AND ($this->inPageBody())) {
+						$this->AcceptPageBreak();
+						if ($this->rtl) {
+							$this->x -= $margin['R'];
+						} else {
+							$this->x += $margin['L'];
+						}
+						$this->lMargin += $margin['L'];
+						$this->rMargin += $margin['R'];
+					}
+                    
+					$w = $this->getRemainingWidth();
+                    
+					$wmax = $w - $this->cell_padding['L'] - $this->cell_padding['R'];
+					if ($linebreak) {
+						$linebreak = false;
+					} else {
+						++$nl;
+						$l = 0;
+					}
+				}
+			}
+            
+			// save last character
+			$pc = $c;
+			++$i;
+		} // end while i < nb
+
+        // $this->console("printed string length $l");
+		// print last substring (if any)
+		if ($l > 0) {
+			switch ($align) {
+				case 'J':
+				case 'C': {
+					break;
+				}
+				case 'L': {
+					if (!$this->rtl) {
+						$w = $l;
+					}
+					break;
+				}
+				case 'R': {
+					if ($this->rtl) {
+						$w = $l;
+					}
+					break;
+				}
+				default: {
+					$w = $l;
+					break;
+				}
+			}
+            
+			$tmpstr = TCPDF_FONTS::UniArrSubString($uchars, $j, $nb);        
+			if ($firstline) {
+				$startx = $this->x;
+				$tmparr = array_slice($chars, $j, ($nb - $j));
+				if ($rtlmode) {
+					$tmparr = TCPDF_FONTS::utf8Bidi($tmparr, $tmpstr, $this->tmprtl, $this->isunicode, $this->CurrentFont);
+				}
+				$linew = $this->GetArrStringWidth($tmparr);
+				unset($tmparr);
+				if ($this->rtl) {
+					$this->endlinex = $startx - $linew;
+				} else {
+					$this->endlinex = $startx + $linew;
+				}
+				$w = $linew;
+				$tmpcellpadding = $this->cell_padding;
+				if ($maxh == 0) {
+					$this->SetCellPadding(0);
+				}
+			}
+            
+			if ($firstblock AND $this->isRTLTextDir()) {
+				$tmpstr = $this->stringRightTrim($tmpstr);
+			}
+			$this->Cell($w, $h, $tmpstr, 0, $ln, $align, $fill, $link, $stretch);
+			unset($tmpstr);
+			if ($firstline) {
+				$this->cell_padding = $tmpcellpadding;
+				return (TCPDF_FONTS::UniArrSubString($uchars, $nb));
+			}
+			++$nl;
+            
+		}
+		if ($firstline) {
+			return '';
+		}
+        // $this->console("Printed Line = $nl");
+		return $nl;
+	}
 }

@@ -26,6 +26,11 @@ trait PHPJasperXML_expression
         // echo "\n  executeExpression: $expression\n";
         $value = $this->parseExpression($expression,$addrowqty);
 
+        //special result, direct return raw value
+        if(gettype($value)=='object' || gettype($value)=='array')
+        {
+            return $value;
+        }
         //it consist of string, use concate instead of maths operation
         if(str_contains($value,'"') || str_contains($value,"'"))
         {
@@ -43,7 +48,7 @@ trait PHPJasperXML_expression
         }
     }
 
-    protected function parseExpression(string $expression,int $addrowqty=0): string
+    protected function parseExpression(string $expression,int $addrowqty=0): mixed
     {
         $value = $expression;
         $fieldpattern = '/\$F{(.*?)}/';
@@ -75,6 +80,10 @@ trait PHPJasperXML_expression
         foreach($paranames as $p => $paraname)
         {
             $data = $this->getParameterValue($paraname);
+            if(gettype($data)=='array' || gettype($data)=='object')
+            {
+                return $data;
+            }
             $value = str_replace($parastrings[$p], $data,$value);
         }
         return $value;        
@@ -105,7 +114,11 @@ trait PHPJasperXML_expression
         $value=null;
         if(!isset($this->parameters[$key]))
         {
-            if(str_contains($key,'_SCRIPTLET'))
+            if($key=='REPORT_CONNECTION')
+            {
+                $value = 'REPORT_CONNECTION';
+            }
+            else if(str_contains($key,'_SCRIPTLET'))
             {
                 $scriptletname = str_replace('_SCRIPTLET','',$key);                
                 if(isset($this->scriptlets[$scriptletname]))
@@ -206,7 +219,9 @@ trait PHPJasperXML_expression
         }
         switch($datatype)
         {
-            
+            case 'array':
+                return $value;
+            break;
             case 'number':
             case 'boolean':
                 if(gettype($value)=='NULL')

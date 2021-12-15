@@ -55,7 +55,7 @@ trait PHPJasperXML_load
         // $obj = simplexml_load_string($jrxml,SimpleXMLElement::class,LIBXML_DTDATTR);
         // $obj = simplexml_load_string($jrxml,SimpleXMLElement::class,LIBXML_COMPACT);
         $this->pageproperties = $this->prop($obj);
-        $this->columnWidth=$this->pageproperties['columnWidth'];
+        $this->columnWidth=$this->pageproperties['columnWidth'] ?? $this->pageproperties['pageWidth'];
         $this->columnCount=$this->pageproperties['columnCount']??1;
         $this->printOrder = $this->pageproperties['printOrder']?? 'Vertical' ;
         foreach ($obj as $k=>$out)
@@ -172,7 +172,7 @@ trait PHPJasperXML_load
             $this->bands[$newbandname]['endY'] = $this->bands[$newbandname]['endY']??0;
             $this->bands[$newbandname]['height'] = $this->bands[$newbandname]['height']??0;
             $this->bands[$newbandname]['originalheight'] = $this->bands[$newbandname]['height']; //hide is dynamically change depends on printwhen expression or scale.
-            $this->elements[$newbandname] = $this->getBandChildren($bandobj);
+            $this->elements[$newbandname] = $this->getBandChildren($bandobj,$newbandname);
             $this->sortElements($newbandname);          
             $count++;
         }  
@@ -231,7 +231,7 @@ trait PHPJasperXML_load
 
     
 
-    protected function getBandChildren($els)
+    protected function getBandChildren($els,string $bandname)
     {
         $data=[];
         foreach($els as $elementtype => $obj)
@@ -282,13 +282,14 @@ trait PHPJasperXML_load
                     }
 
                     
-                    $prop = call_user_func([$this,$methodname],$prop,$objvalue);                          
+                    $prop = call_user_func([$this,$methodname],$prop,$objvalue);      
+                    $prop['band']=$bandname;
                     $data[$uuid] = $prop;
                     if($type=='frame')                    
                     {
                         unset($obj->reportElement);
                         unset($obj->box);
-                        $subdata=$this->getBandChildren($obj->children());
+                        $subdata=$this->getBandChildren($obj->children(),$bandname);
                         foreach($subdata as $subuuid => $subprop)
                         {
                             $subprop['frame']=$uuid;
@@ -345,7 +346,9 @@ trait PHPJasperXML_load
             case 'java.lang.BigDecimal':
                 $type='number';
             break;
-            
+            case 'java.sql.Connection':
+                $type='array';
+            break;
             case 'java.sql.Timestamp':
             case 'java.lang.String':
             default:

@@ -7,6 +7,7 @@ trait PHPJasperXML_datasource{
     protected $rows = [];
     protected $rowcount = 0 ;
     protected $dataloaded=false;
+    protected array $connectionsetting;
     public function setDataSource(array $setting):self
     {
         
@@ -17,6 +18,7 @@ trait PHPJasperXML_datasource{
         else
         {
             $driver = $setting['driver'];
+            $this->connectionsetting = $setting;
             $driverfile = __DIR__.'/datadrivers/'.$driver.'.php';
             if(!file_exists($driverfile))
             {

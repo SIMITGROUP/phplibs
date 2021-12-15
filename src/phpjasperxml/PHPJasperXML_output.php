@@ -10,8 +10,10 @@ trait PHPJasperXML_output
     protected array $descgroupnames=[];
     protected array $row = [];
     protected bool $isgroupchanged=false;
+    protected bool $islastrow = false;
+
     // protected $bandsequence = [];
-    public function export(string $type)
+    public function export(string $type,string $filename='')
     {
         $classname = '\\Simitsdk\\phpjasperxml\\Exports\\'.ucfirst($type);
         $this->output  = new $classname($this->pageproperties);        
@@ -19,6 +21,7 @@ trait PHPJasperXML_output
         if($this->rowcount>0)
         {
             $this->sortData();
+            $this->output->defineColumns($this->columnCount,$this->columnWidth);
             foreach($this->rows as $i=>$r)
             {                
                 $this->setRow($i);
@@ -43,9 +46,10 @@ trait PHPJasperXML_output
         {
             $this->draw_noData();
         }
-        if(!empty($this->filename))
+        if(!empty($filename))
         {
-            $filename = '/tmp/'.str_replace('.jrxml','.pdf',$this->filename);
+            // $filename = '/tmp/'.str_replace('.jrxml','.pdf',$this->filename);
+            
             $this->output->export($filename);
         }
         else
@@ -144,7 +148,9 @@ trait PHPJasperXML_output
     }
     protected function prepareColumn()
     {
-        $this->output->prepareColumn($this->columnCount,$this->columnWidth);
+        // $this->console('output prepareColumn');
+        $this->output->prepareColumn();
+        
     }
     protected function endPage()
     {        
@@ -163,6 +169,11 @@ trait PHPJasperXML_output
         $this->row = $this->rows[$i];
         $this->computeVariables($i);
         $this->output->setRowNumber($i);
+        if($this->rowcount == $i+1 )
+        {
+            $this->islastrow=true;
+            $this->output->islastrow=true;
+        }
         
     }
 
@@ -173,8 +184,7 @@ trait PHPJasperXML_output
         $offsets = $this->output->prepareBand($bandname,$callback);
         $offsetx=(int)$offsets['x'];
         $offsety=(int)$offsets['y'];
-
-        // echo "\n$bandname: $offsetx $offsety\n";
+        
         
         if(isset($this->bands[$bandname]['printWhenExpression']))
         {
@@ -195,7 +205,20 @@ trait PHPJasperXML_output
         $height = $this->bands[$bandname]['height'];
         if($height>0)
         {
+            //loop all element, grow band height if necessary
             
+            // foreach($this->elements[$bandname] as $uuid =>$element)
+            // {
+            //     //if this element will grow
+            //     if($element['elementtype']=='textField' && $element['textAdjust']=='StretchHeight')
+            //     {
+            //         $txt = $this->executeExpression($element['textExpression']);
+            //         $boxheight = $this->output->estimateHeight($element['width'],$txt);
+
+            //     }
+            // }
+
+            //actual draw band elements
             foreach($this->elements[$bandname] as $uuid =>$element)
             {
                 $tmp = $element;
@@ -224,7 +247,7 @@ trait PHPJasperXML_output
                 }                            
             }
         }
-        
+        // $this->output->endBand($bandname,$offsetx,$offsety);
     }
     protected function draw_background()
     {        

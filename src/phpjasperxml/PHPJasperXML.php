@@ -10,6 +10,7 @@ class PHPJasperXML{
     use Tools\Toolbox;
     use PHPJasperXML_output;
     use PHPJasperXML_outputhorizontal;
+    use PHPJasperXML_subreport;
     protected array $defaultbands=['background', 'title', 'pageHeader', 'columnHeader', 'detail', 'columnFooter', 'pageFooter', 'lastPageFooter', 'summary', 'noData', ];
     protected array $bands=[];
     

@@ -234,7 +234,9 @@ trait PHPJasperXML_elements
         // {
         //     $prop['hyperlinkReferenceExpression'] = $this->executeExpression($link);
         // }
-        $this->output->draw_textField($uuid,$prop);
+        $this->output->draw_textField($uuid,$prop,function(){
+            $this->newPage();
+        });
     }
 
     /**
@@ -294,11 +296,64 @@ trait PHPJasperXML_elements
     // }
     protected function element_subreport(array $prop, object $obj): array
     {
+        $prop['subreportExpression']=(string)$obj->subreportExpression;
+        $prop['connectionExpression']=(string)$obj->connectionExpression;  
+        $paras = [];
+        foreach($obj->subreportParameter as $index=>$paraobj)
+        {
+            $paraname = $this->prop($paraobj)['name'];
+            $paramapto =  (string)$paraobj->subreportParameterExpression;
+            $paras[$paraname]=$paramapto;
+            
+        }
+        $prop['paras']=$paras;
+        
         return $prop;
     }
     public function draw_subreport(string $uuid,array $prop)
     {
-        $this->output->draw_unsupportedElement($uuid,$prop);
+        $subreport = new PHPJasperXML();        
+        $subreportExpression = $this->executeExpression($prop['subreportExpression']);        
+        if($this->left($subreportExpression,5)=='<?xml')
+        {
+            $subreport->load_xml_string($subreportExpression);
+        }
+        else
+        {
+            $subreportExpression = str_replace('.jasper','.jrxml',$subreportExpression);
+            $filename = $this->path.'/'.$subreportExpression;
+            $subreport->load_xml_file($filename);
+        }
+        
+
+        $connectionExpression =  $this->executeExpression($prop['connectionExpression']);
+        $connection = [];
+        if($connectionExpression=='REPORT_CONNECTION')
+        {
+            $connection = $this->connectionsetting;
+        }
+        else
+        {
+            $connection = $connectionExpression;            
+        }
+        
+        $paras = [];
+        foreach($prop['paras'] as $pname=>$pexpression)
+        {
+            $paras[$pname]=$this->executeExpression($pexpression);
+        }
+        
+        
+        
+        $subreport
+            ->setParameter($paras)
+            ->setDataSource($connection)
+            ->runSubReport($prop,$this->output);
+            ;
+            // echo "xxxxx";die;
+        // ->export('subreport',$this->output);
+
+        // $this->output->draw_unsupportedElement($uuid,$prop);
     }
     protected function element_componentElement(array $prop, SimpleXMLElement $obj): array
     {        
@@ -410,7 +465,7 @@ trait PHPJasperXML_elements
                 $height = $prop['height'];
                 $width = $prop['width'];
         
-                $this->console("early draw element $uuid x=$x, y=$y\n");
+                // $this->console("early draw element $uuid x=$x, y=$y\n");
                 if(isset($prop['hyperlinkReferenceExpression']))
                 {
                     $prop['hyperlinkReferenceExpression'] = $this->executeExpression($prop['hyperlinkReferenceExpression']);
