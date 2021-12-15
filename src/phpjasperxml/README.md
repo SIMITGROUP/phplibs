@@ -40,8 +40,8 @@ rectangle | :white_check_mark: |
 circle | :white_check_mark: | 
 image | :white_check_mark: | :exclamation: Some scaleImage is not supported (Clip,RealHeight,RealSize). You can define image expression with base64 string too
 barcode | :white_check_mark: |  :exclamation: some standard is not supported, refer barcode example.
-break | :white_check_mark: | 
-subreport | :x: | plan to do
+break | :white_check_mark: | :exclamation: column break not work nicely
+subreport | :white_check_mark: | :exclamation: support basic fixed height sub report (the subreport will simply draw at current location and expand according data without consider band limits)
 chart | :x: | plan to do
 spiderchart | :x: |  plan to do
 list | :x: |  plan to do
