@@ -26,7 +26,7 @@ class Pdf extends TCPDF implements ExportInterface
     protected int $columnCount;
     protected string $defaultfont='helvetica';
     protected int $currentRowNo=0;
-    protected bool $debugband=true;
+    protected bool $debugband=false;
     protected string $groupbandprefix = 'report_group_';
     protected int $printbandcount=0;
     public bool $islastrow = false;
@@ -132,16 +132,18 @@ class Pdf extends TCPDF implements ExportInterface
         return parent::PageNo();
     }
     public function export(string $filename='')
-    {
-        // if(empty($filename))
+    {     
+        if(!empty($filename))
         {
-            $filename = '/tmp/sample1.pdf';
+            $this->Output($filename,'F');
+        }
+        else
+        {
+            // echo 'asdad';
+            $filename='sample.pdf';
+            $this->Output($filename,'I');
         }
         
-        // unlink($filename);
-        // $this->Output($filename,'F');   //send out the complete page
-        // print_r($this->bands);
-        $this->Output($filename,'F');
         // echo $filename;
     }
 
@@ -287,8 +289,9 @@ class Pdf extends TCPDF implements ExportInterface
         
         
         $prop['barcodetype'] = strtoupper($barcodetype);
-        $this->console("$uuid draw_barcode ".$prop['barcodetype']);
+        // $this->console("$uuid draw_barcode ".$prop['barcodetype']);
         // print_r($prop);
+        // echo "<hr/>";
         switch($prop['barcodetype'])
         {
             case 'C39':    
@@ -343,18 +346,20 @@ class Pdf extends TCPDF implements ExportInterface
         $x+=$w/2;
         $y+=$h/2;
         $xres=0.4;//$prop[''];
+        // print_r($prop);
+        // echo gettype($prop['drawText'])."<hr/>";
         $style=$style = array(
             'position' => '',
             'align' => 'C',
             'stretch' => false,
             'fitwidth' => true,
             'cellfitalign' => '',
-            'border' => true,
+            'border' => false,
             'hpadding' => 'auto',
             'vpadding' => 'auto',
             'fgcolor' => array(0,0,0),
             'bgcolor' => false, //array(255,255,255),
-            'text' => true,
+            'text' => ($prop['drawText'] == 'true') ? true : false,
             'font' => $this->defaultfont,
             'fontsize' => 8,
             'stretchtext' => 4
@@ -373,7 +378,12 @@ class Pdf extends TCPDF implements ExportInterface
     {
         $code=$prop['codeExpression'];
         $barcodetype=$prop['barcodetype'];
-        
+        if($barcodetype=='QRCODE' && isset($prop['errorCorrectionLevel']))
+        {
+            $barcodetype .=','.$prop['errorCorrectionLevel'];
+        }
+        // print_r($prop);
+        // echo "<hr/>";
         $x=$prop['x'];
         $y=$prop['y'];
         $w=$prop['width'];
@@ -381,7 +391,7 @@ class Pdf extends TCPDF implements ExportInterface
         $x+=$w/2;
         $y+=$h/2;
         $style = array(
-            'border' => 2,
+            // 'border' => 2,
             'padding' => 'auto',
             // 'fgcolor' => array(0,0,255),
             // 'bgcolor' => array(255,255,64)
@@ -422,11 +432,8 @@ class Pdf extends TCPDF implements ExportInterface
         $h = $prop['height'];
         $prop['forecolor'] = $prop['forecolor'] ??'';
         $prop['backcolor'] = $prop['backcolor'] ??'#FFFFFF';
-        $lineColor = $prop['lineColor'] ?? $prop['forecolor'];
-        $color = $this->convertColorStrToRGB($lineColor);
-        $backcolor = $this->convertColorStrToRGB($prop['backcolor']);        
-        $lineWidth = $prop['lineWidth']??1;
-        $lineStyle = $prop['lineStyle']??'';
+        $lineColor = $prop['lineColor'] ?? $prop['forecolor'];        
+        $backcolor = $this->convertColorStrToRGB($prop['backcolor']);                
         $radius=$prop['radius']??0;
 
         if(isset($prop['mode']) && $prop['mode'] == 'Transparent')
@@ -437,7 +444,18 @@ class Pdf extends TCPDF implements ExportInterface
         {
             $style='FD';
         }        
-        $borderstyle =[ 'TBLR'=> $this->getLineStyle($lineStyle,$lineWidth,$lineColor) ];      
+        
+        
+        
+        $borderstyle = [ 'TBLR'=> $this->getBorderStyles($prop)];//$this->getLineStyle($lineStyle,$lineWidth,$lineColor) ];      
+        // if(!empty($prop['radius']))
+        // {
+        //     print_r($prop);
+        //     echo "<br/>=====<br/>";
+        //     print_r($borderstyle);        
+        //     echo "<hr/>";
+        // }
+        $this->SetLineStyle($borderstyle);
         $this->drawtarget->RoundedRect($x,$y,$w,$h,$radius,'1111',$style,$borderstyle,$backcolor);
     }
     public function draw_frame(string $uuid,array $prop)
@@ -448,12 +466,12 @@ class Pdf extends TCPDF implements ExportInterface
         $h = $prop['height'];
         $prop['forecolor'] = $prop['forecolor'] ??'';
         $prop['backcolor'] = $prop['backcolor'] ??'#FFFFFF';
-        $lineColor = $prop['lineColor'] ?? $prop['forecolor'];
+        // $lineColor = $prop['lineColor'] ?? $prop['forecolor'];
         // $color = $this->convertColorStrToRGB($lineColor);
         $backcolor = $this->convertColorStrToRGB($prop['backcolor']);        
-        // $lineWidth = $prop['lineWidth']??1;
+        $lineWidth = $prop['lineWidth']??0;
         // $lineStyle = $prop['lineStyle']??'';
-        $radius=$prop['radius']??0;
+        // $radius=$prop['radius']??0;
 
         if(isset($prop['mode']) && $prop['mode'] == 'Transparent')
         {
@@ -464,8 +482,12 @@ class Pdf extends TCPDF implements ExportInterface
             $style='FD';
         }        
         // $borderstyle =[ 'TBLR'=> $this->getLineStyle($lineStyle,$lineWidth,$lineColor) ];      
-        $border = $this->getBorderStyles($prop,1);
-        $this->drawtarget->RoundedRect($x,$y,$w,$h,$radius,'1111',$style,$border,$backcolor);
+        if($lineWidth>0)
+        {
+            $border =['BTLR'=> $this->getBorderStyles($prop)];
+            $this->drawtarget->Rect($x,$y,$w,$h,$style,$border,$backcolor);
+        }
+        
     }
     public function draw_ellipse(string $uuid,array $prop)
     {
@@ -583,6 +605,8 @@ class Pdf extends TCPDF implements ExportInterface
     }
     public function draw_staticText(string $uuid,array $prop,bool $isTextField=false,mixed $callback=null)
     {
+        // print_r($prop);
+        // echo "<hr/>";
         $w=$prop['width'];
         $h=$prop['height'];       
         $x=$this->GetX();
@@ -607,12 +631,16 @@ class Pdf extends TCPDF implements ExportInterface
         $prop['fontName'] = $prop['fontName']?? $this->defaultfont;
         $fontName=strtolower($prop['fontName']);        
         $fontstyle='';
-        $fontstyle.= !empty($prop['isBold']) ? 'B':'';
-        $fontstyle.= !empty($prop['isItalic']) ? 'I':'';
-        $fontstyle.= !empty($prop['isUnderline']) ? 'U':'';
-        $fontstyle.= !empty($prop['isStrikeThrough']) ? 'D':'';
-        $fontsize= !empty($prop['size']) ? $prop['size'] : 8;                
+        $fontstyle.= isset($prop['isBold']) && $prop['isBold']=='true' ? 'B':'';
+        $fontstyle.= isset($prop['isItalic']) && $prop['isItalic']=='true' ? 'I':'';
+        $fontstyle.= isset($prop['isUnderline']) && $prop['isUnderline']=='true'  ? 'U':'';
+        $fontstyle.= isset($prop['isStrikeThrough']) && $prop['isStrikeThrough']=='true' ? 'D':'';
+        $fontsize = isset($prop['size']) ? $prop['size'] : 8;                
         
+        // echo $fontstyle."<br/>";
+        // print_r($prop);
+        // echo "<hr/>";
+
         //text can scale at detail and summary band only
         if(! (str_contains($prop['band'],'detail_') || $prop['band'] == 'summary'))
         {
@@ -633,7 +661,7 @@ class Pdf extends TCPDF implements ExportInterface
             $text = $prop['text'];
         }
 
-        $target->useFont($fontName, $fontstyle, $fontsize,$text);        
+        $this->useFont($fontName, $fontstyle, $fontsize,$text);        
         $topPadding=$prop['topPadding']??0;
         $leftPadding=$prop['leftPadding']??0;
         $rightPadding=$prop['rightPadding']??0;
@@ -668,29 +696,43 @@ class Pdf extends TCPDF implements ExportInterface
         
         $rotation = $prop['rotation']?? '';        
         $target->StartTransform();
+        $tmpborder=$border;
         switch($rotation)
         {
             case 'Left':                
-                $this->SetXY($x,$y+$h);
-                $this->Rotate(90);
+                $y+=$h;                
                 $tmpw=$w;
                 $w=$h;
-                $h=$tmpw;
+                $h=$tmpw;                
+                $target->SetXY($x,$y);
+                $target->Rotate(90);
                 
-                
-                
+                $border['T']=$tmpborder['L'];
+                $border['B']=$tmpborder['R'];
+                $border['L']=$tmpborder['B'];
+                $border['R']=$tmpborder['T'];
                 break;
             case 'Right':
-                $this->SetXY($x+$w,$y);
-                $this->Rotate(270);
+                $x+=$w;                
                 $tmpw=$w;
                 $w=$h;
                 $h=$tmpw;
-                // $this->SetY($y+$w/2);
+                $this->SetXY($x,$y);
+                $target->Rotate(270);
+                $border['T']=$tmpborder['R'];
+                $border['B']=$tmpborder['L'];
+                $border['L']=$tmpborder['T'];
+                $border['R']=$tmpborder['B'];
                 break;
             case 'UpsideDown':
-                $this->SetXY($x+$w,$y+$h);
-                $this->Rotate(180);
+                $x+=$w;
+                $y+=$h;
+                $target->SetXY($x,$y);
+                $target->Rotate(180);
+                $border['T']=$tmpborder['B'];
+                $border['B']=$tmpborder['T'];
+                $border['L']=$tmpborder['R'];
+                $border['R']=$tmpborder['L'];
                 break;
             default:
             break;
@@ -725,7 +767,7 @@ class Pdf extends TCPDF implements ExportInterface
         // }
         // if(!empty($this->parentobj))
         // {
-            $totalline = $target->MultiCell($w,$h,$finaltxt,$border,$halign,$fill,2,$x,$y,true,$stretchtype,$ishtml,true,$maxheight,$valign);
+            $totalline = $target->MultiCell($w,$h,$finaltxt,$border,$halign,$fill,0,$x,$y,true,$stretchtype,$ishtml,true,$maxheight,$valign);
         // }
         // else
         // {
@@ -748,7 +790,7 @@ class Pdf extends TCPDF implements ExportInterface
         $newY=$this->GetY();
         if($newY > $this->lastBandEndY)
         {
-            $this->lastBandEndY = $newY;
+            $this->lastBandEndY = (int) $newY;
         }
         
         // $balancetxtlength=0;
@@ -780,10 +822,18 @@ class Pdf extends TCPDF implements ExportInterface
     }
     public function getBorderStyles(array $prop=[],string $sides=''): array
     {
-        $style=[];
+        $style=[];                
         if(empty($sides))
         {
+            $prop['lineStyle']=$prop['lineStyle']??'';
+            $prop['lineColor']=$prop['lineColor']??'';
+            $prop['lineWidth']=$prop['lineWidth']??0;
+            
+            
+            // print_r($prop);
+            // echo "<hr/>";
             $style = $this->getLineStyle( $prop['lineStyle'],$prop['lineWidth'],$prop['lineColor']);
+            
         }
         else
         {
@@ -794,7 +844,8 @@ class Pdf extends TCPDF implements ExportInterface
                 $color_name= $bordername.'PenlineColor';
                 $style_name= $bordername.'PenlineStyle';
 
-                if(!empty($prop[$width_name]))
+                
+                if(isset($prop[$width_name]) && $prop[$width_name]>0)
                 {
                     $prop[$style_name]=$prop[$style_name]??'';
                     $prop[$color_name]=$prop[$color_name]??'';
@@ -854,7 +905,8 @@ class Pdf extends TCPDF implements ExportInterface
         {
             $subtypetxt = "($subtypetxt)";
         }
-        $target->MultiCell($w,10,"element $type $subtypetxt is not support",0);          
+        
+        $this->drawtarget->MultiCell($w,10,"element $type $subtypetxt is not support",0);          
             // $offsetx = isset($offsets['x']) ? $offsets['x']: 0;
             // $offsetx = (int)$offsetx;
             // $offsety = isset($offsets['y']) ? $offsets['y']: 0 ;
@@ -950,6 +1002,8 @@ class Pdf extends TCPDF implements ExportInterface
             $methodname = 'draw_detail';
             $band = $this->bands[$bandname];
             $offsets = call_user_func([$this,$methodname],$bandname,$callback);
+            // print_r($offsets);
+            // echo "<hr>";
         }
         else if(str_contains($bandname,$this->groupbandprefix))
         {
@@ -1022,7 +1076,7 @@ class Pdf extends TCPDF implements ExportInterface
                 // $this->SetLineStyle($style); 
                 $target->Rect($offsetx,$offsety,$width ,$height,'',['TBLR'=>$style]);    
                 $this->lastBandEndY=$offsety+$height;; 
-                $target->Cell($width,10,$bandname."--$this->printbandcount",0);    
+                $target->Cell($width,10,$bandname."--$this->printbandcount ($this->lastBand $offsety,$height,".($offsety+$height).")",0);    
             }
             
         }
@@ -1111,6 +1165,7 @@ class Pdf extends TCPDF implements ExportInterface
         $totaldetailheight = 0;
         
         $offsety = $this->lastBandEndY;       
+        // echo "draw detail lastbandendy =$offsety<hr>";
         $estimateY=$offsety+$this->getBandHeight($detailbandname);
         if($this->isEndDetailSpace($estimateY) && gettype($callback)=='object')
         {            
@@ -1258,7 +1313,7 @@ class Pdf extends TCPDF implements ExportInterface
         $this->SetXY($x,$y);
     }
 
-    protected function getLineStyle(string $lineStyle,float $lineWidth=8,string $lineColor='')
+    protected function getLineStyle(string $lineStyle,float $lineWidth=0,string $lineColor='')
     {
         $forecolor = $this->convertColorStrToRGB($lineColor);        
         switch($lineStyle)
@@ -1465,7 +1520,7 @@ class Pdf extends TCPDF implements ExportInterface
             $last_i++;
             
 			if (($maxh > 0) AND ($this->y > $maxy) ) {
-                $this->balancetext=TCPDF_FONTS::UniArrSubString($uchars,$i); //phpjasperxml code
+                $this->balancetext=TCPDF_FONTS::UniArrSubString($uchars,$j); //phpjasperxml code
                 // $this->console("     (maxh $maxh > 0) AND (this->y $this->y >  $maxy maxy) ");
                 // $this->console("     write text, balance text (i=$i,j=$j,last_i=$last_i,nb=$nb,nl=$nl)= $this->balancetext");
 				break;

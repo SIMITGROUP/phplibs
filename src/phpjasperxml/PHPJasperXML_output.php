@@ -15,9 +15,11 @@ trait PHPJasperXML_output
     // protected $bandsequence = [];
     public function export(string $type,string $filename='')
     {
+        
         $classname = '\\Simitsdk\\phpjasperxml\\Exports\\'.ucfirst($type);
         $this->output  = new $classname($this->pageproperties);        
         $this->output->defineBands($this->bands,$this->elements,$this->groups);
+        // echo "rowcount $this->rowcount";die;
         if($this->rowcount>0)
         {
             $this->sortData();
@@ -44,8 +46,17 @@ trait PHPJasperXML_output
         }
         else
         {
-            $this->draw_noData();
+            if($this->bands['noData']['height'])
+            {
+                $this->draw_noData();
+            }
+            else
+            {
+                die('No data found, and noData band undefined');
+            }
+            
         }
+        // echo "export";die;
         if(!empty($filename))
         {
             // $filename = '/tmp/'.str_replace('.jrxml','.pdf',$this->filename);
@@ -54,6 +65,7 @@ trait PHPJasperXML_output
         }
         else
         {
+            // echo 'export';die;
             $this->output->export();
         }
         
@@ -181,10 +193,17 @@ trait PHPJasperXML_output
     
     protected function drawBand(string $bandname, mixed $callback=null)
     {
+
+        
         $offsets = $this->output->prepareBand($bandname,$callback);
         $offsetx=(int)$offsets['x'];
         $offsety=(int)$offsets['y'];
         
+        if($this->bands[$bandname]['height']==0)
+        {
+            return ;
+        }
+
         
         if(isset($this->bands[$bandname]['printWhenExpression']))
         {
@@ -197,7 +216,7 @@ trait PHPJasperXML_output
             }
             else
             {
-                $this->bands[$bandname]['originalheight']=0;
+                $this->bands[$bandname]['height'] = $this->bands[$bandname]['originalheight'];
             }
         }
 
@@ -236,7 +255,7 @@ trait PHPJasperXML_output
                 if(isset($this->elements[$bandname][$uuid]['frame']))
                 {
                     $frameuuid =$this->elements[$bandname][$uuid]['frame'];
-                    $isdisplayelement = $this->elements[$bandname][$frameuuid]['show'];
+                    $isdisplayelement = $this->elements[$bandname][$frameuuid]['show']??true;
                 }
 
                 //only match printWhenExpression will draw element
@@ -249,6 +268,13 @@ trait PHPJasperXML_output
         }
         // $this->output->endBand($bandname,$offsetx,$offsety);
     }
+    
+    protected function draw_noData()
+    {        
+        $this->output->AddPage();
+        $this->drawBand('noData');
+    }
+
     protected function draw_background()
     {        
         $this->drawBand('background');

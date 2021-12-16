@@ -2,14 +2,7 @@
 include "main.php";
 
 use Simitsdk\phpjasperxml\PHPJasperXML;
-$filename = __DIR__.'/example1.jrxml';
-// $filename = __DIR__.'/multicolumn-vertical.jrxml';
-// $filename = __DIR__.'/multicolumn-horizontal.jrxml';
-// $filename = __DIR__.'/multipleelements.jrxml';
-$filename = __DIR__.'/letter.jrxml';
-// $filename = __DIR__.'/barcodes.jrxml';
-// $filename = __DIR__.'/statement.jrxml';
-// $filename = __DIR__.'/uat.jrxml';
+$filename = __DIR__.'/formating.jrxml';
 
 function getS3($a)
 {
@@ -18,7 +11,7 @@ function getS3($a)
 
 $data = [];
 $faker = Faker\Factory::create('en_US');
-for($i=0;$i<40;$i++)
+for($i=0;$i<10;$i++)
 {
     $tmp=[
         'fullname' => $faker->name(),
@@ -34,7 +27,6 @@ for($i=0;$i<40;$i++)
 }
 
 
-$configsubreport = ['driver'=>'postgresql','host'=>'127.0.0.1','user'=>'postgres','pass'=>'postgres','name'=>'backend']; //postgresql db
 $config = ['driver'=>'dummy','data'=>$data];
 
 $pdffilename = '/tmp/sample1.pdf';
@@ -44,8 +36,7 @@ if(file_exists($pdffilename))
 }
 
 $report = new PHPJasperXML();
-$report->load_xml_file($filename)
-    ->setParameter(['subreportconnection'=>$configsubreport])
+$report->load_xml_file($filename)    
     ->setDataSource($config)
-    ->export('Pdf',$pdffilename);
+    ->export('Pdf');
 

@@ -111,7 +111,7 @@ Transparent | :white_check_mark: |
 Line Color | :white_check_mark: |  Line color override Forecolor
 Line Style | :white_check_mark: | 
 Line Width | :white_check_mark: | 
-Border Radius | :white_check_mark: | 
+Border Radius | :white_check_mark: | :exclamation: radius will cause line style/color/width weird due to bugs in tcpdf. dont use radius if you wish to change line style.
 
 ## Ellipse
 Setting   | Status | Description

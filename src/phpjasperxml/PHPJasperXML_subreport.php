@@ -5,9 +5,7 @@ namespace Simitsdk\phpjasperxml;
 trait PHPJasperXML_subreport{
     protected $parentobj=null;
     public function runSubReport(array $prop,object $outputobj)
-    {
-        // echo "rowcount: $this->rowcount\n";
-        
+    {                
         $this->pageproperties['topMargin']+=$prop['y'];
         $this->pageproperties['leftMargin']+=$prop['x'];
         $fullclassname =  $outputobj::Class;//  = $outputobj;
@@ -48,7 +46,7 @@ trait PHPJasperXML_subreport{
             $this->draw_noData();
         }        
 
-        $this->console( "subreport run");
+        // $this->console( "subreport run");
         // die;
         
     }

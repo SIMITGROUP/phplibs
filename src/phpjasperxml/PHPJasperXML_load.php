@@ -46,14 +46,15 @@ trait PHPJasperXML_load
      */
     public function load_xml_string(string $jrxml): self
     {
-        // $obj = simplexml_load_string($jrxml,SimpleXMLElement::class,LIBXML_NOCDATA);
+        $obj = simplexml_load_string($jrxml,SimpleXMLElement::class,LIBXML_NOCDATA);
         // $obj = simplexml_load_string($jrxml,SimpleXMLElement::class,LIBXML_DTDVALID);
         // $obj = simplexml_load_string($jrxml,SimpleXMLElement::class,LIBXML_DTDLOAD);
-        
-        $obj = simplexml_load_string($jrxml,SimpleXMLElement::class,LIBXML_HTML_NOIMPLIED);
+        // $obj = simplexml_load_string($jrxml);
+        // $obj = simplexml_load_string($jrxml,SimpleXMLElement::class,LIBXML_HTML_NOIMPLIED);
         // $obj = simplexml_load_string($jrxml,SimpleXMLElement::class,LIBXML_HTML_NODEFDTD);
         // $obj = simplexml_load_string($jrxml,SimpleXMLElement::class,LIBXML_DTDATTR);
         // $obj = simplexml_load_string($jrxml,SimpleXMLElement::class,LIBXML_COMPACT);
+        // echo gettype($obj);
         $this->pageproperties = $this->prop($obj);
         $this->columnWidth=$this->pageproperties['columnWidth'] ?? $this->pageproperties['pageWidth'];
         $this->columnCount=$this->pageproperties['columnCount']??1;

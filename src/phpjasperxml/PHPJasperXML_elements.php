@@ -43,7 +43,10 @@ trait PHPJasperXML_elements
      */
     protected function element_rectangle(array $prop, object $obj): array
     {
-        $prop=$this->appendprop($prop,$obj->graphicElement->pen);        
+        if(isset($obj->graphicElement->pen))
+        {
+            $prop=$this->appendprop($prop,$obj->graphicElement->pen);
+        }        
         return $prop;
     }
 
@@ -64,7 +67,11 @@ trait PHPJasperXML_elements
      */
     protected function element_ellipse(array $prop, object $obj): array
     {
-        $prop=$this->appendprop($prop,$obj->graphicElement->pen);        
+        if(isset($obj->graphicElement->pen))
+        {
+            $prop=$this->appendprop($prop,$obj->graphicElement->pen);        
+        }
+        
         return $prop;
     }
 
@@ -179,7 +186,7 @@ trait PHPJasperXML_elements
         $prop = $this->addBorders($prop,$obj);
         if(isset($obj->text))
         {
-            $prop['text']=$obj->text;
+            $prop['text']=(string)$obj->text;
         }        
         return $prop;
     }
@@ -344,7 +351,7 @@ trait PHPJasperXML_elements
         }
         
         
-        
+        // print_r($connection);
         $subreport
             ->setParameter($paras)
             ->setDataSource($connection)
