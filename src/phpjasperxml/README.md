@@ -40,15 +40,14 @@ rectangle | :white_check_mark: |
 circle | :white_check_mark: | 
 image | :white_check_mark: | :exclamation: Some scaleImage is not supported (Clip,RealHeight,RealSize). You can define image expression with base64 string too
 barcode | :white_check_mark: |  :exclamation: some standard is not supported, refer barcode example.
-break | :white_check_mark: | :exclamation: column break not work nicely
+break | :white_check_mark: | :exclamation: column break not work nicely, in single page multple column also may error
 subreport | :white_check_mark: | :exclamation: support basic fixed height sub report (the subreport will simply draw at current location and expand according data without consider band limits)
-chart | :x: | plan to do
-spiderchart | :x: |  plan to do
-list | :x: |  plan to do
-table | :x: |  plan to do
 frame | :white_check_mark: | 
+chart | :x: | 
+spiderchart | :x: | 
+table | :x: |  
+list | :x: | 
 generic | :x: | 
-note | :x: | 
 custom visualzation | :x: | 
 map | :x: | 
 
@@ -63,7 +62,7 @@ w | :white_check_mark: |
 h | :white_check_mark: | 
 Forecolor | :white_check_mark: | 
 Backcolor | :white_check_mark: | 
-Font  | :white_check_mark: | :exclamation: Font is configurable, but upstream (tcpdf) not support lot of fonts. Developer shall manually add font into yourproject/vendor/tecnickcom/tcpdf/fonts. Unicode character for Chinese, Japanese, Korean detected will replace as fixed font(So it display the content instead of show '?'. However, you have no way to change the their font ).
+Font  | :white_check_mark: | :exclamation: Changing font is configurable, but upstream (tcpdf) not support lot of fonts. Developer shall manually add font into yourproject/vendor/tecnickcom/tcpdf/fonts. Unicode character for Chinese, Japanese, Korean detected will replace as fixed font(So it display the content instead of show '?'. However, you have no way to change the their font ).
 Transparent | :white_check_mark: | 
 Print Repeated Value | :x: | Default = True
 Label | :x: |
