@@ -73,10 +73,10 @@
 				<textFieldExpression><![CDATA[$F{email}]]></textFieldExpression>
 			</textField>
 		</band>
-		<band height="124">
-			<property name="com.jaspersoft.studio.layout" value="com.jaspersoft.studio.editor.layout.FreeLayout"/>
-			<textField>
-				<reportElement mode="Opaque" x="0" y="0" width="141" height="124" backcolor="#E6FF05" uuid="8a90a4de-b55c-46cd-a546-71954ee5b2cf"/>
+		<band height="106">
+			<property name="com.jaspersoft.studio.layout" value="com.jaspersoft.studio.editor.layout.spreadsheet.SpreadsheetLayout"/>
+			<textField textAdjust="StretchHeight">
+				<reportElement mode="Opaque" x="0" y="0" width="141" height="106" backcolor="#E6FF05" uuid="8a90a4de-b55c-46cd-a546-71954ee5b2cf"/>
 				<box>
 					<pen lineWidth="2.0" lineColor="#2205FF"/>
 					<topPen lineWidth="2.0" lineStyle="Solid" lineColor="#2205FF"/>
@@ -90,7 +90,7 @@
 				<textFieldExpression><![CDATA[$F{description}+$F{description}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement mode="Opaque" x="141" y="0" width="138" height="124" backcolor="#A6FFB6" uuid="7d3b6a51-7bda-403d-86bf-7b870ee6a9e9"/>
+				<reportElement mode="Opaque" x="141" y="0" width="138" height="106" backcolor="#A6FFB6" uuid="7d3b6a51-7bda-403d-86bf-7b870ee6a9e9"/>
 				<box>
 					<pen lineWidth="3.75" lineStyle="Solid"/>
 					<topPen lineWidth="2.75" lineStyle="Solid" lineColor="#FA232A"/>
@@ -104,7 +104,7 @@
 				<textFieldExpression><![CDATA[$F{description}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement mode="Opaque" x="279" y="0" width="138" height="124" backcolor="#FF99FD" uuid="5ea1f238-24ca-49e7-89e0-48884e9e8d30"/>
+				<reportElement mode="Opaque" x="279" y="0" width="138" height="106" backcolor="#FF99FD" uuid="5ea1f238-24ca-49e7-89e0-48884e9e8d30"/>
 				<box>
 					<pen lineWidth="1.75" lineStyle="Dotted"/>
 					<topPen lineWidth="4.0" lineStyle="Solid" lineColor="#0505FF"/>
@@ -118,7 +118,7 @@
 				<textFieldExpression><![CDATA[$F{description}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement mode="Opaque" x="417" y="0" width="138" height="124" backcolor="#52FFFF" uuid="78f3963f-fcc6-4a7b-a36d-e8329198770d"/>
+				<reportElement mode="Opaque" x="417" y="0" width="138" height="106" backcolor="#52FFFF" uuid="78f3963f-fcc6-4a7b-a36d-e8329198770d"/>
 				<box>
 					<pen lineWidth="3.75" lineStyle="Solid"/>
 					<topPen lineWidth="2.75" lineStyle="Dotted" lineColor="#FA232A"/>
@@ -154,7 +154,7 @@
 				</ellipse>
 			</frame>
 			<rectangle radius="0">
-				<reportElement mode="Opaque" x="210" y="20" width="100" height="50" backcolor="#FCE405" uuid="33106a8d-b90f-49c9-aef6-dc9e51fd871c"/>
+				<reportElement mode="Opaque" x="210" y="8" width="100" height="50" backcolor="#FCE405" uuid="33106a8d-b90f-49c9-aef6-dc9e51fd871c"/>
 				<graphicElement>
 					<pen lineWidth="3.0" lineColor="#F70AFF"/>
 				</graphicElement>

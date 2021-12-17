@@ -11,7 +11,7 @@ function getS3($a)
 
 $data = [];
 $faker = Faker\Factory::create('en_US');
-for($i=0;$i<10;$i++)
+for($i=0;$i<20;$i++)
 {
     $tmp=[
         'fullname' => $faker->name(),

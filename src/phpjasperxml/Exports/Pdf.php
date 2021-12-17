@@ -11,6 +11,7 @@ use TCPDF_STATIC;
 class Pdf extends TCPDF implements ExportInterface
 {
     use \Simitsdk\phpjasperxml\Tools\Toolbox;
+    protected array $currentrowpos=['rowno'=>-1];
     protected array $pagesettings=[];
     protected array $bands=[];
     protected string $lastdetailband='';
@@ -36,6 +37,7 @@ class Pdf extends TCPDF implements ExportInterface
     protected $longtextrepeatcount = 0 ;
     protected $parentobj = null;
     protected $drawtarget = null;
+    protected $offsetby=0;
     public function __construct($prop)
     {           
         $this->pagesettings=$prop;
@@ -611,6 +613,9 @@ class Pdf extends TCPDF implements ExportInterface
         $h=$prop['height'];       
         $x=$this->GetX();
         $y=$this->GetY();
+        $beginingX=$x;
+        $beginingY=$y;
+        $beginingPage =$this->PageNo();
         $target = $this->drawtarget;
         $forecolor = $this->convertColorStrToRGB($prop['forecolor']??'');
         $target->SetTextColor($forecolor["r"],$forecolor["g"],$forecolor["b"]);                
@@ -739,7 +744,7 @@ class Pdf extends TCPDF implements ExportInterface
         }
         $stretchtype=0;
         $limitY = $this->islastrow ?  $this->limitY_last: $this->limitY;
-        $estimateline = $this->estimateHeight($w,$finaltxt);
+        
         
         if($textAdjust=='StretchHeight')
         {
@@ -760,24 +765,63 @@ class Pdf extends TCPDF implements ExportInterface
             $allowscale=false;
         }
         
-        // if($textAdjust=='StretchHeight')
-        // {
-            // $this->console("print $this->lastBand, UUID : $uuid, length ".strlen(($text)).", h:$h,  max height: $maxheight ");
-            // $this->console($text);
-        // }
-        // if(!empty($this->parentobj))
-        // {
-            $totalline = $target->MultiCell($w,$h,$finaltxt,$border,$halign,$fill,0,$x,$y,true,$stretchtype,$ishtml,true,$maxheight,$valign);
-        // }
-        // else
-        // {
-        //     $totalline = $this->MultiCell($w,$h,$finaltxt,$border,$halign,$fill,2,$x,$y,true,$stretchtype,$ishtml,true,$maxheight,$valign);
-        // }
+        //dry run, get estimated $newY
+        // $target->startTransaction();
+        // $target->MultiCell($w,0,$finaltxt,$border,$halign,$fill,0,$x,$y,true,$stretchtype,$ishtml,true,$maxheight,$valign);
+        // $newY=$target->GetY();
+        // $target = $target->rollbackTransaction();
+        if(!$ishtml)
+        {
+            $this->offsetby += 10;
+            $estimateHeight =  max($target->estimateHeight($w,$finaltxt),$h);        
+            $newY = $y+$estimateHeight;
+            // $target->Line(0+$this->offsetby,$y,10+$this->offsetby,$newY);
+            
+        }
+        else{
+            $estimateHeight = $h;
+        }
+        // $newY= $y+$estimateHeight;
+        $target->MultiCell($w,$h,$finaltxt,$border,$halign,$fill,0,$x,$y,true,$stretchtype,$ishtml,true,$maxheight,$valign);
+        $target->StopTransform();
+        $newY= $beginingY+$estimateHeight;
         
-        //$totalline
+
+        // switch($rotation)
+        // {
+        //     case 'Left':                
+        //         $y+=$h;                
+        //         $tmpw=$w;
+        //         $w=$h;
+        //         $h=$tmpw;                
+        //         $target->SetXY($x,$y);                
+        //         break;
+        //     case 'Right':
+        //         $x+=$w;                
+        //         $tmpw=$w;
+        //         $w=$h;
+        //         $h=$tmpw;
+        //         $this->SetXY($x,$y);
+        //         break;
+        //     case 'UpsideDown':
+        //         $x+=$w;
+        //         $y+=$h;
+        //         $target->SetXY($x,$y);
+        //         $target->Rotate(180);
+        //         break;
+        //     default:
+        //     break;
+        // }
+
+        if($newY > $target->lastBandEndY)
+        {
+            $target->lastBandEndY = (int) $newY;
+            // $this->SetY($newY);
+        }
         
-        $balancetxtlength = strlen($this->balancetext);
         
+        // $target->Line($x,$y,$x+$w,$newY);
+        $balancetxtlength = strlen($target->balancetext);
 
         // if($textAdjust=='StretchHeight' && $balancetxtlength)
         // {
@@ -786,18 +830,14 @@ class Pdf extends TCPDF implements ExportInterface
             // $this->console("maxheight = $maxheight, balance txt = '$this->balancetext'");
         // }
         
-        $target->StopTransform();
-        $newY=$this->GetY();
-        if($newY > $this->lastBandEndY)
-        {
-            $this->lastBandEndY = (int) $newY;
-        }
+        // $newY=$this->GetY();
+        
         
         // $balancetxtlength=0;
         // $allowscale=false;
         if($balancetxtlength > 0 && $allowscale==true)
         {            
-                $this->longtextrepeatcount++;                
+                // $this->longtextrepeatcount++;                
                 $prop['textFieldExpression'] =$this->balancetext;                
             //     // $this->AddPage();
                 // $this->console("Print balancetext $this->longtextrepeatcount : $this->balancetext");
@@ -813,7 +853,10 @@ class Pdf extends TCPDF implements ExportInterface
                 
                 $this->SetXY($x,$this->lastBandEndY);
                 $this->draw_staticText($uuid,$prop,$isTextField,$callback);           
+                $this->setPage($beginingPage);
+                // $this->SetXY($beginingX,$beginingY);
         }
+        
     }
     public function setParentObj($parentobj)
     {
@@ -995,6 +1038,7 @@ class Pdf extends TCPDF implements ExportInterface
     {      
         
         $offsets=[];
+        
         $this->lastBand=$bandname;
         
         if(str_contains($bandname,'detail'))
@@ -1083,6 +1127,21 @@ class Pdf extends TCPDF implements ExportInterface
         $this->lastBandEndY=$offsety+$height;;
         $this->bands[$bandname]['endY']=$this->lastBandEndY;
         $pageno=$this->PageNo();
+
+
+        if($this->currentrowpos['rowno']!=$this->currentRowNo)
+        {
+            $this->currentrowpos=[
+                'rowno'=>$this->currentRowNo,
+                'beginpage'=>$this->PageNo(),
+                'beginx'=>$offsets['x'],
+                'beginy'=>$offsets['y'],
+                'endx'=>$offsets['x'],
+                'endy'=>$offsety+$height,
+                'height'=>$height
+            ];
+        }
+        
         // echo "\n Print band($pageno) --$this->printbandcount $bandname, column: $this->columnno, $offsetx:$offsety, height:$height = endY = $this->lastBandEndY \n";
         return $offsets;
 
@@ -1410,8 +1469,8 @@ class Pdf extends TCPDF implements ExportInterface
 
     public function estimateHeight(mixed $w,mixed $txt)
     {
-        return $this->getNumLines($txt,$w);
-        // return $this->getStringHeight($w, $txt, $reseth = false, $autopadding = true, $cellMargin = '', $lineWidth = '');
+        // return $this->getNumLines($txt,$w);
+        return $this->getStringHeight($w, $txt, $reseth = false, $autopadding = true, $cellMargin = '', $lineWidth = '');
     }
 
 
@@ -1520,9 +1579,7 @@ class Pdf extends TCPDF implements ExportInterface
             $last_i++;
             
 			if (($maxh > 0) AND ($this->y > $maxy) ) {
-                $this->balancetext=TCPDF_FONTS::UniArrSubString($uchars,$j); //phpjasperxml code
-                // $this->console("     (maxh $maxh > 0) AND (this->y $this->y >  $maxy maxy) ");
-                // $this->console("     write text, balance text (i=$i,j=$j,last_i=$last_i,nb=$nb,nl=$nl)= $this->balancetext");
+                $this->balancetext=TCPDF_FONTS::UniArrSubString($uchars,$j); //phpjasperxml code                
 				break;
 			}
 			//Get the current character
