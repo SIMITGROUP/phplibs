@@ -1,6 +1,6 @@
 <?php
 
-namespace Simitsdk\phpjasperxml;
+namespace simitsdk\phpjasperxml;
 
 trait PHPJasperXML_datasource{
     protected $db = null;
@@ -26,7 +26,7 @@ trait PHPJasperXML_datasource{
             }
             else
             {
-                $classname = '\\Simitsdk\\phpjasperxml\\datadrivers\\' . ucfirst($driver);
+                $classname = '\\simitsdk\\phpjasperxml\\datadrivers\\' . ucfirst($driver);
                 $this->db = new $classname($setting);     
                 $this->fetchData();
                 return $this;           

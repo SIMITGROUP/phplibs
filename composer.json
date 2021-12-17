@@ -9,7 +9,7 @@
     },
     "autoload": {
         "psr-4": {
-            "Simitsdk\\": "src/"
+            "simitsdk\\": "src/"
         }
     }
 }

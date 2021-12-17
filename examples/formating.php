@@ -1,7 +1,7 @@
 <?php
 include "main.php";
 
-use Simitsdk\phpjasperxml\PHPJasperXML;
+use simitsdk\phpjasperxml\PHPJasperXML;
 $filename = __DIR__.'/formating.jrxml';
 
 function getS3($a)

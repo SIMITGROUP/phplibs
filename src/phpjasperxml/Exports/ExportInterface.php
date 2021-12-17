@@ -1,6 +1,6 @@
 <?php
 
-namespace Simitsdk\phpjasperxml\Exports;
+namespace simitsdk\phpjasperxml\Exports;
 interface ExportInterface
 {
     public function setData(array $data);

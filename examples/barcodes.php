@@ -1,6 +1,6 @@
 <?php
 include "main.php";
-use Simitsdk\phpjasperxml\PHPJasperXML;
+use simitsdk\phpjasperxml\PHPJasperXML;
 $filename = __DIR__.'/barcodes.jrxml';
 
 $data=[

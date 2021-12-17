@@ -1,5 +1,5 @@
 <?php
-namespace Simitsdk\phpjasperxml\datadrivers;
+namespace simitsdk\phpjasperxml\datadrivers;
 
 class Postgresql implements DataInterface
 {

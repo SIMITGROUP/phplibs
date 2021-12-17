@@ -1,6 +1,6 @@
 <?php
 
-namespace Simitsdk\phpjasperxml\Tools;
+namespace simitsdk\phpjasperxml\Tools;
 
 use SimpleXMLElement;
 

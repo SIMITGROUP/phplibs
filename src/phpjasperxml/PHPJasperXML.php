@@ -1,5 +1,5 @@
 <?php
-namespace Simitsdk\phpjasperxml;
+namespace simitsdk\phpjasperxml;
 
 class PHPJasperXML{
     use PHPJasperXML_load;

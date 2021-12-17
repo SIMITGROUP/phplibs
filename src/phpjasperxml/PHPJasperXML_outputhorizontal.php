@@ -1,6 +1,6 @@
 <?php
 
-namespace Simitsdk\phpjasperxml;
+namespace simitsdk\phpjasperxml;
 
 trait PHPJasperXML_outputhorizontal{
     protected $currentRowTop=0;

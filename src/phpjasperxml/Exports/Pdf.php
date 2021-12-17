@@ -1,5 +1,5 @@
 <?php
-namespace Simitsdk\phpjasperxml\Exports;
+namespace simitsdk\phpjasperxml\Exports;
 use Com\Tecnick\Color\Model\Rgb;
 use Throwable;
 use TCPDF;

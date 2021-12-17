@@ -1,6 +1,6 @@
 <?php
 
-namespace Simitsdk\phpjasperxml;
+namespace simitsdk\phpjasperxml;
 
 trait PHPJasperXML_output
 {                    
@@ -16,7 +16,7 @@ trait PHPJasperXML_output
     public function export(string $type,string $filename='')
     {
         
-        $classname = '\\Simitsdk\\phpjasperxml\\Exports\\'.ucfirst($type);
+        $classname = '\\simitsdk\\phpjasperxml\\Exports\\'.ucfirst($type);
         $this->output  = new $classname($this->pageproperties);        
         $this->output->defineBands($this->bands,$this->elements,$this->groups);
         // echo "rowcount $this->rowcount";die;
@@ -204,7 +204,7 @@ trait PHPJasperXML_output
             return ;
         }
 
-        
+
         if(isset($this->bands[$bandname]['printWhenExpression']))
         {
             $banddisplayexpression = $this->bands[$bandname]['printWhenExpression'];
