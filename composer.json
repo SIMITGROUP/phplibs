@@ -1,6 +1,6 @@
 {
     "name": "simitsdk/phplibs",
-    "description": "All php libs",
+    "description": "Several useful library for develop php based management system such as wysiwyg pdf document generator (phpjasperxml). Library \n1. phpjasperxml\n2. Coming soon",
     "require": {
         "php": ">=7.4",
         "tecnickcom/tc-lib-pdf":"*",
