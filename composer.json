@@ -11,5 +11,12 @@
         "psr-4": {
             "simitsdk\\": "src/"
         }
-    }
+    },
+    "authors": [
+        {
+            "name": "kstan",
+            "email": "kstan@simitgroup.com"
+        }
+    ]
+
 }
