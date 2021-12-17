@@ -17,6 +17,9 @@
             "name": "kstan",
             "email": "kstan@simitgroup.com"
         }
-    ]
+    ],
+    "license": [
+        "BSD-3-Clause"
+     ]
 
 }
