@@ -4,11 +4,6 @@ include "main.php";
 use simitsdk\phpjasperxml\PHPJasperXML;
 $filename = __DIR__.'/formating.jrxml';
 
-function getS3($a)
-{
-    return "hi hi hi ".$a;
-}
-
 $data = [];
 $faker = Faker\Factory::create('en_US');
 for($i=0;$i<20;$i++)
@@ -27,13 +22,7 @@ for($i=0;$i<20;$i++)
 }
 
 
-$config = ['driver'=>'dummy','data'=>$data];
-
-$pdffilename = '/tmp/sample1.pdf';
-if(file_exists($pdffilename))
-{
-    unlink($pdffilename);
-}
+$config = ['driver'=>'hasharray','data'=>$data];
 
 $report = new PHPJasperXML();
 $report->load_xml_file($filename)    

@@ -17,6 +17,7 @@ trait PHPJasperXML_subreport{
         $this->output->setParentObj($outputobj);
 
         $this->output->defineBands($this->bands,$this->elements,$this->groups);
+        // echo "$this->rowcount";die;
         if($this->rowcount>0)
         {
             $this->sortData();

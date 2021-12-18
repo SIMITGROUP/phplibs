@@ -18,6 +18,7 @@ trait PHPJasperXML_output
         
         $classname = '\\simitsdk\\phpjasperxml\\Exports\\'.ucfirst($type);
         $this->output  = new $classname($this->pageproperties);        
+        // print_r($this->bands);die;
         $this->output->defineBands($this->bands,$this->elements,$this->groups);
         // echo "rowcount $this->rowcount";die;
         if($this->rowcount>0)
@@ -224,21 +225,8 @@ trait PHPJasperXML_output
         $height = $this->bands[$bandname]['height'];
         if($height>0)
         {
-            //loop all element, grow band height if necessary
-            
-            // foreach($this->elements[$bandname] as $uuid =>$element)
-            // {
-            //     //if this element will grow
-            //     if($element['elementtype']=='textField' && $element['textAdjust']=='StretchHeight')
-            //     {
-            //         $txt = $this->executeExpression($element['textExpression']);
-            //         $boxheight = $this->output->estimateHeight($element['width'],$txt);
-
-            //     }
-            // }
-
-            //actual draw band elements
-            foreach($this->elements[$bandname] as $uuid =>$element)
+         
+           foreach($this->elements[$bandname] as $uuid =>$element)
             {
                 $tmp = $element;
                 $isdisplayelement = true;

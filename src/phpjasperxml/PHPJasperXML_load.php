@@ -77,7 +77,17 @@ trait PHPJasperXML_load
                         $setting[$key]=(string)$value;
                     }
                     $setting['datatype']=$this->getDataType($setting);
-                    if($k!='field')
+                    
+                    if($k=='variable')
+                    {
+                        // print_r($setting);
+                        if(empty($setting['variableExpression']))
+                        {
+                            die("variable $name undefined expression");
+                        }
+                        $setting['value']=null;
+                    }
+                    else if($k=='parameter')
                     {
                         $setting['value']=null;
                     }
@@ -344,7 +354,7 @@ trait PHPJasperXML_load
             case 'java.lang.Short':
             case 'java.lang.Double':            
             case 'java.lang.Float':
-            case 'java.lang.BigDecimal':
+            case 'java.math.BigDecimal':
                 $type='number';
             break;
             case 'java.sql.Connection':

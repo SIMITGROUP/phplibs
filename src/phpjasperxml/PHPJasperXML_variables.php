@@ -145,9 +145,13 @@ trait PHPJasperXML_variables
      */
     protected function compute_Sum(string $varname,array $setting, int $rowno, bool $isreset=false): mixed
     {        
-        $prevvalue=$this->getVariableValue($varname);
+        $prevvalue=$this->getVariableValue($varname) ?? 0;
         $variableExpression = $setting['variableExpression'];
-        $newvalue = $this->executeExpression($variableExpression);
+        // print_r($setting);
+        // echo "<hr/>";
+        $newvalue = $this->executeExpression($variableExpression) ?? 0;
+        // $prevvalue = ($prevvalue == "''") ? 0 : $prevvalue;
+        // $newvalue = ($newvalue == "''") ? 0 : $newvalue;
         // echo "\nvariableExpression = $variableExpression, prevvalue = $prevvalue, newvalue = $newvalue, isreset $isreset\n";
         if($isreset)
         {
@@ -155,6 +159,7 @@ trait PHPJasperXML_variables
         }
         else
         {
+            // echo "\$variablevalue=$prevvalue + $newvalue;";
             $variablevalue=$prevvalue + $newvalue;
         }        
         return $variablevalue;

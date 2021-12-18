@@ -97,7 +97,7 @@ class Pdf extends TCPDF implements ExportInterface
     public function defineBands(array $bands,array $elements,array $groups)
     {
         
-        $this->bands = $bands;
+        $this->bands = $bands;        
         $this->elements = $elements;              
         $this->groups = $groups;
         foreach($groups as $gname=>$gsetting)
@@ -639,7 +639,7 @@ class Pdf extends TCPDF implements ExportInterface
         // echo "<hr/>";
 
         //text can scale at detail and summary band only
-        if(! (str_contains($prop['band'],'detail_') || $prop['band'] == 'summary'))
+        if(! (str_contains($prop['band'],'detail_')))
         {
             $prop['textAdjust']='';
         }
@@ -1000,7 +1000,9 @@ class Pdf extends TCPDF implements ExportInterface
         {            
             // echo "<br/>end band  $bandname have pageOffSetY $this->pageOffSetY<br/>";
             $this->lastBandEndY =$this->pageOffSetY;
+            $this->bands[$bandname]['endY'] = $this->pageOffSetY;
             $this->pageOffSetY=0;  
+            
             $this->SetPage($this->getNumPages());
         }
 
@@ -1282,12 +1284,34 @@ class Pdf extends TCPDF implements ExportInterface
         }
         else
         {
+            // $offsety = $this->bands[$lastband]['endY'];
+            // $offsety = $this->lastBandEndY;
             $offsety = $this->bands[$this->lastdetailband]['endY'];
+            // if($this->offsetby > 0 )
+            // {
+            //     // echo  $this->offsetby;
+            //     $offsety = $this->offsetby;
+            //     $this->offsetby=0;
+            //     $this->SetY($offsety);
+                
+            //     // $this->SetPage( $this->PageNo()-1);
+            //     // $this->SetPage($this->getNumPages());
+            //     // $this->deletePage($this->getNumPages());
+
+            // }
+            // else
+            // {
+                $offsety = $this->bands[$this->lastdetailband]['endY'];
+            // }
         }
         
         $estimateY=$offsety+$this->getBandHeight('summary');
-        if(($this->columnno >0 || $this->isEndDetailSpace($estimateY) ) && gettype($callback)=='object')
+        // print_r($this->bands);
+        // echo $estimateY;die;
+        // if(($this->columnno >0 || $this->isEndDetailSpace($estimateY) ) && gettype($callback)=='object')
+        if($this->isEndDetailSpace($estimateY) )
         {            
+
             $offsety = $callback();//$this->bands['columnHeader']['endY'];    
         }
         $offset = ['x'=>$this->pagesettings['leftMargin'],'y'=>$offsety];        

@@ -7,7 +7,7 @@ $data=[
     ['a'=>1]
 ]; // 1 row
 
-$config = ['driver'=>'dummy','data'=>$data];
+$config = ['driver'=>'hasharray','data'=>$data];
 $report = new PHPJasperXML();
 $report->load_xml_file($filename)    
     ->setDataSource($config)

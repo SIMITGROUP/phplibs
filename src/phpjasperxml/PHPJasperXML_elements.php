@@ -319,6 +319,7 @@ trait PHPJasperXML_elements
     }
     public function draw_subreport(string $uuid,array $prop)
     {
+        // echo "draw_subreport<hr>";
         $subreport = new PHPJasperXML();        
         $subreportExpression = $this->executeExpression($prop['subreportExpression']);        
         if($this->left($subreportExpression,5)=='<?xml')
@@ -338,6 +339,10 @@ trait PHPJasperXML_elements
         if($connectionExpression=='REPORT_CONNECTION')
         {
             $connection = $this->connectionsetting;
+            if(isset($connection['data']))
+            {
+                $connection['data'] = [['a'=>1]];
+            }
         }
         else
         {
@@ -351,16 +356,11 @@ trait PHPJasperXML_elements
         }
         
         
-        // print_r($connection);
         $subreport
             ->setParameter($paras)
             ->setDataSource($connection)
             ->runSubReport($prop,$this->output);
             ;
-            // echo "xxxxx";die;
-        // ->export('subreport',$this->output);
-
-        // $this->output->draw_unsupportedElement($uuid,$prop);
     }
     protected function element_componentElement(array $prop, SimpleXMLElement $obj): array
     {        

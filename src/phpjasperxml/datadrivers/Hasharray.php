@@ -1,7 +1,7 @@
 <?php
 namespace simitsdk\phpjasperxml\datadrivers;
 
-class Dummy implements DataInterface
+class Hasharray implements DataInterface
 {
     protected $conn;
     protected array $data=[];
@@ -9,7 +9,7 @@ class Dummy implements DataInterface
     {
         if(!isset($config['data']))
         {
-            die('Undefine data in dummy driver');
+            die('Undefine data in array driver');
         }
         else
         {

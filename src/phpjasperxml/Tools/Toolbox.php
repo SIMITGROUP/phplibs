@@ -48,7 +48,12 @@ trait Toolbox
 
     public function console(mixed $txt='')
     {
-        echo "\n$txt\n";
+        if (php_sapi_name() == "cli") {
+            echo "\n$txt\n";
+        } else {
+            echo "<br/>$txt<br/>";
+        }
+        
     }
 
 }
