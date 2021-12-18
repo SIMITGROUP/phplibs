@@ -7,3 +7,5 @@ Libraries | Status | Description
 
 
 
+# Install
+`composer require simitsdk/phplibs`
