@@ -1,7 +1,9 @@
 # phplibs
-all independent php libraries included
+This repository maintain some useful php libraries developed by us.
+
+Libraries | Status | Description
+--------- | ------ | -----------
+[phpjasperxml](src/phpjasperxml/README.md) | :white_check_mark: | PHP WYSIWYG PDF renderer of Jasper studio
 
 
-Libraries:
-1. [phpjasperxml](https://github.com/SIMITGROUP/phplibs/tree/main/src/phpjasperxml) - PHP WYSIWYG PDF renderer of Jasper studio
 
