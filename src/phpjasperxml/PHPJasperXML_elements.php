@@ -341,7 +341,15 @@ trait PHPJasperXML_elements
             $connection = $this->connectionsetting;
             if(isset($connection['data']))
             {
-                $connection['data'] = [['a'=>1]];
+                if(count($connection['data'])>0)
+                {
+                    $connection['data'] = [['a'=>1]];
+                }
+                else
+                {
+                    $connection['data']=[];
+                }
+                
             }
         }
         else
