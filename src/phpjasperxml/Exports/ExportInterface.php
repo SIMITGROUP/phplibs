@@ -31,5 +31,5 @@ interface ExportInterface
     public function PageNo():int;
     public function ColumnNo():int;
     public function columnCount(): int;
-    public function getNumPages(): int;
+    
 }

@@ -266,7 +266,8 @@ trait PHPJasperXML_output
                 }                            
             }
         }
-        // $this->output->endBand($bandname,$offsetx,$offsety);
+        $this->output->endBand($bandname);
+        
     }
     
     protected function draw_noData()

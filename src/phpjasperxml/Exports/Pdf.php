@@ -32,12 +32,15 @@ class Pdf extends TCPDF implements ExportInterface
     protected int $printbandcount=0;
     public bool $islastrow = false;
     protected string $balancetext='';
+    protected $defaultDetailbeginY=0;
+    protected $pageOffSetY=0;
     protected $limitY=0;
     protected $limitY_last=0;
     protected $longtextrepeatcount = 0 ;
     protected $parentobj = null;
     protected $drawtarget = null;
     protected $offsetby=0;
+    
     public function __construct($prop)
     {           
         $this->pagesettings=$prop;
@@ -109,6 +112,7 @@ class Pdf extends TCPDF implements ExportInterface
             }
         }  
         $page = $this->pagesettings;              
+        $this->defaultDetailbeginY = $page['topMargin'] + $this->bands['pageHeader']['height'] + $this->bands['columnHeader']['height'];
         $this->limitY = $page['pageHeight'] - $page['bottomMargin'] - $this->bands['columnFooter']['height'] - $this->bands['pageFooter']['height'];
         $laspageheight = $this->bands['lastPageFooter']['height'] >0 ? $this->bands['lastPageFooter']['height'] :$this->bands['pageFooter']['height'] ;
         $this->limitY_last = $page['pageHeight'] - $page['bottomMargin'] - $this->bands['columnFooter']['height'] - $laspageheight;
@@ -153,24 +157,6 @@ class Pdf extends TCPDF implements ExportInterface
     //*********************************************** draw elements ***************************************************/    
     //*********************************************** draw elements ***************************************************/    
     
-    /**
-     * draw all report elements according position
-     */
-    // public function drawElement(string $uuid, array $prop,int $offsetx,int $offsety)
-    // {        
-    //     // $prop = $this->prop($obj->reportElement);
-    //     $x = $prop['x']+$offsetx;
-    //     $y = $prop['y']+$offsety;//$this->currentY;
-    //     $height = $prop['height'];
-    //     $width = $prop['width'];
-
-    //     // echo "draw element $uuid $obj->type:".print_r($prop,true)."\n";
-    //     $this->setPosition($x,$y);
-    //     $methodname = 'draw_'.$prop['elementtype'];
-    //     call_user_func([$this,$methodname],$uuid,$prop);
-        
-    // }
-
     public function draw_line(string $uuid,array $prop)
     {
         $x1=$this->GetX();
@@ -529,6 +515,12 @@ class Pdf extends TCPDF implements ExportInterface
         // }
         $this->Ellipse($x,$y,$rx,$ry,0,0,360,$style,$ellipsestyle);
     }
+    protected function updateLastEndY(int $y)
+    {
+        $page = $this->PageNo();
+        $column = $this->getColumnNo();
+
+    }
     protected function useFont(string $fontName, string $fontstyle, int $fontsize,mixed $text)
     {
         // \p{Common}
@@ -605,7 +597,7 @@ class Pdf extends TCPDF implements ExportInterface
         // $this->Rect($x,$y,$w,$h);
         // echo "\ndraw_rectangle  $uuid ".print_r($prop,true)."\n";
     }
-    public function draw_staticText(string $uuid,array $prop,bool $isTextField=false,mixed $callback=null)
+    public function draw_staticText(string $uuid,array $prop,bool $isTextField=false,mixed $callback=null,$iscontinue=false)
     {
         // print_r($prop);
         // echo "<hr/>";
@@ -784,77 +776,48 @@ class Pdf extends TCPDF implements ExportInterface
         // $newY= $y+$estimateHeight;
         $target->MultiCell($w,$h,$finaltxt,$border,$halign,$fill,0,$x,$y,true,$stretchtype,$ishtml,true,$maxheight,$valign);
         $target->StopTransform();
-        $newY= $beginingY+$estimateHeight;
+        $newY= (int) ($beginingY+$estimateHeight);
         
 
-        // switch($rotation)
-        // {
-        //     case 'Left':                
-        //         $y+=$h;                
-        //         $tmpw=$w;
-        //         $w=$h;
-        //         $h=$tmpw;                
-        //         $target->SetXY($x,$y);                
-        //         break;
-        //     case 'Right':
-        //         $x+=$w;                
-        //         $tmpw=$w;
-        //         $w=$h;
-        //         $h=$tmpw;
-        //         $this->SetXY($x,$y);
-        //         break;
-        //     case 'UpsideDown':
-        //         $x+=$w;
-        //         $y+=$h;
-        //         $target->SetXY($x,$y);
-        //         $target->Rotate(180);
-        //         break;
-        //     default:
-        //     break;
-        // }
-
-        if($newY > $target->lastBandEndY)
+        if($iscontinue)
         {
-            $target->lastBandEndY = (int) $newY;
-            // $this->SetY($newY);
+            
+            $target->lastBandEndY = $newY;
+            $this->pageOffSetY=$newY;            
+            // echo "<br/>until  page: ".$this->PageNo().", Y=$newY <br/> ";
+        }
+        else if( $newY > $target->lastBandEndY)
+        {
+            $newY =(int) $newY;
+            $target->lastBandEndY = $newY;
+            
+
         }
         
         
-        // $target->Line($x,$y,$x+$w,$newY);
         $balancetxtlength = strlen($target->balancetext);
-
-        // if($textAdjust=='StretchHeight' && $balancetxtlength)
-        // {
-            // $this->console("totalline $totalline / $estimateline estimateline");            
-            // $this->console("$textAdjust balancetxt $uuid ".strlen(($this->balancetext)));
-            // $this->console("maxheight = $maxheight, balance txt = '$this->balancetext'");
-        // }
-        
-        // $newY=$this->GetY();
         
         
-        // $balancetxtlength=0;
-        // $allowscale=false;
         if($balancetxtlength > 0 && $allowscale==true)
         {            
+                // echo "<br/>print long text cross page: ".$this->PageNo()." ====> ".$prop['textFieldExpression']."<br/> ";
                 // $this->longtextrepeatcount++;                
-                $prop['textFieldExpression'] =$this->balancetext;                
+                $prop['textFieldExpression'] =$this->balancetext;    
+                
             //     // $this->AddPage();
-                // $this->console("Print balancetext $this->longtextrepeatcount : $this->balancetext");
                 
                 if(gettype($callback)=='object')
                 {
-                    // $this->console("$this->longtextrepeatcount balance $uuid text go next page: $this->balancetext");
-                    
+                    $originalEndY = $this->lastBandEndY;
                     $callback();
                 }
                 $this->balancetext='';
-                // $prop['y']=0;
                 
                 $this->SetXY($x,$this->lastBandEndY);
-                $this->draw_staticText($uuid,$prop,$isTextField,$callback);           
+                
+                $this->draw_staticText($uuid,$prop,$isTextField,$callback,true);                                           
                 $this->setPage($beginingPage);
-                // $this->SetXY($beginingX,$beginingY);
+                $this->SetXY($x,$beginingY);
         }
         
     }
@@ -1030,6 +993,18 @@ class Pdf extends TCPDF implements ExportInterface
             }
         }
     }
+
+    public function endBand(string $bandname)
+    {
+        if($this->pageOffSetY>0)
+        {            
+            // echo "<br/>end band  $bandname have pageOffSetY $this->pageOffSetY<br/>";
+            $this->lastBandEndY =$this->pageOffSetY;
+            $this->pageOffSetY=0;  
+            $this->SetPage($this->getNumPages());
+        }
+
+    }
     /**
      * prepare band in pdf, and return x,y offsets
      * @param 
@@ -1041,13 +1016,13 @@ class Pdf extends TCPDF implements ExportInterface
         
         $this->lastBand=$bandname;
         
+        
         if(str_contains($bandname,'detail'))
         {
-            $methodname = 'draw_detail';
+            $methodname = 'draw_detail';            
             $band = $this->bands[$bandname];
-            $offsets = call_user_func([$this,$methodname],$bandname,$callback);
-            // print_r($offsets);
-            // echo "<hr>";
+            $offsets = call_user_func([$this,$methodname],$bandname,$callback);            
+            
         }
         else if(str_contains($bandname,$this->groupbandprefix))
         {
@@ -1077,11 +1052,16 @@ class Pdf extends TCPDF implements ExportInterface
 
         $width = $this->getPageWidth() - $this->pagesettings['leftMargin'] - $this->pagesettings['rightMargin'];
         $height = isset($band['height'])? $band['height'] : 0;
-        $offsety=$this->pagesettings['topMargin'];
 
+        //define y position if height = 0;
         
-
-        if($height>0)
+        
+        
+        if($height==0)
+        {
+            $offsety=$this->pagesettings['topMargin'];
+        }
+        else
         {
             $offsetx = isset($offsets['x']) ? $offsets['x']: 0;
             $offsetx = (int)$offsetx;
@@ -1127,20 +1107,6 @@ class Pdf extends TCPDF implements ExportInterface
         $this->lastBandEndY=$offsety+$height;;
         $this->bands[$bandname]['endY']=$this->lastBandEndY;
         $pageno=$this->PageNo();
-
-
-        if($this->currentrowpos['rowno']!=$this->currentRowNo)
-        {
-            $this->currentrowpos=[
-                'rowno'=>$this->currentRowNo,
-                'beginpage'=>$this->PageNo(),
-                'beginx'=>$offsets['x'],
-                'beginy'=>$offsets['y'],
-                'endx'=>$offsets['x'],
-                'endy'=>$offsety+$height,
-                'height'=>$height
-            ];
-        }
         
         // echo "\n Print band($pageno) --$this->printbandcount $bandname, column: $this->columnno, $offsetx:$offsety, height:$height = endY = $this->lastBandEndY \n";
         return $offsets;
@@ -1255,6 +1221,26 @@ class Pdf extends TCPDF implements ExportInterface
     public function setRowNumber(int $no)
     {
         $this->currentRowNo=$no;
+        
+        // if($this->currentrowpos['rowno']==0)
+        // {
+        //     $this->currentrowpos=[
+        //         'rowno'=>$this->currentRowNo,
+        //         'beginpage'=>$this->PageNo(),
+        //         'endpage'=>$this->PageNo(),
+        //         // 'beginx'=>$offsets['x'],
+        //         'beginy'=>$this->getLastBandEndY(),
+        //         // 'endx'=>$offsets['x'],
+        //         // 'endy'=>$offsety+$height,
+        //         // 'height'=>$height
+        //     ];
+        // }
+        // else
+        // {
+        //     $tmp = $this->currentrowpos;
+        // }
+        
+        
     }
     public function draw_columnFooter()
     {        
@@ -1302,20 +1288,8 @@ class Pdf extends TCPDF implements ExportInterface
         $estimateY=$offsety+$this->getBandHeight('summary');
         if(($this->columnno >0 || $this->isEndDetailSpace($estimateY) ) && gettype($callback)=='object')
         {            
-            // echo "summary add page";
             $offsety = $callback();//$this->bands['columnHeader']['endY'];    
         }
-        // else
-        // {
-        //     $offsety = $this->lastBandEndY;
-        // }
-        
-        // $estimateY=$offsety+$this->getBandHeight('summary');
-        // if($this->isEndDetailSpace($estimateY) && gettype($callback)=='object')
-        // {            
-        //     $callback();
-        //     $offsety = $this->bands['columnHeader']['endY'];    
-        // }
         $offset = ['x'=>$this->pagesettings['leftMargin'],'y'=>$offsety];        
         return $offset;
     }
@@ -1338,11 +1312,6 @@ class Pdf extends TCPDF implements ExportInterface
             $callback();
             $offsety = $this->bands['columnHeader']['endY'];    
         }
-        /*
-            if parent == previousheader
-            else parent == this group footer
-
-         */
         $offset=['x'=>$offsetx,'y'=>$offsety];
         return $offset;
     }
@@ -1397,22 +1366,10 @@ class Pdf extends TCPDF implements ExportInterface
         ];
         return $style;
     }
-    // public function __call($methodname,$args)
-    // {
-    //     if(!method_exists($this,$methodname))
-    //     {
-    //         echo "\n$methodname() does not exists\n";
-    //     }
-    // }
 
     public function columnCount(): int
     {
         return $this->pagesettings['columnCount'];
-    }
-
-    public function getNumPages(): int
-    {
-        return parent::getNumPages();
     }
 
     protected function convertColorStrToRGB(string $colorstr):array
