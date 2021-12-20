@@ -230,8 +230,10 @@ trait PHPJasperXML_elements
      * @param string $uuid unique id
      * @param array $prop
      */
-    public function draw_textField(string $uuid,array $prop){
-        $prop['textFieldExpression']=$this->executeExpression($prop['textFieldExpression']);
+    public function draw_textField(string $uuid,array $prop)
+    {
+        $prop['evaluationTime'] = $prop['evaluationTime']?? '';    
+        $prop['textFieldExpression']=$this->executeExpression($prop['textFieldExpression'],0,$prop['evaluationTime']);
         // $link = $prop['hyperlinkReferenceExpression']??'';        
         if(!empty($prop['patternExpression']))
         {

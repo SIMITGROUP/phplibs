@@ -360,7 +360,8 @@ trait PHPJasperXML_output
                         $columnno = $this->output->getColumnNo();
                         if($columnno == $this->columnCount -1)
                         {
-                            $this->newPage();
+                            //by right shall create new page, but dun understand why it no need, tmp disable it
+                            // $this->newPage();
                         }
                         else
                         {
@@ -469,7 +470,7 @@ trait PHPJasperXML_output
                 $this->groups[$groupname]['ischange']=false;
                 $this->output->groups[$groupname]['ischange']=false;
             }
-
+            $this->groups[$groupname]['count']++;
 
             array_push($this->descgroupnames,$groupname);                        
         }        

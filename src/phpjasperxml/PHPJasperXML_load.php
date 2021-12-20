@@ -217,7 +217,7 @@ trait PHPJasperXML_load
         $bandname = 'report_group_'.$name;
         $groupExpression = $obj->groupExpression;
         $prop['value']=0;
-        $prop['count']=0;
+        $prop['count']=1;
         $prop['groupExpression']=$groupExpression;
         $prop['groupno']=$this->groupcount;
         $prop['ischange']=true;

@@ -21,10 +21,10 @@ trait PHPJasperXML_expression
         // $this->console("expression $expression === $result");
         return $result;
     }
-    protected function executeExpression(string $expression,int $addrowqty=0): mixed
+    protected function executeExpression(string $expression,int $addrowqty=0,string $evaluationTime=''): mixed
     {   
-        // echo "\n  executeExpression: $expression\n";
-        $value = $this->parseExpression($expression,$addrowqty);
+        // $this->console( "executeExpression: $expression");
+        $value = $this->parseExpression($expression,$addrowqty,$evaluationTime);
 
         //special result, direct return raw value
         if(gettype($value)=='object' || gettype($value)=='array')
@@ -39,22 +39,27 @@ trait PHPJasperXML_expression
         
         
         $evalstr = "return $value;";
+        // $this->console( $evalstr);
         try{
             $finalvalue = eval($evalstr);
+            // $this->console( $finalvalue."<hr/>");
             return $finalvalue;
         }catch(Throwable $err){
-            die("Cannot eval formula \"$evalstr\"".$err->getMessage());
+            $this->console("Eval failed.");
+            $this->console($evalstr);
+            $this->failed($err->getMessage());
 
         }
     }
 
-    protected function parseExpression(string $expression,int $addrowqty=0): mixed
+    protected function parseExpression(string $expression,int $addrowqty=0,string $evaluationTime=''): mixed
     {
         $value = $expression;
         $fieldpattern = '/\$F{(.*?)}/';
         $varpattern = '/\$V{(.*?)}/';
         $parapattern = '/\$P{(.*?)}/';
 
+        $value = $this->overrideJavaFunctions($value,$evaluationTime);
         // echo "\nparseExpression $expression\n";
         preg_match_all($fieldpattern, $value, $matchfield);
         preg_match_all($varpattern, $value, $matchvar);
@@ -66,31 +71,36 @@ trait PHPJasperXML_expression
         $paranames = $matchpara[1];
         $varstrings = $matchvar[0];
         $varnames = $matchvar[1];    
-        
+        // $this->console($expression);
         foreach($fieldnames as $f => $fieldname)
         {
-            $data = $this->getFieldValue($fieldname,$addrowqty);
+            $data = $this->getFieldValue($fieldname,$addrowqty,$evaluationTime);
             $value = str_replace($fieldstrings[$f], $data,$value);
         }
         foreach($varnames as $v => $varname)
         {
-            $data = $this->getVariableValue($varname);
+            $data = $this->getVariableValue($varname,$evaluationTime);
             $value = str_replace($varstrings[$v], $data,$value);
         }
         foreach($paranames as $p => $paraname)
         {
-            $data = $this->getParameterValue($paraname);
+            $data = $this->getParameterValue($paraname,$evaluationTime);
             if(gettype($data)=='array' || gettype($data)=='object')
             {
                 return $data;
             }
             $value = str_replace($parastrings[$p], $data,$value);
         }
+        // $this->console($value);
         return $value;        
     }    
 
-
-    protected function getFieldValue(string $name,int $addrowqty=0)
+    protected function overrideJavaFunctions(string $expression,string $evaluationTime='')
+    {
+        $expression = str_replace('new java.util.Date()','"'.date('Y-m-d H:i:s').'"',$expression);        
+        return $expression;
+    }
+    protected function getFieldValue(string $name,int $addrowqty=0,string $evaluationTime='')
     {
         $rowno = $this->currentRow+$addrowqty;
         $datatype = $this->fields[$name]['datatype'];
@@ -109,7 +119,7 @@ trait PHPJasperXML_expression
     }
 
 
-    protected function getParameterValue($key)
+    protected function getParameterValue(string $key,string $evaluationTime='')
     {
         $value=null;
         if(!isset($this->parameters[$key]))
@@ -150,14 +160,23 @@ trait PHPJasperXML_expression
     }
 
 
-    protected function getVariableValue($key)
+    protected function getVariableValue($key,string $evaluationTime='')
     {        
         // echo "\n getVariableValue $key: \n";
         $datatype = "number";//by default all datatype is number, unless variable class defined
         switch($key)
         {
             case 'PAGE_NUMBER':
-                $result = $this->output->PageNo();
+                // $this->console("$key, $evaluationTime");
+                if($evaluationTime=='Report')
+                {
+                    
+                    $result = '"'.$this->output->getAliasNbPages().'"';
+                }
+                else
+                {
+                    $result = $this->output->PageNo();
+                }                
             break;
             case 'MASTER_CURRENT_PAGE':
                 $result = '***MASTER_CURRENT_PAGE NOT SUPPORTED***';
@@ -236,7 +255,9 @@ trait PHPJasperXML_expression
                 {
                     $value = '';
                 }
-                $data = "'".addslashes($value)."'";
+                // $data = addslashes($value);
+                // $data = addslashes($value);
+                $data = '"'.addslashes($value).'"';
             break;
         }
         return (string) $data;

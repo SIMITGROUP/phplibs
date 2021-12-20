@@ -103,9 +103,9 @@ now() as invoicedate,
 				<reportElement x="0" y="240" width="550" height="500" uuid="29a4fd89-9923-4767-b793-d6b278e0367a"/>
 			</rectangle>
 			<textField>
-				<reportElement x="35" y="410" width="480" height="210" forecolor="#949494" uuid="ba6b1b9c-c76c-429a-94ec-b8f4d9b777ac"/>
+				<reportElement x="35" y="310" width="480" height="370" forecolor="#949494" uuid="ba6b1b9c-c76c-429a-94ec-b8f4d9b777ac"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="Times" size="60" isBold="true"/>
+					<font fontName="Times" size="70" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{statustxt}]]></textFieldExpression>
 			</textField>

@@ -11,7 +11,8 @@ use TCPDF_STATIC;
 class Pdf extends TCPDF implements ExportInterface
 {
     use \Simitsdk\phpjasperxml\Tools\Toolbox;
-    protected array $currentrowpos=['rowno'=>-1];
+    protected bool $debugband=false;
+    protected array $pagecolumnoccupation=[];
     protected array $pagesettings=[];
     protected array $bands=[];
     protected string $lastdetailband='';
@@ -27,7 +28,7 @@ class Pdf extends TCPDF implements ExportInterface
     protected int $columnCount;
     protected string $defaultfont='helvetica';
     protected int $currentRowNo=0;
-    protected bool $debugband=false;
+    
     protected string $groupbandprefix = 'report_group_';
     protected int $printbandcount=0;
     public bool $islastrow = false;
@@ -139,6 +140,7 @@ class Pdf extends TCPDF implements ExportInterface
     }
     public function export(string $filename='')
     {     
+        // $this->console($this->pagecolumnoccupation);
         if(!empty($filename))
         {
             $this->Output($filename,'F');
@@ -762,7 +764,7 @@ class Pdf extends TCPDF implements ExportInterface
         // $target->MultiCell($w,0,$finaltxt,$border,$halign,$fill,0,$x,$y,true,$stretchtype,$ishtml,true,$maxheight,$valign);
         // $newY=$target->GetY();
         // $target = $target->rollbackTransaction();
-        if(!$ishtml)
+        if(!$ishtml && $textAdjust=='StretchHeight')
         {
             $this->offsetby += 10;
             $estimateHeight =  max($target->estimateHeight($w,$finaltxt),$h);        
@@ -775,6 +777,10 @@ class Pdf extends TCPDF implements ExportInterface
         }
         // $newY= $y+$estimateHeight;
         $target->MultiCell($w,$h,$finaltxt,$border,$halign,$fill,0,$x,$y,true,$stretchtype,$ishtml,true,$maxheight,$valign);
+        if($textAdjust!='StretchHeight' || $ishtml)
+        {
+            $this->balancetext='';
+        }
         $target->StopTransform();
         $newY= (int) ($beginingY+$estimateHeight);
         
@@ -790,7 +796,7 @@ class Pdf extends TCPDF implements ExportInterface
         {
             $newY =(int) $newY;
             $target->lastBandEndY = $newY;
-            
+            $this->bands[$prop['band']]['endY']=$newY;
 
         }
         
@@ -803,7 +809,7 @@ class Pdf extends TCPDF implements ExportInterface
                 // echo "<br/>print long text cross page: ".$this->PageNo()." ====> ".$prop['textFieldExpression']."<br/> ";
                 // $this->longtextrepeatcount++;                
                 $prop['textFieldExpression'] =$this->balancetext;    
-                
+                $this->balancetext='';
             //     // $this->AddPage();
                 
                 if(gettype($callback)=='object')
@@ -811,7 +817,7 @@ class Pdf extends TCPDF implements ExportInterface
                     $originalEndY = $this->lastBandEndY;
                     $callback();
                 }
-                $this->balancetext='';
+                
                 
                 $this->SetXY($x,$this->lastBandEndY);
                 
@@ -996,6 +1002,8 @@ class Pdf extends TCPDF implements ExportInterface
 
     public function endBand(string $bandname)
     {
+        $pageno = $this->PageNo();
+        $columnno = $this->getColumnNo();
         if($this->pageOffSetY>0)
         {            
             // echo "<br/>end band  $bandname have pageOffSetY $this->pageOffSetY<br/>";
@@ -1005,6 +1013,21 @@ class Pdf extends TCPDF implements ExportInterface
             
             $this->SetPage($this->getNumPages());
         }
+        if(empty($this->pagecolumnoccupation[$pageno]))
+        {
+            $this->pagecolumnoccupation[$pageno] = [];
+        }
+
+        if(empty($this->pagecolumnoccupation[$pageno][$columnno]))
+        {
+            $this->pagecolumnoccupation[$pageno][$columnno]=[];
+        }
+
+        $this->pagecolumnoccupation[$pageno][$columnno] = $this->lastBandEndY;
+        
+        
+
+        
 
     }
     /**
@@ -1017,7 +1040,7 @@ class Pdf extends TCPDF implements ExportInterface
         $offsets=[];
         
         $this->lastBand=$bandname;
-        
+        // $this->console("early $bandname ..$this->lastBandEndY");
         
         if(str_contains($bandname,'detail'))
         {
@@ -1047,7 +1070,7 @@ class Pdf extends TCPDF implements ExportInterface
             $methodname = 'draw_'.$bandname;
             $band = $this->bands[$bandname];
             $offsets = call_user_func([$this,$methodname],$callback);
-            
+            // print_r($offsets);
         }
         $offsetx=0;
         
@@ -1061,7 +1084,7 @@ class Pdf extends TCPDF implements ExportInterface
         
         if($height==0)
         {
-            $offsety=$this->pagesettings['topMargin'];
+            $offsety=$offsets['y'];//$this->pagesettings['topMargin'];
         }
         else
         {
@@ -1102,11 +1125,13 @@ class Pdf extends TCPDF implements ExportInterface
                 // $this->SetLineStyle($style); 
                 $target->Rect($offsetx,$offsety,$width ,$height,'',['TBLR'=>$style]);    
                 $this->lastBandEndY=$offsety+$height;; 
-                $target->Cell($width,10,$bandname."--$this->printbandcount ($this->lastBand $offsety,$height,".($offsety+$height).")",0);    
+                $target->Cell($width,10,$bandname."--$this->printbandcount ($offsety,$height,".($offsety+$height).")",0);    
             }
             
         }
+        
         $this->lastBandEndY=$offsety+$height;;
+        // $this->console("after $bandname ..$this->lastBandEndY");
         $this->bands[$bandname]['endY']=$this->lastBandEndY;
         $pageno=$this->PageNo();
         
@@ -1153,7 +1178,9 @@ class Pdf extends TCPDF implements ExportInterface
         {
             $offsety = $this->pagesettings['topMargin'] + $this->getBandHeight('pageHeader');
         }
+        // $offsety=$this->lastBandEndY;
         $offset = ['x'=>$this->getColumnBeginingX(),'y'=>$offsety];
+        // print_r($offset);
         //$this->drawBand($bandname,$offset);
         return $offset;
     }
@@ -1211,7 +1238,8 @@ class Pdf extends TCPDF implements ExportInterface
     {
         $offsets = $this->draw_columnFooter();
         $offsety=$offsets['y'];
-        if($estimateY > $offsety)
+        $buffer = 0;
+        if($estimateY >=$offsety+$buffer)
         {
             return true;
         }
@@ -1286,7 +1314,7 @@ class Pdf extends TCPDF implements ExportInterface
         {
             // $offsety = $this->bands[$lastband]['endY'];
             // $offsety = $this->lastBandEndY;
-            $offsety = $this->bands[$this->lastdetailband]['endY'];
+            // $offsety = $this->bands[$this->lastdetailband]['endY'];
             // if($this->offsetby > 0 )
             // {
             //     // echo  $this->offsetby;
@@ -1329,14 +1357,18 @@ class Pdf extends TCPDF implements ExportInterface
     {
         $offsetx=$this->getColumnBeginingX();//$this->pagesettings['leftMargin'];
         // $offsety=$this->pagesettings['leftMargin'];
+        
         $offsety = $this->lastBandEndY;
+        // $this->console("$bandname offsety : $offsety ");
         $estimateY=$offsety+$this->getBandHeight($bandname);
         if($this->isEndDetailSpace($estimateY) && gettype($callback)=='object')
         {            
             $callback();
+            // $this->SetPage($this->PageNo()-1);
             $offsety = $this->bands['columnHeader']['endY'];    
         }
         $offset=['x'=>$offsetx,'y'=>$offsety];
+        // print_r($offset);
         return $offset;
     }
 
@@ -1409,6 +1441,7 @@ class Pdf extends TCPDF implements ExportInterface
     {
         // scientific
         $data = $value;
+        $prepattern = $pattern;
         if(str_contains($pattern,'E0'))
         {
             
@@ -1416,7 +1449,56 @@ class Pdf extends TCPDF implements ExportInterface
         //date
         else if(str_contains($pattern,'d') || str_contains($pattern,'h')|| str_contains($pattern,'H') || str_contains($pattern,'M')) //date
         {
+            // $arrdate = gmdate(strtotime($value));
+            $vars = [
+                'yyyy'=>'Y',
+                'yy'=>'y',
+                'd'=>'d',
+                'hh'=>'h',
+                'h'=>'g',
+                'HH'=>'H',
+                'H'=>'G',
+                'mm'=>'i',
+                'ss'=>'s',
+                // 'a '=>'a',
+                // 'a'=>'',
+                'zzzz'=>'',
+                'z'=>'e',
+            ];
+            $varmonth = [
+                'MMMM'=>'F',
+                'MMM'=>'M',
+                'M'=>'n',
+            ];
+            foreach($vars as $key=>$replace)
+            {
+                $pattern = str_replace($key,$replace,$pattern);
+            }
 
+            $i=0;
+            foreach($varmonth as $key=>$replace)
+            {
+                $i++;
+                // $this->console( "$i chechmonth $key");
+                if(str_contains($pattern,$key))
+                {
+                    // $this->console( "exists");
+                    $pattern = str_replace($key,$replace,$pattern);
+                    break;
+                }                
+                
+            }
+
+            // $this->console("Old pattern $prepattern, new pattern $pattern");
+            $data = date($pattern,strtotime($value));
+            // M/d/yy
+            // MMM d, yyyy
+            // MMMM d, yyyy
+            // M/d/yy h:mm a
+            // MMM d, yyyy h:mm:ss a
+            // MMM d, yyyy h:mm:ss a z
+            // HH:mm:ss a
+            // HH:mm:ss zzzz
         }
         //number
         else if(str_contains($pattern,'#') ) 

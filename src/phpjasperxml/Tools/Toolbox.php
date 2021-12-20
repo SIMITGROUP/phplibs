@@ -51,9 +51,23 @@ trait Toolbox
         if (php_sapi_name() == "cli") {
             echo "\n$txt\n";
         } else {
-            echo "<br/>$txt<br/>";
+            if(gettype($txt) == 'array')
+            {
+                echo "<pre/>",print_r($txt,true)."<pre/>";
+            }
+            else
+            {
+                echo "<br/>$txt<br/>";
+            }
+            
         }
         
+    }
+
+    public function failed(mixed $txt='')
+    {
+        $this->console($txt);
+        die;        
     }
 
 }

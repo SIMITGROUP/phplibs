@@ -13,26 +13,24 @@ trait PHPJasperXML_variables
      */
     protected function computeVariables(int $rowno)
     {
+        
         foreach($this->variables as $varname=>$setting)
         {            
             $setting['calculation']=$setting['calculation']??'None';
-            
             $setting['incrementType']=$setting['incrementType']??'';
             $setting['initialValueExpression']=$setting['initialValueExpression']??'';
             $setting['variableExpression']=$setting['variableExpression']??'';
-            
             $setting['incrementType']=$setting['incrementType']??'';
             $setting['incrementGroup']=$setting['incrementGroup']??'';
             $setting['resetType']=$setting['resetType']??'None';
-            
             $setting['resetGroup']=$setting['resetGroup']??'';                
-            // $setting['lastresetvalue']=$setting['lastresetvalue']??'--no reset value yet--';
-            
-            
             $resettype = $setting['resetType'];            
             $resetGroup = $setting['resetGroup'];
             $initialValueExpression = $setting['initialValueExpression'];
             $isreset = false;
+
+
+
             if(isset($this->variables[$varname]['lastresetvalue']))
             {
                 $lastresetvalue=$this->variables[$varname]['lastresetvalue'];
