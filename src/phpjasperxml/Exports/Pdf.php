@@ -472,11 +472,12 @@ class Pdf extends TCPDF implements ExportInterface
             $style='FD';
         }        
         // $borderstyle =[ 'TBLR'=> $this->getLineStyle($lineStyle,$lineWidth,$lineColor) ];      
-        if($lineWidth>0)
-        {
-            $border =['BTLR'=> $this->getBorderStyles($prop)];
+        // if($lineWidth>0)
+        // {
+            // $border =['BTLR'=> $this->getBorderStyles($prop)];
+            $border = $this->getBorderStyles($prop,1);
             $this->drawtarget->Rect($x,$y,$w,$h,$style,$border,$backcolor);
-        }
+        // }
         
     }
     public function draw_ellipse(string $uuid,array $prop)
@@ -1221,7 +1222,7 @@ class Pdf extends TCPDF implements ExportInterface
         $offsety = $this->lastBandEndY;       
         // echo "draw detail lastbandendy =$offsety<hr>";
         $estimateY=$offsety+$this->getBandHeight($detailbandname);
-        if($this->isEndDetailSpace($estimateY) && gettype($callback)=='object')
+        if($this->isEndDetailSpace($estimateY) && gettype($callback)=='object' && $this->currentRowNo >0)
         {            
             $callback();
             $offsety = $this->bands['columnHeader']['endY'];    
@@ -1337,7 +1338,7 @@ class Pdf extends TCPDF implements ExportInterface
         // print_r($this->bands);
         // echo $estimateY;die;
         // if(($this->columnno >0 || $this->isEndDetailSpace($estimateY) ) && gettype($callback)=='object')
-        if($this->isEndDetailSpace($estimateY) )
+        if($this->isEndDetailSpace($estimateY) && gettype($callback) == 'object')
         {            
 
             $offsety = $callback();//$this->bands['columnHeader']['endY'];    

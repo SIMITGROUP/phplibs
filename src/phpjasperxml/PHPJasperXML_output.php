@@ -118,6 +118,7 @@ trait PHPJasperXML_output
     protected function newPage($withTitle=false)
     {
         
+        // $this->console("newpage withTitle:".$withTitle);
         if(!$withTitle)
         {
             $this->draw_columnFooter();
@@ -411,8 +412,8 @@ trait PHPJasperXML_output
                     // $currentpage = $this->output->PageNo();
                     // $totalpage = $this->output->getNumPages();                            
                     $columnno = $this->output->getColumnNo();
-                    if($columnno == $this->columnCount -1)
-                    {
+                    if(($columnno == $this->columnCount -1) )
+                    {                        
                         $this->newPage();
                     }
                     else

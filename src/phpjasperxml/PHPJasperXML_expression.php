@@ -185,7 +185,7 @@ trait PHPJasperXML_expression
                 $result = '***MASTER_TOTAL_PAGES NOT SUPPORTED***';
             break;
             case 'COLUMN_NUMBER':
-                $result = $this->output->ColumnNo();
+                $result = $this->output->ColumnNo()+1;
             break;
             case 'COLUMN_COUNT':
                 $result = $this->output->columnCount();
