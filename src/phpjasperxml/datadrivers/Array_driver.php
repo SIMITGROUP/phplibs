@@ -1,7 +1,7 @@
 <?php
 namespace simitsdk\phpjasperxml\datadrivers;
 
-class Hasharray implements DataInterface
+class Array_driver implements DataInterface
 {
     protected $conn;
     protected array $data=[];

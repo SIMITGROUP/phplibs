@@ -23,14 +23,14 @@ trait PHPJasperXML_datasource{
         {
             $driver = $setting['driver'];
             $this->connectionsetting = $setting;
-            $driverfile = __DIR__.'/datadrivers/'.$driver.'.php';
+            $driverfile = __DIR__.'/datadrivers/'.$driver.'_driver.php';
             if(!file_exists($driverfile))
             {
                 die("$driverfile does not exists");
             }
             else
             {
-                $classname = '\\simitsdk\\phpjasperxml\\datadrivers\\' . ucfirst($driver);
+                $classname = '\\simitsdk\\phpjasperxml\\datadrivers\\' . ucfirst($driver).'_driver';
                 $this->db = new $classname($setting);     
                 $this->fetchData();
                 return $this;           
@@ -42,6 +42,7 @@ trait PHPJasperXML_datasource{
     public function fetchData() : self
     {
         $sql = $this->parseExpression($this->querystring);
+        
         $data =$this->db->fetchData($sql);
         $this->loadData($data);        
         return $this;

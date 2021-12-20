@@ -5,7 +5,7 @@ $filename = __DIR__.'/allelements.jrxml';
 
 $data=[];
 
-$config = ['driver'=>'hasharray','data'=>$data];
+$config = ['driver'=>'array','data'=>$data];
 
 $report = new PHPJasperXML();
 $report->load_xml_file($filename)    

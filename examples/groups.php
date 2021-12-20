@@ -23,7 +23,7 @@ for($i=0;$i<100;$i++)
 }
 
 
-$config = ['driver'=>'hasharray','data'=>$data];
+$config = ['driver'=>'array','data'=>$data];
 
 $report = new PHPJasperXML();
 $report->load_xml_file($filename)    

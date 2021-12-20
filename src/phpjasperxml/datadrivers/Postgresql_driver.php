@@ -1,7 +1,7 @@
 <?php
 namespace simitsdk\phpjasperxml\datadrivers;
 
-class Postgresql implements DataInterface
+class Postgresql_driver implements DataInterface
 {
     protected $conn;
     public function __construct(array $config)
@@ -61,38 +61,5 @@ class Postgresql implements DataInterface
             // Throw error.
         }
     }
-    // public function fetchFields($q): array
-    // {
-    //     try
-    //     {
-    //         if($q)
-    //         {                                
-    //             $data =[];
-    //             $fieldqty = pg_num_fields($q);
-    //             for ($i = 0; $i < $fieldqty; $i++)
-    //             {
-    //                 $fieldname = pg_field_name($q, $i);
-    //                 $fieldtype =  pg_field_type($q, $i);
-    //                 $data[$fieldname]=[
-    //                     'datatype'=>$fieldtype,
-    //                 ];
-    //             }
-
-    //             return $data;
-    //         }
-    //         else
-    //         {
-    //             return [];
-    //         }
-    //     }
-    //     catch(\Exception $e) 
-    //     {
-    //         return [];
-    //     }
-    // }
-
-    // public function num_rows($q) : int
-    // {
-    //     return pg_num_rows($q);
-    // }
+    
 }

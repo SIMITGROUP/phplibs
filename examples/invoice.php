@@ -45,7 +45,7 @@ for($i=0;$i<20;$i++)
 }
 
 
-$config = ['driver'=>'hasharray','data'=>$data];
+$config = ['driver'=>'array','data'=>$data];
 $paras = [
     'companyname'=>$faker->company(),
     'address'=>"10, block 10, Street 1, Street 2, Street3, 112345, MY",
