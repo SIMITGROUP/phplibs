@@ -210,3 +210,11 @@ Scriptlet is a method to allow report fetch specific value from existing functio
 
 # :x: Styles
 Style template is ignore, and not effect element at the moment.
+
+
+# Supported Datasource:
+[samples](https://github.com/SIMITGROUP/phplibs/blob/main/examples/databasesample.php)
+1. Postgresql
+2. Mysql
+3. PDO (the rest of database)
+4. Array (prepare associate array outside of lib)
