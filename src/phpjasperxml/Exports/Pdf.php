@@ -44,7 +44,17 @@ class Pdf extends TCPDF implements ExportInterface
     
     public function __construct($prop)
     {           
+        // print_r($prop);
         $this->pagesettings=$prop;
+        // $this->console($prop);
+        $name = $prop['name'];
+        $title = $prop['title'];
+        $subject = $prop['subject'];
+        $author = $prop['author'];
+        $creator = $prop['creator'];
+        $keywords = $prop['keywords'];
+
+        $description = $prop['com.jaspersoft.studio.report.description']??'';
         // $fontfolder = sys_get_temp_dir().'/phpjasperxml/fonts';        
         $orientation = isset($prop['orientation'])? $this->left($prop['orientation'],1):'P';
         $unit='pt';
@@ -55,11 +65,12 @@ class Pdf extends TCPDF implements ExportInterface
 
         $this->setPrintHeader(false);        
         $this->setPrintFooter(false);
-        $this->SetCreator('ks');
-        $this->SetAuthor('simitsdk');
-        $this->SetTitle('sample pdf');
-        $this->SetSubject('subject1');
-        $this->SetKeywords('keyword1');
+        $this->SetCreator($creator);
+        $this->SetAuthor($author);
+        $this->SetTitle($title);
+        $this->SetSubject($subject);
+        $this->SetKeywords($keywords);
+        
         $this->drawtarget = $this;
     }
 

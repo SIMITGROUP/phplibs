@@ -11,13 +11,28 @@ trait PHPJasperXML_output
     protected array $row = [];
     protected bool $isgroupchanged=false;
     protected bool $islastrow = false;
+    protected string $creator = 'phpjasperxml';
+    protected string $author = 'simitsdk';
+    protected string $keywords = 'pdf, phpjasperxml, simitsdk';
+    protected string $title = '';
+    protected string $subject = '';    
 
     // protected $bandsequence = [];
     public function export(string $type,string $filename='')
     {
         
+        $this->pageproperties['creator']=$this->creator;
+        $this->pageproperties['author']= $this->author;
+        $this->pageproperties['keywords']=$this->keywords;
+        $this->pageproperties['title']= !empty($this->title) ? $this->title : $this->pageproperties['name'];
+        $this->pageproperties['subject']= !empty($this->subject) ? $this->subject : $this->pageproperties['name'];
+        // print_r($this->pageproperties);
+        
         $classname = '\\simitsdk\\phpjasperxml\\Exports\\'.ucfirst($type);
-        $this->output  = new $classname($this->pageproperties);        
+
+        // $this->console($this->pageproperties);die;
+        $this->output  = new $classname($this->pageproperties);
+        
         // print_r($this->bands);die;
         $this->output->defineBands($this->bands,$this->elements,$this->groups);
         // echo "rowcount $this->rowcount";die;
@@ -523,4 +538,32 @@ trait PHPJasperXML_output
     {
         $this->drawBand('pageFooter');
     }
+
+    public function setCreator(string $creator):self
+    {
+        $this->creator = $creator;
+        return $this;
+    }
+    public function setAuthor(string $author):self
+    {
+        $this->author = $author;
+        return $this;
+    }
+    public function setKeywords(string $keywords):self
+    {
+        $this->keywords = $keywords;
+        return $this;
+    }
+    public function setTitle(string $title):self
+    {
+        $this->title = $title;
+        return $this;
+    }
+    public function setSubject(string $subject):self
+    {
+        $this->subject = $subject;
+        return $this;
+    }
+
+
 }

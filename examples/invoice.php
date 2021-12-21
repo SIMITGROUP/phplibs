@@ -15,6 +15,8 @@ $customeraddress = $faker->address()."\n".$faker->city()." ".$faker->postcode().
 $invoiceno="IV00001";
 $totalamount = 0;
 $totalqty = 0;
+$invoicedate = date('Y-m-d');
+$salesagent = $faker->name;
 for($i=0;$i<20;$i++)
 {
     $qty = $faker->numberBetween(1,20);
@@ -28,9 +30,9 @@ for($i=0;$i<20;$i++)
         'customeraddress'=>$customeraddress,
         'customercontact'=>"\nAttn: $attn\nTel: $phoneNumber Email: $email",
         'invoiceno'=>$invoiceno,
-        'salesagent'=>$faker->name,
+        'salesagent'=>$salesagent ,
         'termname'=>'30 Days',
-        'invoicedate'=> date('Y-m-d'),
+        'invoicedate'=> $invoicedate,
         'itemname'=>'Item '. ($i+1),
         'description'=>$faker->text( $faker->numberBetween(200,2000)),
         'qty'=>$qty,
@@ -58,5 +60,10 @@ $report = new PHPJasperXML();
 $report->load_xml_file($filename)    
     ->setParameter($paras)
     ->setDataSource($config)
+    ->setCreator('invoice.php')
+    ->setAuthor($salesagent)
+    ->setTitle("Invoice " .$invoiceno)
+    ->setSubject("Invoice - $customername-" .$invoiceno)
+    ->setKeywords("$invoiceno,$salesagent,$customername, $invoicedate")
     ->export('Pdf');
 

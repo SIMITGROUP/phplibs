@@ -3,6 +3,7 @@
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="invoice" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="8ab680fb-ae75-422f-a830-01fecb809f81">
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="postgres"/>
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<property name="com.jaspersoft.studio.report.description" value="invoice description"/>
 	<parameter name="companyname" class="java.lang.String" isForPrompting="false"/>
 	<parameter name="address" class="java.lang.String" isForPrompting="false"/>
 	<parameter name="registrationno" class="java.lang.String" isForPrompting="false"/>

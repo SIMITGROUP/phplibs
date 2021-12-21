@@ -6,6 +6,12 @@ trait PHPJasperXML_subreport{
     protected $parentobj=null;
     public function runSubReport(array $prop,object $outputobj)
     {                
+        $this->pageproperties['creator']=$this->creator;
+        $this->pageproperties['author']= $this->author;
+        $this->pageproperties['keywords']=$this->keywords;
+        $this->pageproperties['title']= !empty($this->title) ? $this->title : $this->pageproperties['name'];
+        $this->pageproperties['subject']= !empty($this->subject) ? $this->subject : $this->pageproperties['name'];
+        
         $this->pageproperties['topMargin']+=$prop['y'];
         $this->pageproperties['leftMargin']+=$prop['x'];
         $fullclassname =  $outputobj::Class;//  = $outputobj;

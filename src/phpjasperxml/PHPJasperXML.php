@@ -23,19 +23,19 @@ class PHPJasperXML{
     }
 
 
-    public function __call($methodname, $args)
-    {
+    // public function __call($methodname, $args)
+    // {
         
-        if(method_exists($this,$methodname))
-        {
-            die('method '.$methodname.' does not exists');
-        }
-        else
-        {
-            return call_user_func_array([$this,$methodname],$args);
-        }
+    //     if(method_exists($this,$methodname))
+    //     {
+    //         die('method '.$methodname.' does not exists');
+    //     }
+    //     else
+    //     {
+    //         return call_user_func_array([$this,$methodname],$args);
+    //     }
         
-    }
+    // }
 
     public function setParameter(array $paras=[]):self
     {
