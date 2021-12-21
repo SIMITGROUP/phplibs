@@ -38,8 +38,16 @@ class Postgresql_driver implements DataInterface
         $user =  $config['user'];
         $pass =  $config['pass'];
         $name =  $config['name'];
-        $cnstring = sprintf("host=%s user=%s password=%s dbname=%s options='--client_encoding=UTF8 '",$host,$user,$pass,$name);        
-        $cn = pg_connect($cnstring,PGSQL_CONNECT_FORCE_NEW);        
+        if(gettype($config['connection'])=='object')
+        {
+            $cn = $config['connection'];
+        }
+        else
+        {
+            $cnstring = sprintf("host=%s user=%s password=%s dbname=%s options='--client_encoding=UTF8 '",$host,$user,$pass,$name);        
+            $cn = pg_connect($cnstring,PGSQL_CONNECT_FORCE_NEW);        
+        }
+        
         return $cn;
     }
 

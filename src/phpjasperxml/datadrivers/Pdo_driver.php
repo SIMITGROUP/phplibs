@@ -64,7 +64,17 @@ class Pdo_driver implements DataInterface
         $dsn = $config['dsn'];
         $user = $config['user'];
         $password = $config['user'];
-        $cn = new PDO($dsn,$user,$password);
+        
+
+        if(gettype($config['connection'])=='object')
+        {
+            $cn = $config['connection'];
+        }
+        else
+        {            
+            $cn = new PDO($dsn,$user,$password);
+        }
+
         return $cn;
     }
 

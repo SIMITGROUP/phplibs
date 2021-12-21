@@ -66,7 +66,14 @@ class Mysql_driver implements DataInterface
         $pass =  $config['pass'];
         $name =  $config['name'];
         
-        $cn = new mysqli($host, $user, $pass, $name);
+        if(gettype($config['connection'])=='object')
+        {
+            $cn = $config['connection'];
+        }
+        else
+        {
+            $cn = new mysqli($host, $user, $pass, $name);
+        }
         return $cn;
     }
 
