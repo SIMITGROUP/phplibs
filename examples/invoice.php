@@ -4,7 +4,7 @@ include "main.php";
 use simitsdk\phpjasperxml\PHPJasperXML;
 $filename = __DIR__.'/invoice.jrxml';
 
-
+$type = $_GET['type'];
 $data = [];
 $faker = Faker\Factory::create('en_US');
 
@@ -65,5 +65,5 @@ $report->load_xml_file($filename)
     ->setTitle("Invoice " .$invoiceno)
     ->setSubject("Invoice - $customername-" .$invoiceno)
     ->setKeywords("$invoiceno,$salesagent,$customername, $invoicedate")
-    ->export('Xlsx');
+    ->export(ucfirst($type));
 
