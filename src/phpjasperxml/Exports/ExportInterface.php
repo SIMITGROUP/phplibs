@@ -5,9 +5,12 @@ interface ExportInterface
 {
     public function setData(array $data);
     public function defineBands(array $bands,array $elements,array $groups);
+    public function defineColumns(int $columnCount,mixed $columnWidth);
     //bands
 
     public function prepareBand(string $bandname):array;
+    public function prepareColumn();
+    public function endBand(string $bandname);
     public function draw_background();
     public function draw_title();
     public function draw_pageHeader();
@@ -26,10 +29,16 @@ interface ExportInterface
     public function draw_break(string $uuid,array $prop);
     public function draw_staticText(string $uuid,array $prop,bool $isTextField=false);
     public function draw_textField(string $uuid,array $prop);
+    public function draw_image(string $uuid,array $prop);
     
     //others
     public function PageNo():int;
     public function ColumnNo():int;
     public function columnCount(): int;
-    
+    public function setRowNumber(int $no);
+    public function AddPage();
+    public function setPosition(int $x,int $y,array $prop);
+    public function setParentObj(object $parentobj);   
+    public function export(string $filename='');
+    public function supportSubReport(): bool;
 }

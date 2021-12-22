@@ -65,5 +65,5 @@ $report->load_xml_file($filename)
     ->setTitle("Invoice " .$invoiceno)
     ->setSubject("Invoice - $customername-" .$invoiceno)
     ->setKeywords("$invoiceno,$salesagent,$customername, $invoicedate")
-    ->export('Pdf');
+    ->export('Xlsx');
 

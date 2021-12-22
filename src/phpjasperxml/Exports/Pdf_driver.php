@@ -8,7 +8,7 @@ use TCPDF_FONTS;
 use TCPDF_STATIC;
 // use \tecnickcom\tcpdf;
 
-class Pdf extends TCPDF implements ExportInterface
+class Pdf_driver extends TCPDF implements ExportInterface
 {
     use \Simitsdk\phpjasperxml\Tools\Toolbox;
     protected bool $debugband=false;
@@ -839,7 +839,7 @@ class Pdf extends TCPDF implements ExportInterface
         }
         
     }
-    public function setParentObj($parentobj)
+    public function setParentObj(object $parentobj)
     {
         $this->parentobj = $parentobj;
         $this->drawtarget = $parentobj;
@@ -1262,27 +1262,7 @@ class Pdf extends TCPDF implements ExportInterface
     }
     public function setRowNumber(int $no)
     {
-        $this->currentRowNo=$no;
-        
-        // if($this->currentrowpos['rowno']==0)
-        // {
-        //     $this->currentrowpos=[
-        //         'rowno'=>$this->currentRowNo,
-        //         'beginpage'=>$this->PageNo(),
-        //         'endpage'=>$this->PageNo(),
-        //         // 'beginx'=>$offsets['x'],
-        //         'beginy'=>$this->getLastBandEndY(),
-        //         // 'endx'=>$offsets['x'],
-        //         // 'endy'=>$offsety+$height,
-        //         // 'height'=>$height
-        //     ];
-        // }
-        // else
-        // {
-        //     $tmp = $this->currentrowpos;
-        // }
-        
-        
+        $this->currentRowNo=$no;    
     }
     public function draw_columnFooter()
     {        
@@ -1403,8 +1383,11 @@ class Pdf extends TCPDF implements ExportInterface
 
 
     /*************** misc function ****************/
-    
-    public function setPosition(int $x,int $y)
+    public function supportSubReport(): bool
+    {
+        return true;
+    }
+    public function setPosition(int $x,int $y,array $prop)
     {
         $this->SetXY($x,$y);
     }

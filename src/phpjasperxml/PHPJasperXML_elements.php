@@ -322,55 +322,60 @@ trait PHPJasperXML_elements
     public function draw_subreport(string $uuid,array $prop)
     {
         // echo "draw_subreport<hr>";
-        $subreport = new PHPJasperXML();        
-        $subreportExpression = $this->executeExpression($prop['subreportExpression']);        
-        if($this->left($subreportExpression,5)=='<?xml')
+        if($this->output->supportSubReport())
         {
-            $subreport->load_xml_string($subreportExpression);
-        }
-        else
-        {
-            $subreportExpression = str_replace('.jasper','.jrxml',$subreportExpression);
-            $filename = $this->path.'/'.$subreportExpression;
-            $subreport->load_xml_file($filename);
-        }
-        
 
-        $connectionExpression =  $this->executeExpression($prop['connectionExpression']);
-        $connection = [];
-        if($connectionExpression=='REPORT_CONNECTION')
-        {
-            $connection = $this->connectionsetting;
-            if(isset($connection['data']))
+            
+            $subreport = new PHPJasperXML();        
+            $subreportExpression = $this->executeExpression($prop['subreportExpression']);        
+            if($this->left($subreportExpression,5)=='<?xml')
             {
-                if(count($connection['data'])>0)
-                {
-                    $connection['data'] = [['a'=>1]];
-                }
-                else
-                {
-                    $connection['data']=[];
-                }
-                
+                $subreport->load_xml_string($subreportExpression);
             }
-        }
-        else
-        {
-            $connection = $connectionExpression;            
-        }
-        
-        $paras = [];
-        foreach($prop['paras'] as $pname=>$pexpression)
-        {
-            $paras[$pname]=$this->executeExpression($pexpression);
-        }
-        
-        
-        $subreport
-            ->setParameter($paras)
-            ->setDataSource($connection)
-            ->runSubReport($prop,$this->output);
+            else
+            {
+                $subreportExpression = str_replace('.jasper','.jrxml',$subreportExpression);
+                $filename = $this->path.'/'.$subreportExpression;
+                $subreport->load_xml_file($filename);
+            }
+            
+
+            $connectionExpression =  $this->executeExpression($prop['connectionExpression']);
+            $connection = [];
+            if($connectionExpression=='REPORT_CONNECTION')
+            {
+                $connection = $this->connectionsetting;
+                if(isset($connection['data']))
+                {
+                    if(count($connection['data'])>0)
+                    {
+                        $connection['data'] = [['a'=>1]];
+                    }
+                    else
+                    {
+                        $connection['data']=[];
+                    }
+                    
+                }
+            }
+            else
+            {
+                $connection = $connectionExpression;            
+            }
+            
+            $paras = [];
+            foreach($prop['paras'] as $pname=>$pexpression)
+            {
+                $paras[$pname]=$this->executeExpression($pexpression);
+            }
+            
+            
+            $subreport
+                ->setParameter($paras)
+                ->setDataSource($connection)
+                ->runSubReport($prop,$this->output);                
             ;
+        }
     }
     protected function element_componentElement(array $prop, SimpleXMLElement $obj): array
     {        
@@ -487,7 +492,7 @@ trait PHPJasperXML_elements
                 {
                     $prop['hyperlinkReferenceExpression'] = $this->executeExpression($prop['hyperlinkReferenceExpression']);
                 }
-                $this->output->setPosition($x,$y);                
+                $this->output->setPosition($x,$y,$prop);
                 $methodname = 'draw_'.$prop['elementtype'];
                 call_user_func([$this,$methodname],$uuid,$prop);
     }

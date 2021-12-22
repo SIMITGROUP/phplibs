@@ -19,8 +19,7 @@ trait PHPJasperXML_output
 
     // protected $bandsequence = [];
     public function export(string $type,string $filename='')
-    {
-        
+    {                
         $this->pageproperties['creator']=$this->creator;
         $this->pageproperties['author']= $this->author;
         $this->pageproperties['keywords']=$this->keywords;
@@ -28,7 +27,7 @@ trait PHPJasperXML_output
         $this->pageproperties['subject']= !empty($this->subject) ? $this->subject : $this->pageproperties['name'];
         // print_r($this->pageproperties);
         
-        $classname = '\\simitsdk\\phpjasperxml\\Exports\\'.ucfirst($type);
+        $classname = '\\simitsdk\\phpjasperxml\\Exports\\'.ucfirst($type)."_driver";
 
         // $this->console($this->pageproperties);die;
         $this->output  = new $classname($this->pageproperties);
@@ -213,6 +212,8 @@ trait PHPJasperXML_output
 
         
         $offsets = $this->output->prepareBand($bandname,$callback);
+        // $this->console($bandname);
+        // $this->console($offsets);
         $offsetx=(int)$offsets['x'];
         $offsety=(int)$offsets['y'];
         
