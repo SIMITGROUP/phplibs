@@ -23,7 +23,7 @@ trait PHPJasperXML_datasource{
         {
             $driver = $setting['driver'];
             $this->connectionsetting = $setting;
-            $driverfile = __DIR__.'/datadrivers/'.$driver.'_driver.php';
+            $driverfile = __DIR__.'/datadrivers/'.ucfirst($driver).'_driver.php';
             if(!file_exists($driverfile))
             {
                 die("$driverfile does not exists");
