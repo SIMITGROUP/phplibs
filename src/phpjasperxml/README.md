@@ -147,7 +147,7 @@ PHPJasperxml going to output report into several format.
 Output   | Status | Description
 --------- | ------ | -----------
 PDF | :white_check_mark: | done, not stable yet
-XLSX | :x: | coming future
+XLSX | :white_check_mark: | Only support staticText and TextField
 HTML | :x: |  coming future
 
 
