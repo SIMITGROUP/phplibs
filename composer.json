@@ -6,13 +6,9 @@
         "tecnickcom/tc-lib-pdf":"*",
         "tecnickcom/tcpdf": "^6.4",
         "fakerphp/faker": "^1.17",
-        "phpoffice/phpspreadsheet": "^1.20"         
-    },
-    "autoload": {
-        "psr-4": {
-            "simitsdk\\": "src/"
-        }
-    },
+        "phpoffice/phpspreadsheet": "^1.20",
+        "simitgroup/phpjasperxml": "*"
+    },    
     "authors": [
         {
             "name": "kstan",
